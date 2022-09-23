@@ -3,3 +3,6 @@
 
 #executable
 webserv
+
+#swp files
+*.swp
