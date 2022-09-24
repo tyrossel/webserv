@@ -8,6 +8,7 @@
 #include <stack>
 #include <vector>
 #include <iostream>
+#include <string>
 
 /***********************************************************************************
  *                              FUNCTIONS                                          *
