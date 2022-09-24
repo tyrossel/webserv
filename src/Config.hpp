@@ -21,12 +21,11 @@ class ServerConfig {
         virtual ~ServerConfig();
 
         // Getters
-        const int                                   ServerConfig::getPort() const;
-        const std::string                           ServerConfig::getHost() const;
-        const std::string                           ServerConfig::getRoot() const;
-        const std::string                           ServerConfig::getIndex() const;
-        const std::map<std::string, std::string>    ServerConfig::getLocation() const;
-
+        const int                                   getPort() const;
+        const std::string                           getHost() const;
+        const std::string                           getRoot() const;
+        const std::string                           getIndex() const;
+        const std::map<std::string, std::string>    getLoca
         // Member functions
 };
 
