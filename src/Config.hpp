@@ -25,7 +25,7 @@ class ServerConfig {
         const std::string                           getHost() const;
         const std::string                           getRoot() const;
         const std::string                           getIndex() const;
-        const std::map<std::string, std::string>    getLoca
+        const std::map<std::string, std::string>    getLocation() const;
         // Member functions
 };
 
