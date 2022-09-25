@@ -12,7 +12,7 @@
 
 TARGET		= webserv
 CXX			= c++
-CXXFLAGS	= -Wall -Wextra -Werror -std=c++98 -pedantic
+CXXFLAGS	= -Wall -Wextra -Werror -std=c++98 -pedantic -g
 CPPFLAGS	= -Iinclude
 SRC_DIR		= src
 OBJS_DIR	= obj

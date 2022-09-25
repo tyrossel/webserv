@@ -12,11 +12,31 @@
 
 #include "Config.hpp"
 
+void createConfig()
+{
+    ServerConfig server;
+    Config  config;
+
+    server.addHost("localhost");
+    server.addHost("mywebsite.com");
+    server.addIndex("index.html");
+    server.addIndex("index.php");
+    server.addRoot("/var/www/html");
+    server.addPort(8080);
+    server.addLocation("location_path", "");
+    server.addLocation("root", "subfolder");
+
+    config.addServer(server);
+    std::cout << config << std::endl;
+}
+
 int	main(int argc, char *argv[], char *envp[])
 {
 	(void)argc;
 	(void)argv;
 	(void)envp;
+
+    createConfig();
 
 	return (0);
 }

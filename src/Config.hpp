@@ -26,10 +26,11 @@ class ServerConfig {
         std::vector<std::string>                    getIndex() const;
         std::map<std::string, std::string>          getLocation() const;
         // Member functions
-        void                                        addPort(int port);
-        void                                        addHost(const std::string &host);
-        void                                        addRoot(const std::string &root);
-        void                                        addIndex(const std::string &index);
+        void        addPort(int port);
+        void        addHost(const std::string &host);
+        void        addRoot(const std::string &root);
+        void        addIndex(const std::string &index);
+        void        addLocation(const std::string &key, const std::string &value);
 };
 
 class Config {
@@ -43,13 +44,11 @@ class Config {
         virtual ~Config();
 
         // Getters
-        const       std::vector<ServerConfig> getServer() const;
-        int         getNbServer( void ) const;
+        const std::vector<ServerConfig> getServer() const;
+        int                             getNbServer( void ) const;
 
         // Member functions
         void        addServer(const ServerConfig &newServ);
-
-        friend std::ostream &operator<<(std::ostream &out, const Config &rhs);
 
 };
 
