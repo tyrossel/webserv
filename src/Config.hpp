@@ -16,7 +16,7 @@ class ServerConfig {
     public:
         // Constructors / Destructor
         ServerConfig();
-        ServerConfig(int port, std::string host, std::string root);
+        ServerConfig(int port, std::string host, std::string root, std::string index, std::map<std::string, std::string> location);
         ServerConfig(const ServerConfig &other);
         virtual ~ServerConfig();
 
