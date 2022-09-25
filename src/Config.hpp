@@ -5,10 +5,10 @@
 
 class ServerConfig {
     private:
-        int                                 _port;  //🐖🐖🐖🐖🐖🐖🐖🐖
-        std::string                         _host;  //🏠🏠🏠🏠🏠🏠🏠🏠
-        std::string                         _root;  //🌳🌳🌳🌳🌳🌳🌳🌳
-        std::string                         _index; //👆👆👆👆👆👆👆👆
+        std::vector<int>                    _port;  //🐖🐖🐖🐖🐖🐖🐖🐖
+        std::vector<std::string>            _host;  //🏠🏠🏠🏠🏠🏠🏠🏠
+        std::vector<std::string>            _root;  //🌳🌳🌳🌳🌳🌳🌳🌳
+        std::vector<std::string>            _index; //👆👆👆👆👆👆👆👆
         // For the map we will have in [0][0](root) the location followed by the path
         // The next parsed elements will go in the map in a random order and will be called with find
         std::map<std::string, std::string>  _location;
@@ -16,17 +16,20 @@ class ServerConfig {
     public:
         // Constructors / Destructor
         ServerConfig();
-        ServerConfig(int port, std::string host, std::string root, std::string index, std::map<std::string, std::string> location);
         ServerConfig(const ServerConfig &other);
         virtual ~ServerConfig();
 
         // Getters
-        int                                         getPort() const;
-        const std::string                           getHost() const;
-        const std::string                           getRoot() const;
-        const std::string                           getIndex() const;
-        const std::map<std::string, std::string>    getLocation() const;
+        std::vector<int>                            getPort() const;
+        std::vector<std::string>                    getHost() const;
+        std::vector<std::string>                    getRoot() const;
+        std::vector<std::string>                    getIndex() const;
+        std::map<std::string, std::string>          getLocation() const;
         // Member functions
+        void                                        addPort(int port);
+        void                                        addHost(const std::string &host);
+        void                                        addRoot(const std::string &root);
+        void                                        addIndex(const std::string &index);
 };
 
 class Config {

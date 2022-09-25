@@ -16,7 +16,6 @@
 // ------------------------------- SERVER CONFIG ------------------------------------ //
 
 ServerConfig::ServerConfig() : _port(), _host(), _root(), _index(), _location() {}
-ServerConfig::ServerConfig(int port, std::string host, std::string root, std::string index, std::map<std::string, std::string> location) : _port(port), _host(host), _root(root), _index(index), _location(location) {}
 ServerConfig::ServerConfig(const ServerConfig &other) : _port(other._port), _host(other._host), _root(other._root), _index(other._index), _location(other._location) {}
 ServerConfig::~ServerConfig() {}
 
@@ -32,11 +31,16 @@ Config::~Config() {}
 
 // ------------------------------- SERVER CONFIG ------------------------------------ //
 
-int                                         ServerConfig::getPort() const { return (this->_port); }
-const std::string                           ServerConfig::getHost() const { return (this->_host); }
-const std::string                           ServerConfig::getRoot() const { return (this->_root); }
-const std::string                           ServerConfig::getIndex() const { return (this->_index); }
-const std::map<std::string, std::string>    ServerConfig::getLocation() const { return (this->_location); }
+std::vector<int>                    ServerConfig::getPort() const { return (this->_port); }
+std::vector<std::string>            ServerConfig::getHost() const { return (this->_host); }
+std::vector<std::string>            ServerConfig::getRoot() const { return (this->_root); }
+std::vector<std::string>            ServerConfig::getIndex() const { return (this->_index); }
+std::map<std::string, std::string>  ServerConfig::getLocation() const { return (this->_location); }
+
+void    ServerConfig::addPort(int port) { _port.push_back(port); }
+void    ServerConfig::addHost(const std::string &host) { _host.push_back(host); }
+void    ServerConfig::addRoot(const std::string &root) { _root.push_back(root); }
+void    ServerConfig::addIndex(const std::string &index) { _index.push_back(index); }
 
 // ----------------------------------- CONFIG --------------------------------------- //
 
@@ -52,10 +56,12 @@ std::ostream &operator<<(std::ostream &out, const Config &rhs)
 {
     out << "Configuration Servers" << std::endl;
     for (int i = 0; i < rhs.getNbServer(); i++) {
-        out << "Server number : " << i << "\nPort : " << rhs._server[i].getPort()
-        << "\nHost : " << rhs._server[i].getHost()
-        << "\nRoot : " << rhs._server[i].getRoot()
-        << "\nIndex : " << rhs._server[i].getIndex() << std::endl;
+        // TODO: double for loop to catch multiple vector datas if there is some :)
+        out << "Server number : " << i
+        << "\nPort : " << rhs._server[i].getPort()[0]
+        << "\nHost : " << rhs._server[i].getHost()[0]
+        << "\nRoot : " << rhs._server[i].getRoot()[0]
+        << "\nIndex : " << rhs._server[i].getIndex()[0] << std::endl;
     }
     return (out);
 }

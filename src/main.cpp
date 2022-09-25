@@ -18,13 +18,5 @@ int	main(int argc, char *argv[], char *envp[])
 	(void)argv;
 	(void)envp;
 
-    Config test;
-    std::map<std::string, std::string> location;
-    location["location_path"] = "~ \\.php$";
-    ServerConfig server1(8080, "localhost", "/var/www/html", "index.html", location);
-
-    test.addServer(server1);
-    std::cout << test;
-
 	return (0);
 }
