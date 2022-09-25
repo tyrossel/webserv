@@ -18,6 +18,7 @@ SRC_DIR		= src
 OBJS_DIR	= obj
 OBJS = 		$(patsubst %.cpp, $(OBJS_DIR)/%.o, $(SRCS))
 SRCS		= main.cpp \
+			  Config.cpp
 
 all: $(TARGET)
 
