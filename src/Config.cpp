@@ -32,29 +32,30 @@ Config::~Config() {}
 
 // ------------------------------- SERVER CONFIG ------------------------------------ //
 
-const int                                   ServerConfig::getPort() const { return (this->_port) }
-const std::string                           ServerConfig::getHost() const { return (this->_host) }
-const std::string                           ServerConfig::getRoot() const { return (this->_root) }
-const std::string                           ServerConfig::getIndex() const { return (this->_index) }
-const std::map<std::string, std::string>    ServerConfig::getLocation() const { return (this->_location) }
+int                                         ServerConfig::getPort() const { return (this->_port); }
+const std::string                           ServerConfig::getHost() const { return (this->_host); }
+const std::string                           ServerConfig::getRoot() const { return (this->_root); }
+const std::string                           ServerConfig::getIndex() const { return (this->_index); }
+const std::map<std::string, std::string>    ServerConfig::getLocation() const { return (this->_location); }
 
 // ----------------------------------- CONFIG --------------------------------------- //
 
-void        Config::addServer(const ServerConfig &newServ) const { this->_server.push_back(newServ); }
+void        Config::addServer(const ServerConfig &newServ) { this->_server.push_back(newServ); }
 const       std::vector<ServerConfig> Config::getServer() const { return (this->_server); }
-const int   Config::getNbServer() const { return (this->_server.size()); }
+int         Config::getNbServer() const { return (this->_server.size()); }
 
 /**************************************************************************************/
 /*                                NON MEMBER FUNCTIONS                                */
 /**************************************************************************************/
 
-std::ostream &Config::operator<<(std::ostream &out, const Config &rhs)
+std::ostream &operator<<(std::ostream &out, const Config &rhs)
 {
     out << "Configuration Servers" << std::endl;
-    for (unsigned int i = 0; i < rhs.getNbServer(); i++) {
-        out << "Server number : " << i << "\nPort : " << rhs[i].getPort()
-        << "\nHost : " << rhs[i].getHost()
-        << "\nRoot : " << rhs[i].getRoot()
-        << "\nIndex : " << rhs[i].getIndex() << std::endl;
+    for (int i = 0; i < rhs.getNbServer(); i++) {
+        out << "Server number : " << i << "\nPort : " << rhs._server[i].getPort()
+        << "\nHost : " << rhs._server[i].getHost()
+        << "\nRoot : " << rhs._server[i].getRoot()
+        << "\nIndex : " << rhs._server[i].getIndex() << std::endl;
     }
+    return (out);
 }

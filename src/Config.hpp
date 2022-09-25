@@ -21,7 +21,7 @@ class ServerConfig {
         virtual ~ServerConfig();
 
         // Getters
-        const int                                   getPort() const;
+        int                                         getPort() const;
         const std::string                           getHost() const;
         const std::string                           getRoot() const;
         const std::string                           getIndex() const;
@@ -40,11 +40,13 @@ class Config {
         virtual ~Config();
 
         // Getters
-        const       std::vector<ServerConfig> Config::getServer() const;
-        const int   Config::getNbServer( void ) const;
+        const       std::vector<ServerConfig> getServer() const;
+        int         getNbServer( void ) const;
 
         // Member functions
-        void        addServer(const ServerConfig &newServ) const;
+        void        addServer(const ServerConfig &newServ);
+
+        friend std::ostream &operator<<(std::ostream &out, const Config &rhs);
 
 };
 
