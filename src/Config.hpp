@@ -5,10 +5,10 @@
 
 class ServerConfig {
     private:
-        std::vector<int>                    _port;  //🐖🐖🐖🐖🐖🐖🐖🐖
-        std::vector<std::string>            _host;  //🏠🏠🏠🏠🏠🏠🏠🏠
-        std::vector<std::string>            _root;  //🌳🌳🌳🌳🌳🌳🌳🌳
-        std::vector<std::string>            _index; //👆👆👆👆👆👆👆👆
+        int                                 _port;  //🐖🐖🐖🐖🐖🐖🐖🐖
+        std::vector<std::string>            _host;  //🏠🏠🏠🏠🏠🏠🏠🏠🏠
+        std::vector<std::string>            _root;  //🌳🌳🌳🌳🌳🌳🌳🌳🌳
+        std::vector<std::string>            _index; //👆👆👆👆👆👆👆👆👆👆
         // For the map we will have in [0][0](root) the location followed by the path
         // The next parsed elements will go in the map in a random order and will be called with find
         std::map<std::string, std::string>  _location;
@@ -20,7 +20,7 @@ class ServerConfig {
         virtual ~ServerConfig();
 
         // Getters
-        std::vector<int>                            getPort() const;
+        int                                         getPort() const;
         std::vector<std::string>                    getHost() const;
         std::vector<std::string>                    getRoot() const;
         std::vector<std::string>                    getIndex() const;

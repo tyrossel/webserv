@@ -31,13 +31,13 @@ Config::~Config() {}
 
 // ------------------------------- SERVER CONFIG ------------------------------------ //
 
-std::vector<int>                    ServerConfig::getPort() const { return (this->_port); }
+int                                 ServerConfig::getPort() const { return (this->_port); }
 std::vector<std::string>            ServerConfig::getHost() const { return (this->_host); }
 std::vector<std::string>            ServerConfig::getRoot() const { return (this->_root); }
 std::vector<std::string>            ServerConfig::getIndex() const { return (this->_index); }
 std::map<std::string, std::string>  ServerConfig::getLocation() const { return (this->_location); }
 
-void    ServerConfig::addPort(int port) { _port.push_back(port); }
+void    ServerConfig::addPort(int port) { _port = port; }
 void    ServerConfig::addHost(const std::string &host) { _host.push_back(host); }
 void    ServerConfig::addRoot(const std::string &root) { _root.push_back(root); }
 void    ServerConfig::addIndex(const std::string &index) { _index.push_back(index); }
@@ -58,7 +58,7 @@ std::ostream &operator<<(std::ostream &out, const Config &rhs)
     for (int i = 0; i < rhs.getNbServer(); i++) {
         // TODO: double for loop to catch multiple vector datas if there is some :)
         out << "Server number : " << i
-        << "\nPort : " << rhs._server[i].getPort()[0]
+        << "\nPort : " << rhs._server[i].getPort()
         << "\nHost : " << rhs._server[i].getHost()[0]
         << "\nRoot : " << rhs._server[i].getRoot()[0]
         << "\nIndex : " << rhs._server[i].getIndex()[0] << std::endl;
