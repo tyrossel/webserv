@@ -6,3 +6,7 @@ webserv
 
 #swp files
 *.swp
+
+#mac files
+.idea/
+.DS_Store

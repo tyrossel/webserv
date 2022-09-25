@@ -41,12 +41,14 @@ void    ServerConfig::addPort(int port) { _port = port; }
 void    ServerConfig::addHost(const std::string &host) { _host.push_back(host); }
 void    ServerConfig::addRoot(const std::string &root) { _root.push_back(root); }
 void    ServerConfig::addIndex(const std::string &index) { _index.push_back(index); }
+void    ServerConfig::addLocation(const std::string &key, const std::string &value) { _location[key] = value; }
+
 
 // ----------------------------------- CONFIG --------------------------------------- //
 
-void        Config::addServer(const ServerConfig &newServ) { this->_server.push_back(newServ); }
-const       std::vector<ServerConfig> Config::getServer() const { return (this->_server); }
-int         Config::getNbServer() const { return (this->_server.size()); }
+const std::vector<ServerConfig> Config::getServer() const { return (this->_server); }
+void                            Config::addServer(const ServerConfig &newServ) { this->_server.push_back(newServ); }
+int                             Config::getNbServer() const { return (this->_server.size()); }
 
 /**************************************************************************************/
 /*                                NON MEMBER FUNCTIONS                                */
@@ -56,12 +58,20 @@ std::ostream &operator<<(std::ostream &out, const Config &rhs)
 {
     out << "Configuration Servers" << std::endl;
     for (int i = 0; i < rhs.getNbServer(); i++) {
-        // TODO: double for loop to catch multiple vector datas if there is some :)
         out << "Server number : " << i
-        << "\nPort : " << rhs._server[i].getPort()
-        << "\nHost : " << rhs._server[i].getHost()[0]
-        << "\nRoot : " << rhs._server[i].getRoot()[0]
-        << "\nIndex : " << rhs._server[i].getIndex()[0] << std::endl;
+        << "\nPort : " << rhs.getServer()[i].getPort()
+        << "\nRoot : " << rhs.getServer()[i].getRoot()[0];
+
+        for (size_t j = 0; j < rhs.getServer()[i].getHost().size(); j++)
+            out << "\nHost : " << rhs.getServer()[i].getHost()[j];
+
+        for (size_t j = 0; j < rhs.getServer()[i].getIndex().size(); j++)
+            out << "\nIndex : " << rhs.getServer()[i].getIndex()[j];
+
+        std::map<std::string, std::string> location = rhs.getServer()[i].getLocation();
+        for (std::map<std::string, std::string>::iterator it = location.begin();
+                it != location.end(); it++)
+            out << "\nLocation : " << (*it).first << " || " << (*it).second;
     }
     return (out);
 }
