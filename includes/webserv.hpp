@@ -1,6 +1,10 @@
 #ifndef WEBSERV_HPP
 # define WEBSERV_HPP
 
+# define BUFFER_SIZE 4096
+# define EPOLL_EVENTS 100
+# define MAX_EVENTS 128
+
 /***********************************************************************************
  *                              LIBRARIES                                          *
  ***********************************************************************************/
@@ -13,9 +17,10 @@
 /***********************************************************************************
  *                              FUNCTIONS                                          *
  ***********************************************************************************/
-//#include <sys/event.h> kqueue and kevent. does not compile for some reasons
+//#include <sys/event.h> //kqueue and kevent. does not compile for some reasons
 
 #include <arpa/inet.h>
+#include <sys/epoll.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <sys/select.h>
