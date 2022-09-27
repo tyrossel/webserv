@@ -2,8 +2,6 @@
 # define WEBSERV_HPP
 
 # define BUFFER_SIZE 4096
-# define EPOLL_EVENTS 100
-# define MAX_EVENTS 128
 
 /***********************************************************************************
  *                              LIBRARIES                                          *
@@ -29,4 +27,4 @@
 #include <fcntl.h>
 #include <netinet/in.h>
 
-#endif // WEBSERVHPP
+#endif // WEBSERV_HPP

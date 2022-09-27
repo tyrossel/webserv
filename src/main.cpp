@@ -11,9 +11,6 @@
 /* ************************************************************************** */
 
 #include "Config.hpp"
-#include "IOLoop.hpp"
-#include "ServerHandler.hpp"
-#include "EchoHandler.hpp"
 
 void createConfig(Config  &config)
 {
@@ -38,12 +35,8 @@ int	main(int argc, char *argv[], char *envp[])
 	(void)argv;
 	(void)envp;
     Config  config;
-    IOLoop looper;
 
     createConfig(config);
-    ServerHandler(config.getServer()[0].getPort());
-
-    looper.start();
 
 	return (0);
 }
