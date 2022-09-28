@@ -29,7 +29,6 @@
 #include <netinet/in.h>
 #include <netdb.h>
 
-
 #define TRUE 1
 #define FALSE 0
 
@@ -85,8 +84,8 @@ int read_from_client(int filedes) {
         return -1;
     else {
         /* Data read. */
-        write(1, &buffer, strlen(buffer));
-        //printf(stderr, "Server: got message: `%s'\n", buffer);
+        //write(1, &buffer, strlen(buffer));
+        fprintf(stderr, "Server: got message: `%s'\n", buffer);
         return 0;
     }
 }
@@ -168,5 +167,6 @@ int main(int argc, char *argv[], char *envp[]) {
                 }
             }
     }
+
     return (0);
 }
