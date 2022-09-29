@@ -6,11 +6,12 @@
 /*   By: trossel <trossel@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/20 15:21:50 by trossel           #+#    #+#             */
-/*   Updated: 2022/09/20 15:23:05 by trossel          ###   ########.fr       */
+/*   Updated: 2022/09/26 17:01:11 by trossel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Looper.hpp"
+#include "conf/parse.hpp"
 
 void createConfig(Config &config) {
     ServerConfig server;
@@ -43,10 +44,11 @@ void createConfig(Config &config) {
 //	}
 //}
 
-int main(int argc, char *argv[], char *envp[]) {
-    (void) argc;
-    (void) argv;
-    (void) envp;
+int	main(int argc, char *argv[], char *envp[])
+{
+	(void)argc;
+	(void)argv;
+	(void)envp;
 
 	if (argc < 2 || argc > 2)
 	{
