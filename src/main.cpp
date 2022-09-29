@@ -28,10 +28,32 @@ void createConfig(Config &config) {
     //std::cout << config << std::endl;
 }
 
+//ServerConfig getConfig(const std::string &filename)
+//{
+//	ConfigParsor parsor(filename);
+//	try
+//	{
+//		ServerConfig conf = parsor.parse();
+//		return conf;
+//
+//	}
+//	catch (const std::exception& e)
+//	{
+//		std::cerr << e.what() << std::endl;
+//	}
+//}
+
 int main(int argc, char *argv[], char *envp[]) {
     (void) argc;
     (void) argv;
     (void) envp;
+
+	if (argc < 2 || argc > 2)
+	{
+		std::cerr << "Usage: ./webserv <config file>" << std::endl;
+//		exit(1);
+	}
+//	ConfigParsor parsor("
     Config config;
     Server serv(8080, "0.0.0.0");
     Looper loop;
