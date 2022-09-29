@@ -10,13 +10,11 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Config.hpp"
+#include "Looper.hpp"
 #include "conf/parse.hpp"
 
-void createConfig()
-{
+void createConfig(Config &config) {
     ServerConfig server;
-    Config  config;
 
     server.addHost("localhost");
     server.addHost("mywebsite.com");
@@ -28,7 +26,7 @@ void createConfig()
     server.addLocation("root", "subfolder");
 
     config.addServer(server);
-    std::cout << config << std::endl;
+    //std::cout << config << std::endl;
 }
 
 //ServerConfig getConfig(const std::string &filename)
@@ -58,7 +56,14 @@ int	main(int argc, char *argv[], char *envp[])
 //		exit(1);
 	}
 //	ConfigParsor parsor("
-    createConfig();
+    Config config;
+    Server serv(8080, "0.0.0.0");
+    Looper loop;
 
-	return (0);
+    createConfig(config);
+    loop.addServer(serv);
+    loop.setupLoop();
+    loop.loop();
+
+    return (0);
 }
