@@ -47,11 +47,12 @@ int Looper::readFromClient(int filedes) {
     char buffer[BUFFER_SIZE];
     int nbytes;
 
+//    printf("\n\nFD RECEIVED : %i \n\n", filedes);
     nbytes = recv(filedes, buffer, BUFFER_SIZE, 0);
     if (nbytes < 0) {
         /* Read error. */
         log("recv failed");
-        exit(1);
+        //exit(1);
     } else if (nbytes == 0)
         /* End-of-file. */
         return -1;
@@ -61,6 +62,7 @@ int Looper::readFromClient(int filedes) {
         fprintf(stderr, "Server: got message: `%s'\n", buffer);
         return 0;
     }
+    return 0;
 }
 
 void Looper::loop()
@@ -85,30 +87,34 @@ void Looper::loop()
         /* Service all the sockets with input pending. */
         for (int i = 0; i <= _max_fd; ++i) {
             if (FD_ISSET(i, &read_fd_set)) {
-                if (i == (_servers[0].getSock())) //TODO : THIS IS STATIC FOR 1 SERVER
-                {
-                    /* Connection request on original socket. */
-                    int _new;
-                    size = sizeof(clientname);
+                for (unsigned int j = 0; j < _servers.size(); j++) {
+                    if (i == (_servers[j].getSock())) //TODO : THIS IS STATIC FOR 1 SERVER
+                    {
+//                        printf("\n\nFD CATCHED : %i \n\n", i);
 
-                    //TODO : THIS IS STATIC FOR 1 SERVER
-                    _new = accept(_servers[0].getSock(), (struct sockaddr *) &clientname,
-                                  (socklen_t * ) & size); // accept can be called like accept(socket, NULL, NULL)
-                    if (_new < 0) {
-                        log("accept failed");
-                        exit(1);
-                    }
+                        /* Connection request on original socket. */
+                        int _new;
+                        size = sizeof(clientname);
 
-                    fprintf(stderr, "Server: connect from host %s, port %hd.\n",
-                            inet_ntoa(clientname.sin_addr),
-                            ntohs(clientname.sin_port));
+                        //TODO : THIS IS STATIC FOR 1 SERVER
+                        _new = accept(_servers[j].getSock(), (struct sockaddr *) &clientname,
+                                      (socklen_t * ) & size); // accept can be called like accept(socket, NULL, NULL)
+                        if (_new < 0) {
+                            log("accept failed");
+                            exit(1);
+                        }
 
-                    FD_SET(_new, &_active_fd_set);
-                } else {
-                    /* Data arriving on an already-connected socket. */
-                    if (readFromClient(i) < 0) {
-                        close(i);
-                        FD_CLR(i, &_active_fd_set);
+                        fprintf(stderr, "Server: connect from host %s, port %hd.\n",
+                                inet_ntoa(clientname.sin_addr),
+                                ntohs(clientname.sin_port));
+
+                        FD_SET(_new, &_active_fd_set);
+                    } else {
+                        /* Data arriving on an already-connected socket. */
+                        if (readFromClient(i) < 0) {
+                            close(i);
+                            FD_CLR(i, &_active_fd_set);
+                        }
                     }
                 }
             }
