@@ -31,20 +31,20 @@ void createConfig()
     std::cout << config << std::endl;
 }
 
-ServerConfig getConfig(const std::string &filename)
-{
-	ConfigParsor parsor(filename);
-	try
-	{
-		ServerConfig conf = parsor.parse();
-		return conf;
-
-	}
-	catch (const std::exception& e)
-	{
-		std::cerr << e.what() << std::endl;
-	}
-}
+//ServerConfig getConfig(const std::string &filename)
+//{
+//	ConfigParsor parsor(filename);
+//	try
+//	{
+//		ServerConfig conf = parsor.parse();
+//		return conf;
+//
+//	}
+//	catch (const std::exception& e)
+//	{
+//		std::cerr << e.what() << std::endl;
+//	}
+//}
 
 int	main(int argc, char *argv[], char *envp[])
 {
@@ -55,9 +55,9 @@ int	main(int argc, char *argv[], char *envp[])
 	if (argc < 2 || argc > 2)
 	{
 		std::cerr << "Usage: ./webserv <config file>" << std::endl;
-		exit(1);
+//		exit(1);
 	}
-	ConfigParsor parsor("
+//	ConfigParsor parsor("
     createConfig();
 
 	return (0);
