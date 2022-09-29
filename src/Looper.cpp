@@ -50,7 +50,7 @@ int Looper::readFromClient(int filedes) {
     nbytes = recv(filedes, buffer, BUFFER_SIZE, 0);
     if (nbytes < 0) {
         /* Read error. */
-        log("read failed");
+        log("recv failed");
         exit(1);
     } else if (nbytes == 0)
         /* End-of-file. */
@@ -95,7 +95,7 @@ void Looper::loop()
                     _new = accept(_servers[0].getSock(), (struct sockaddr *) &clientname,
                                   (socklen_t * ) & size); // accept can be called like accept(socket, NULL, NULL)
                     if (_new < 0) {
-                        log("accept");
+                        log("accept failed");
                         exit(1);
                     }
 

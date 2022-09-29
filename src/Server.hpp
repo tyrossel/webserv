@@ -27,4 +27,4 @@ class Server {
 
 };
 
-#endif // SERVERHPP
+#endif // SERVER_HPP
