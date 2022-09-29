@@ -47,18 +47,16 @@ int Looper::readFromClient(int filedes) {
     char buffer[BUFFER_SIZE];
     int nbytes;
 
-//    printf("\n\nFD RECEIVED : %i \n\n", filedes);
     nbytes = recv(filedes, buffer, BUFFER_SIZE, 0);
     if (nbytes < 0) {
         /* Read error. */
         log("recv failed");
-        //exit(1);
+        exit(1);
     } else if (nbytes == 0)
         /* End-of-file. */
         return -1;
     else {
         /* Data read. */
-        //write(1, &buffer, strlen(buffer));
         fprintf(stderr, "Server: got message: `%s'\n", buffer);
         return 0;
     }
@@ -85,13 +83,14 @@ void Looper::loop()
         }
 
         /* Service all the sockets with input pending. */
-        for (int i = 0; i <= _max_fd; ++i) {
-            if (FD_ISSET(i, &read_fd_set)) {
-                for (unsigned int j = 0; j < _servers.size(); j++) {
+        for (int i = 0; i <= _max_fd; ++i)
+        {
+            if (FD_ISSET(i, &read_fd_set))
+            {
+                for (unsigned int j = 0; j < _servers.size(); j++)
+                {
                     if (i == (_servers[j].getSock())) //TODO : THIS IS STATIC FOR 1 SERVER
                     {
-//                        printf("\n\nFD CATCHED : %i \n\n", i);
-
                         /* Connection request on original socket. */
                         int _new;
                         size = sizeof(clientname);
@@ -103,19 +102,18 @@ void Looper::loop()
                             log("accept failed");
                             exit(1);
                         }
+                        fprintf(stderr, "new : %i\n", _new);
 
                         fprintf(stderr, "Server: connect from host %s, port %hd.\n",
                                 inet_ntoa(clientname.sin_addr),
                                 ntohs(clientname.sin_port));
 
                         FD_SET(_new, &_active_fd_set);
-                    } else {
-                        /* Data arriving on an already-connected socket. */
-                        if (readFromClient(i) < 0) {
-                            close(i);
-                            FD_CLR(i, &_active_fd_set);
-                        }
                     }
+                }
+                if (readFromClient(_max_fd) < 0) {
+                    close(i);
+                    FD_CLR(i, &_active_fd_set);
                 }
             }
         }
