@@ -63,21 +63,43 @@ void Looper::setMaxFd()
     }
 }
 
-void	*ft_memcpy(void *dst, const void *src, size_t n)
-{
-    size_t			i;
-    unsigned char	*p;
-    unsigned char	*q;
+<<<<<<< HEAD
+void	*ft_memcpy(void *dst, const void *src, size_t n) {
+    size_t i;
+    unsigned char *p;
+    unsigned char *q;
 
     i = 0;
-    p = (unsigned char *)dst;
-    q = (unsigned char *)src;
-    while (i < n)
-    {
+    p = (unsigned char *) dst;
+    q = (unsigned char *) src;
+    while (i < n) {
         p[i] = q[i];
         i++;
     }
     return (dst);
+
+}
+
+int Looper::readFromClient(int filedes) {
+    char buffer[BUFFER_SIZE];
+    int nbytes;
+
+    nbytes = recv(filedes, buffer, BUFFER_SIZE, 0);
+
+    //START PARSING HERE
+
+    if (nbytes < 0) {
+        /* Read error. */
+        log("recv failed");
+        exit(1);
+    } else if (nbytes == 0)
+        /* End-of-file. */
+        return -1;
+    else {
+        /* Data read. */
+        fprintf(stderr, "Server: got message: `%s'\n", buffer);
+    }
+    return 0;
 }
 
 void Looper::loop()
