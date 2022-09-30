@@ -20,7 +20,8 @@ OBJS = 		$(patsubst %.cpp, $(OBJS_DIR)/%.o, $(SRCS))
 SRCS		= main.cpp \
 			  Config.cpp \
 			  Looper.cpp \
-			  Server.cpp
+			  Server.cpp \
+			  RequestParser.cpp
 
 all: $(TARGET)
 

@@ -1,8 +1,8 @@
 #include "RequestParser.hpp"
 
-RequestParser::RequestParser() : _method(), _version(), _headers(), _body() {}
+RequestParser::RequestParser() : _method(), _url(), _version(), _headers(), _body() {}
 
-RequestParser::RequestParser(const RequestParser &other) : _method(other._method), _version(other._version), _headers(other._headers), _body(other._body) {}
+RequestParser::RequestParser(const RequestParser &other) : _method(other._method), _url(), _version(other._version), _headers(other._headers), _body(other._body) {}
 
 RequestParser::~RequestParser() {}
 
@@ -11,11 +11,17 @@ RequestParser &RequestParser::operator=(const RequestParser &other)
     if (this != &other)
     {
         this->_method = other._method;
+        this->_url = other._url;
         this->_version = other._version;
         this->_headers = other._headers;
         this->_body = other._body;
     }
     return (*this);
+}
+
+std::string                         RequestParser::getNextLine(std::string &str, size_t &i)
+{
+
 }
 
 void                                RequestParser::parseRequest(const char *str)
@@ -24,6 +30,9 @@ void                                RequestParser::parseRequest(const char *str)
         return;
     std::string request = str;
 
+    int start, end = 0;
+    end = request.find(" ");
+    _method = request.substr(0, end);
 
 }
 
