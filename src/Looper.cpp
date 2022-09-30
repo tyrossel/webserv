@@ -63,7 +63,6 @@ void Looper::setMaxFd()
     }
 }
 
-<<<<<<< HEAD
 void	*ft_memcpy(void *dst, const void *src, size_t n) {
     size_t i;
     unsigned char *p;
@@ -126,7 +125,28 @@ void Looper::loop()
 
                     if (ret_val == 0)
                     {
+<<<<<<< HEAD
                         _ready_fd.erase(it); // erase the fd from vector when comm is over
+=======
+                        /* Connection request on original socket. */
+                        int _new;
+                        size = sizeof(clientname);
+
+                        //TODO : THIS IS STATIC FOR 1 SERVER
+                        _new = accept(_servers[j].getSock(), (struct sockaddr *) &clientname,
+                                      (socklen_t * ) & size); // accept can be called like accept(socket, NULL, NULL)
+                        if (_new < 0) {
+                            log("accept failed");
+                            exit(1);
+                        }
+//                        fprintf(stderr, "new : %i\n", _new);
+//
+//                        fprintf(stderr, "Server: connect from host %s, port %hd.\n",
+//                                inet_ntoa(clientname.sin_addr),
+//                                ntohs(clientname.sin_port));
+
+                        FD_SET(_new, &_active_fd_set);
+>>>>>>> parse first line done
                     }
                     else if
                     {

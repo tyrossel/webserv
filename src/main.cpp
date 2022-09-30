@@ -52,7 +52,7 @@ int	main(int argc, char *argv[], char *envp[])
 
 	if (argc < 2 || argc > 2)
 	{
-		std::cerr << "Usage: ./webserv <config file>" << std::endl;
+//		std::cerr << "Usage: ./webserv <config file>" << std::endl;
 //		exit(1);
 	}
 //	ConfigParsor parsor("
