@@ -67,8 +67,6 @@ int	main(int argc, char *argv[], char *envp[])
     Server serv7(7070, "0.0.0.0");
     Server serv(8080, "0.0.0.0");
 
-
-
     Looper loop;
 
     loop.addServer(serv);
