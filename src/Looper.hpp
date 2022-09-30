@@ -3,6 +3,7 @@
 
 #include "Config.hpp"
 #include "Server.hpp"
+#include "RequestParser.hpp"
 
 class Looper {
     private:

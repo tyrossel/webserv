@@ -86,19 +86,9 @@ int Looper::readFromClient(int filedes) {
 
     nbytes = recv(filedes, buffer, BUFFER_SIZE, 0);
 
-    //START PARSING HERE
+    RequestParser parser;
+    parser.parseRequest(buffer);
 
-    if (nbytes < 0) {
-        /* Read error. */
-        log("recv failed");
-        exit(1);
-    } else if (nbytes == 0)
-        /* End-of-file. */
-        return -1;
-    else {
-        /* Data read. */
-        fprintf(stderr, "Server: got message: `%s'\n", buffer);
-    }
     return 0;
 }
 

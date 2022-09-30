@@ -1,9 +1,12 @@
 #ifndef REQUESTPARSER_HPP
 #define REQUESTPARSER_HPP
 
+#include "../includes/webserv.hpp"
+
 class RequestParser {
     private:
         std::string                         _method;
+        std::string                         _url;
         std::string                         _version;
         std::map<std::string, std::string>  _headers;
         std::string                         _body;
@@ -15,6 +18,7 @@ class RequestParser {
 
         RequestParser &operator=(const RequestParser &other);
 
+        std::string                         getNextLine(std::string &str, size_t &i);
         void                                parseRequest(const char *request);
 
         /* GETTERS */
