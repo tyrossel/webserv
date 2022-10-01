@@ -27,6 +27,7 @@ class RequestParser {
 
         /* GETTERS */
         std::string                         getMethod();
+        std::string                         getUrl();
         std::string                         getVersion();
         std::string                         getBody();
         std::map<std::string, std::string>  getHeaders();
