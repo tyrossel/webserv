@@ -1,5 +1,9 @@
 #include "RequestParser.hpp"
 
+/**************************************************************************************/
+/*                          CONSTRUCTORS / DESTRUCTORS                                */
+/**************************************************************************************/
+
 RequestParser::RequestParser() : _method(""), _url(""), _version(""), _headers(), _body(""), _return(0) {}
 
 RequestParser::RequestParser(const RequestParser &other) : _method(other._method), _url(other._url), _version(other._version), _headers(other._headers), _body(other._body), _return(other._return) {}
@@ -20,17 +24,26 @@ RequestParser &RequestParser::operator=(const RequestParser &other)
     return (*this);
 }
 
-std::string RequestParser::getNextLine(std::string &str, size_t &i)
+/**************************************************************************************/
+/*                                  MEMBER FUNCTIONS                                  */
+/**************************************************************************************/
+
+std::string RequestParser::getNextLine(std::string &str, size_t &start)
 {
-    (void)str;
-    (void)i;
-    return NULL;
+    std::string line;
+    size_t      end;
+
+    end = str.find_first_of('\n', start);
+    line = str.substr(start, end - start);
+    start = end + 1;
+
+    return line;
 }
 
-int RequestParser::parseVersion(std::string &full_line, size_t &start, size_t &end)
+int RequestParser::parseVersion(std::string &first_line, size_t &start, size_t &end)
 {
-    /* Stock the next \n index in end, and check if no \n are found */
-    start = full_line.find_first_not_of(' ', end);
+    /* Stock the next ' ' index in end, and check if no ' ' are found */
+    start = first_line.find_first_not_of(' ', end);
     if (start == std::string::npos)
     {
         std::cout << "Error Not Found : There is no newline after version HTTP" << std::endl;
@@ -38,7 +51,8 @@ int RequestParser::parseVersion(std::string &full_line, size_t &start, size_t &e
         return (-1);
     }
 
-    std::string format = full_line.substr(start, 5);
+    /* Get the 5 next characters. Expect that it will be HTTP/ */
+    std::string format = first_line.substr(start, 5);
     if (format != "HTTP/")
     {
         std::cout << "Wrong HTTP format" << std::endl;
@@ -46,7 +60,8 @@ int RequestParser::parseVersion(std::string &full_line, size_t &start, size_t &e
         return (-1);
     }
 
-    this->_version = full_line.substr(start + 5, 3);
+    /* Extract version */
+    this->_version = first_line.substr(start + 5, 3);
     if (this->_version != "1.0" && this->_version != "1.1")
     {
         std::cout << "Wrong HTTP version" << std::endl;
@@ -57,34 +72,29 @@ int RequestParser::parseVersion(std::string &full_line, size_t &start, size_t &e
     return 0;
 }
 
-int RequestParser::parseUrl(std::string &full_line, size_t &start, size_t &end)
+int RequestParser::parseUrl(std::string &first_line, size_t &start, size_t &end)
 {
     /* Stock the next spaces index in end, and check if no spaces are found */
-    start = full_line.find_first_not_of(' ', end);
+    start = first_line.find_first_not_of(' ', end);
     if (start == std::string::npos)
     {
         std::cout << "Error Not Found : There is no spaces after URL" << std::endl;
         this->_return = 404;
         return (-1);
     }
-    end = full_line.find_first_of(' ', start);
-    this->_url = full_line.substr(start, end - start);
+    end = first_line.find_first_of(' ', start);
+    this->_url = first_line.substr(start, end - start);
 
-    return parseVersion(full_line, start, end);
+    return parseVersion(first_line, start, end);
 }
 
-int RequestParser::parseFirstLine(std::string &str)
+int RequestParser::parseFirstLine(std::string &first_line)
 {
     size_t      start = 0;
     size_t      end = 0;
-    std::string full_line;
-
-    /* Extract the first line */
-    end = str.find_first_of('\n');
-    full_line = str.substr(start, end);
 
     /* Get the spaces after method */
-    end = full_line.find_first_of(' ');
+    end = first_line.find_first_of(' ');
 
     /* If there is no spaces after method, end will be equal to npos */
     if (end == std::string::npos)
@@ -93,23 +103,50 @@ int RequestParser::parseFirstLine(std::string &str)
         this->_return = 404;
         return (-1);
     }
-    this->_method = full_line.substr(start, end);
+    this->_method = first_line.substr(start, end);
 
-    return parseUrl(full_line, start, end);
+    return parseUrl(first_line, start, end);
 }
 
-int    RequestParser::parseRequest(const char *str)
+int RequestParser::parseRequest(const char *str)
 {
     if (!str)
+    {
+        std::cerr << "Wrong buffer send by recv" << std::endl;
         return -1;
-    std::string request(str);
+    }
 
-    this->parseFirstLine(request);
+    size_t      index = 0;
+    size_t      trunc = 0;
+
+    std::string request(str);
+    std::string line, key;
+
+    line = getNextLine(request, index);
+    this->parseFirstLine(line);
+
+    for (int i = 0; i < 10; i++)
+    {
+        line = getNextLine(request, index);
+        trunc = line.find_first_of(":");
+        key = line.substr(0, trunc);
+
+        this->_headers[key] = line.substr(trunc, line.size() - trunc);
+    }
+
+    for (std::map<std::string, std::string>::iterator it = this->_headers.begin(); it != this->_headers.end(); it++) {
+        std::cout << it->first << it->second << std::endl;
+    }
 
     return 0;
 }
 
+/**************************************************************************************/
+/*                                      GETTERS                                       */
+/**************************************************************************************/
+
 std::string                         RequestParser::getMethod() { return (this->_method); }
+std::string                         RequestParser::getUrl() { return (this->_url); }
 std::string                         RequestParser::getVersion() { return (this->_version); }
 std::string                         RequestParser::getBody() { return (this->_body); }
 std::map<std::string, std::string>  RequestParser::getHeaders() { return (this->_headers); }
