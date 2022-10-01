@@ -64,6 +64,7 @@ int	main(int argc, char *argv[], char *envp[])
     Server serv4(4040, "0.0.0.0");
     Server serv5(5050, "0.0.0.0");
     Server serv6(6060, "0.0.0.0");
+    Server serv7(7070, "0.0.0.0");
     Server serv(8080, "0.0.0.0");
 
 
@@ -76,6 +77,8 @@ int	main(int argc, char *argv[], char *envp[])
     loop.addServer(serv4);
     loop.addServer(serv5);
     loop.addServer(serv6);
+    loop.addServer(serv7);
+
     loop.setupLoop();
     loop.loop();
 

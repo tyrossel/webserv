@@ -3,13 +3,16 @@
 
 #include "Config.hpp"
 #include "Server.hpp"
+#include "utils.cpp"
 
 class Looper {
     private:
         Config              _config;
         int                 _max_fd;
         std::vector<Server> _servers;
-        fd_set              _active_fd_set;
+        std::vector<Server> _active_servers;
+
+    fd_set              _active_fd_set;
 
     public:
         Looper();
@@ -21,7 +24,6 @@ class Looper {
         void    addServer(Server &server);
         void    log(std::string message);
         void    loop();
-        int     readFromClient(int filedes);
 };
 
 #endif // LOOPER_HPP
