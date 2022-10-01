@@ -139,9 +139,8 @@ int RequestParser::parseRequest(const char *str)
     if (this->parseFirstLine(line) == -1)
         return -1;
 
-    for (int i = 0; i < 10; i++)
+    while((line = getNextLine(request, index)) != "\r" && line != "")
     {
-        line = getNextLine(request, index);
         trunc = line.find_first_of(":");
         key = line.substr(0, trunc);
 
