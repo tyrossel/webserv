@@ -58,7 +58,7 @@ int RequestParser::parseVersion(std::string &first_line, size_t &start, size_t &
     if (start == std::string::npos)
     {
         std::cout << "Error Not Found : There is no newline after version HTTP" << std::endl;
-        this->_return = 400;
+        this->_return = BAD_REQUEST;
         return (-1);
     }
 
@@ -67,7 +67,7 @@ int RequestParser::parseVersion(std::string &first_line, size_t &start, size_t &
     if (format != "HTTP/")
     {
         std::cout << "Wrong HTTP format" << std::endl;
-        this->_return = 400;
+        this->_return = BAD_REQUEST;
         return (-1);
     }
 
@@ -76,7 +76,7 @@ int RequestParser::parseVersion(std::string &first_line, size_t &start, size_t &
     if (this->_version != "1.0" && this->_version != "1.1")
     {
         std::cout << "Wrong HTTP version" << std::endl;
-        this->_return = 400;
+        this->_return = BAD_REQUEST;
         return (-1);
     }
 
@@ -90,7 +90,7 @@ int RequestParser::parseUrl(std::string &first_line, size_t &start, size_t &end)
     if (start == std::string::npos)
     {
         std::cout << "Error Not Found : There is no spaces after URL" << std::endl;
-        this->_return = 400;
+        this->_return = BAD_REQUEST;
         return (-1);
     }
     end = first_line.find_first_of(' ', start);
@@ -111,7 +111,7 @@ int RequestParser::parseFirstLine(std::string &first_line)
     if (end == std::string::npos)
     {
         std::cout << "Error Not Found : There is no spaces after method" << std::endl;
-        this->_return = 400; //  server cannot or will not process the request due to something that is perceived to be a client error
+        this->_return = BAD_REQUEST; //  server cannot or will not process the request due to something that is perceived to be a client error
         return (-1);
     }
     this->_method = first_line.substr(start, end);

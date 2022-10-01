@@ -30,8 +30,8 @@ class RequestParser {
         std::string                         getMethod();
         std::string                         getUrl();
         std::string                         getVersion();
-        std::string                         getBody();
         std::map<std::string, std::string>  getHeaders();
+        std::string                         getBody();
 
 };
 
