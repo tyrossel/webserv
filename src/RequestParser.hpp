@@ -20,6 +20,8 @@ class RequestParser {
         RequestParser &operator=(const RequestParser &other);
 
         std::string                         getNextLine(std::string &str, size_t &i);
+        int                                 parseUrl(std::string &full_line, size_t &start, size_t &end);
+        int                                 parseVersion(std::string &full_line, size_t &start, size_t &end);
         int                                 parseFirstLine(std::string &str);
         int                                 parseRequest(const char *request);
 
