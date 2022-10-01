@@ -27,39 +27,8 @@ std::string RequestParser::getNextLine(std::string &str, size_t &i)
     return NULL;
 }
 
-int RequestParser::parseFirstLine(std::string &str)
+int RequestParser::parseVersion(std::string &full_line, size_t &start, size_t &end)
 {
-    size_t      start = 0;
-    size_t      end = 0;
-    std::string full_line;
-
-    /* Extract the first line */
-    end = str.find_first_of('\n');
-    full_line = str.substr(start, end);
-
-    /* Get the spaces after method */
-    end = full_line.find_first_of(' ');
-
-    /* If there is no spaces after method, end will be equal to npos */
-    if (end == std::string::npos)
-    {
-        std::cout << "Error Not Found : There is no spaces after method" << std::endl;
-        this->_return = 404;
-        return (-1);
-    }
-    this->_method = full_line.substr(start, end);
-
-    /* Stock the next spaces index in end, and check if no spaces are found */
-    start = full_line.find_first_not_of(' ', end);
-    if (start == std::string::npos)
-    {
-        std::cout << "Error Not Found : There is no spaces after URL" << std::endl;
-        this->_return = 404;
-        return (-1);
-    }
-    end = full_line.find_first_of(' ', start);
-    this->_url = full_line.substr(start, end - start);
-
     /* Stock the next \n index in end, and check if no \n are found */
     start = full_line.find_first_not_of(' ', end);
     if (start == std::string::npos)
@@ -88,6 +57,47 @@ int RequestParser::parseFirstLine(std::string &str)
     return 0;
 }
 
+int RequestParser::parseUrl(std::string &full_line, size_t &start, size_t &end)
+{
+    /* Stock the next spaces index in end, and check if no spaces are found */
+    start = full_line.find_first_not_of(' ', end);
+    if (start == std::string::npos)
+    {
+        std::cout << "Error Not Found : There is no spaces after URL" << std::endl;
+        this->_return = 404;
+        return (-1);
+    }
+    end = full_line.find_first_of(' ', start);
+    this->_url = full_line.substr(start, end - start);
+
+    return parseVersion(full_line, start, end);
+}
+
+int RequestParser::parseFirstLine(std::string &str)
+{
+    size_t      start = 0;
+    size_t      end = 0;
+    std::string full_line;
+
+    /* Extract the first line */
+    end = str.find_first_of('\n');
+    full_line = str.substr(start, end);
+
+    /* Get the spaces after method */
+    end = full_line.find_first_of(' ');
+
+    /* If there is no spaces after method, end will be equal to npos */
+    if (end == std::string::npos)
+    {
+        std::cout << "Error Not Found : There is no spaces after method" << std::endl;
+        this->_return = 404;
+        return (-1);
+    }
+    this->_method = full_line.substr(start, end);
+
+    return parseUrl(full_line, start, end);
+}
+
 int    RequestParser::parseRequest(const char *str)
 {
     if (!str)
@@ -95,9 +105,7 @@ int    RequestParser::parseRequest(const char *str)
     std::string request(str);
 
     this->parseFirstLine(request);
-    std::cout << "Method : " << this->_method << std::endl
-    << "URL : " << this ->_url << std::endl
-    << "Version : " << this->_version << std::endl;
+
     return 0;
 }
 
