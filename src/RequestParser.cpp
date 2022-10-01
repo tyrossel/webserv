@@ -28,6 +28,17 @@ RequestParser &RequestParser::operator=(const RequestParser &other)
 /*                                  MEMBER FUNCTIONS                                  */
 /**************************************************************************************/
 
+int RequestParser::checkMethod(std::string &method)
+{
+    // Rest Connect, Options, Trace and Patch
+
+    if (method == "GET" || method == "HEAD"
+        || method == "POST" || method == "PUT"
+        || method == "DELETE")
+        return 0;
+    return -1;
+}
+
 std::string RequestParser::getNextLine(std::string &str, size_t &start)
 {
     std::string line;
@@ -47,7 +58,7 @@ int RequestParser::parseVersion(std::string &first_line, size_t &start, size_t &
     if (start == std::string::npos)
     {
         std::cout << "Error Not Found : There is no newline after version HTTP" << std::endl;
-        this->_return = 404;
+        this->_return = 400;
         return (-1);
     }
 
@@ -56,7 +67,7 @@ int RequestParser::parseVersion(std::string &first_line, size_t &start, size_t &
     if (format != "HTTP/")
     {
         std::cout << "Wrong HTTP format" << std::endl;
-        this->_return = 404;
+        this->_return = 400;
         return (-1);
     }
 
@@ -65,7 +76,7 @@ int RequestParser::parseVersion(std::string &first_line, size_t &start, size_t &
     if (this->_version != "1.0" && this->_version != "1.1")
     {
         std::cout << "Wrong HTTP version" << std::endl;
-        this->_return = 404;
+        this->_return = 400;
         return (-1);
     }
 
@@ -79,7 +90,7 @@ int RequestParser::parseUrl(std::string &first_line, size_t &start, size_t &end)
     if (start == std::string::npos)
     {
         std::cout << "Error Not Found : There is no spaces after URL" << std::endl;
-        this->_return = 404;
+        this->_return = 400;
         return (-1);
     }
     end = first_line.find_first_of(' ', start);
@@ -100,10 +111,12 @@ int RequestParser::parseFirstLine(std::string &first_line)
     if (end == std::string::npos)
     {
         std::cout << "Error Not Found : There is no spaces after method" << std::endl;
-        this->_return = 404;
+        this->_return = 400; //  server cannot or will not process the request due to something that is perceived to be a client error
         return (-1);
     }
     this->_method = first_line.substr(start, end);
+    if (checkMethod(this->_method) == -1)
+        return -1;
 
     return parseUrl(first_line, start, end);
 }
@@ -123,7 +136,8 @@ int RequestParser::parseRequest(const char *str)
     std::string line, key;
 
     line = getNextLine(request, index);
-    this->parseFirstLine(line);
+    if (this->parseFirstLine(line) == -1)
+        return -1;
 
     for (int i = 0; i < 10; i++)
     {
