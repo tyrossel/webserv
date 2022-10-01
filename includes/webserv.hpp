@@ -21,22 +21,22 @@
 # define HTTP_SEE_OTHER 303                     // response to direct the client to get the requested resource at another URI with a GET request
 
 /*----------------------------- CLIENT ERROR RESPONSES -----------------------------*/
-# define HTTP_BAD_REQUEST 400                   // server cannot or will not process the request due to something that is perceived to be a client error
-# define HTTP_UNAUTHORIZED 401                  // client must authenticate itself to get the requested response
-# define HTTP_FORBIDDEN 403                     // client does not have access rights to the content. Unlike 401 Unauthorized, the client's identity is known to the server
-# define HTTP_NOT_FOUND 404                     // server can not find the requested resource
-# define HTTP_PROXY_AUTHENTICATION 407          // similar to 401 Unauthorized but authentication is needed to be done by a proxy
-# define HTTP_REQUEST_TIMEOUT 408               // server would like to shut down this unused connection
-# define HTTP_CONFLICT 409                      // request conflicts with the current state of the server
-# define HTTP_LENGTH_REQUIRED 411               // server rejected the request because the Content-Length header field is not defined and the server requires it
-# define HTTP_PRECONDITION_FAILED 412           // client has indicated preconditions in its headers which the server does not meet
-# define HTTP_URI_TOO_LONG 414                  // URI requested by the client is longer than the server is willing to interpret
-# define HTTP_MEDIA_UNSUPPORTED 415             // media format of the requested data is not supported by the server
-# define HTTP_RANGE_NOT_SATISFIABLE 416         // range specified by the Range header field in the request cannot be fulfilled (possible that the range is outside the size of the target URI's data)
-# define HTTP_EXPECTATION_FAILED 417            // expectation indicated by the Expect request header field cannot be met by the server
-# define HTTP_TEAPOT 418                        // server refuses the attempt to brew coffee with a teapot
-# define HTTP_TOO_MANY_REQUESTS 429             // user has sent too many requests in a given amount of time ("rate limiting")
-# define HTTP_UNAVAILABLE_LEGAL_REASON 451      // user agent requested a resource that cannot legally be provided, such as a web page censored by a government
+# define BAD_REQUEST 400                        // server cannot or will not process the request due to something that is perceived to be a client error
+# define UNAUTHORIZED 401                       // client must authenticate itself to get the requested response
+# define FORBIDDEN 403                          // client does not have access rights to the content. Unlike 401 Unauthorized, the client's identity is known to the server
+# define NOT_FOUND 404                          // server can not find the requested resource
+# define PROXY_AUTHENTICATION 407               // similar to 401 Unauthorized but authentication is needed to be done by a proxy
+# define REQUEST_TIMEOUT 408                    // server would like to shut down this unused connection
+# define CONFLICT 409                           // request conflicts with the current state of the server
+# define LENGTH_REQUIRED 411                    // server rejected the request because the Content-Length header field is not defined and the server requires it
+# define PRECONDITION_FAILED 412                // client has indicated preconditions in its headers which the server does not meet
+# define URI_TOO_LONG 414                       // URI requested by the client is longer than the server is willing to interpret
+# define MEDIA_UNSUPPORTED 415                  // media format of the requested data is not supported by the server
+# define RANGE_NOT_SATISFIABLE 416              // range specified by the Range header field in the request cannot be fulfilled (possible that the range is outside the size of the target URI's data)
+# define EXPECTATION_FAILED 417                 // expectation indicated by the Expect request header field cannot be met by the server
+# define TEAPOT 418                             // server refuses the attempt to brew coffee with a teapot
+# define TOO_MANY_REQUESTS 429                  // user has sent too many requests in a given amount of time ("rate limiting")
+# define UNAVAILABLE_LEGAL_REASON 451           // user agent requested a resource that cannot legally be provided, such as a web page censored by a government
 
 /*----------------------------- SERVER ERROR RESPONSES -----------------------------*/
 # define INTERNAL_SERVER_ERROR 500              // server has encountered a situation it does not know how to handle
