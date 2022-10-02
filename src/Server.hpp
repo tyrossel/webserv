@@ -6,7 +6,7 @@
 class Server {
     private:
         int             _port;
-        long             _fd;
+        long            _fd;
         unsigned int    _host;
         sockaddr_in     _addr;
 

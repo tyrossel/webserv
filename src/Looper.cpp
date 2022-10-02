@@ -174,7 +174,7 @@ void Looper::loop()
                         // if it has a valid socket fd, we enter it into our active_fd_set
                         // and we add it into the _active_servers map with his fd as a key for the sock
                         FD_SET(socket, &_active_fd_set);
-                        _active_servers.insert(std::make_pair<long int, Server *>((*it).getFd(), &(*it)));
+                        _active_servers.insert(std::make_pair<long int, Server *>(socket, &(*it)));
                         for (std::map<long int, Server *>::iterator it = _active_servers.begin(); it != _active_servers.end(); ++it)
                             std::cout << (*it).first << std::endl;
                         // Setting max_fd if the new fd from the socket is greater
@@ -203,5 +203,4 @@ void Looper::loop()
     }
 }
 
-// TODO : Bind ??
 // TODO : Ask Bima how the requests are stocked. Maybe we would use a map of <long, std::string> to hold the socket

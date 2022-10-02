@@ -6,11 +6,11 @@
 
 class Looper {
     private:
-        Config                      _config;
-        int                         _max_fd;
-        std::vector<Server>         _servers;
+        Config                          _config;
+        int                             _max_fd;
+        std::vector<Server>             _servers;
         std::map<long int, Server *>    _active_servers;
-        std::vector<int>            _ready_fd;
+        std::vector<int>                _ready_fd;
 
         fd_set                      _active_fd_set;
 
