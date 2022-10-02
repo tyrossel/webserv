@@ -24,6 +24,9 @@ class Looper {
         void    addServer(Server &server);
         void    log(std::string message);
         void    loop();
+        void    catchCommunication(fd_set &reading_fd_set);
+        void    requestProcess(fd_set &reading_fd_set);
+        void    selectErrorHandle();
 };
 
 #endif // LOOPER_HPP
