@@ -6,7 +6,7 @@
 class Server {
     private:
         int             _port;
-        int             _sock;
+        long             _fd;
         unsigned int    _host;
         sockaddr_in     _addr;
 
@@ -17,13 +17,15 @@ class Server {
         ~Server();
 
         void    log(std::string message);
-        void    createSocket(); //Create and set socket
+        long    createSocket(); //Create and set socket
         void    setAddress();   //Set address
-        void    setupSocket(); // Bind and listen socket
-        void    buildServer();
+        int     setupListen(); // Bind and listen socket
+        int     buildServer();
+        void    close(int socket);
+        int     readFromClient(long socket);
 
         int     getPort();
-        int     getSock();
+        long    getFd();
 
 };
 
