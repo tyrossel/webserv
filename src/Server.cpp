@@ -51,16 +51,6 @@ long    Server::createSocket()
     return (socket);
 }
 
-int Server::readFromClient(long socket)
-{
-    char	buffer[1024];
-    int		ret;
-
-    ret = recv(socket, buffer, 1024, 0);
-    printf("%s", buffer);
-    return (ret);
-}
-
 void    Server::setAddress()
 {
     memset((char *)&_addr, 0, sizeof(_addr)); //TODO : import our memset
