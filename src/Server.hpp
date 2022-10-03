@@ -22,6 +22,7 @@ class Server {
         int     setupListen(); // Bind and listen socket
         int     buildServer();
         void    close(int socket);
+        int     send(long socket);
 
         int     getPort();
         long    getFd();

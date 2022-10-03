@@ -47,7 +47,8 @@ long    Server::createSocket()
     socket = accept(_fd, NULL, NULL);
     if (socket == -1)
         std::cout << "Could not create socket for host " << _host << std::endl;
-    // TODO : use of fcntl ?!
+    else
+        fcntl(socket, F_SETFL, O_NONBLOCK);
     return (socket);
 }
 
@@ -58,6 +59,15 @@ void    Server::setAddress()
     _addr.sin_family = AF_INET;
     _addr.sin_addr.s_addr = htonl(_host);
     _addr.sin_port = htons(_port);
+}
+
+int     Server::send(long socket)
+{
+    int ret = 0;
+    std::cout << "I am preparing an answer on socket : " << socket << std::endl;
+    ret = ::send(socket, "HTTP/1.1 200 OK\nServer: WetServ/1.0.0\nTransfer-Encoding: identity\nContent-Length: 12\nContent-Type: text/plain\n\nHello, world\0", 124, 0);
+    std::cout << "send return : " << ret << std::endl;
+    return (0);
 }
 
 int    Server::setupListen()

@@ -75,6 +75,7 @@
 #include <netinet/in.h>
 #include <errno.h>
 #include <cstring>
+#include <fcntl.h>
 
 #include <stdio.h>
 #include <errno.h>
