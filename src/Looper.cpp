@@ -114,54 +114,58 @@ void Looper::loop()
         // ret will be greater than 0 if any valid event is catched
         if (ret > 0)
         {
-            /*for (std::vector<int>::iterator it = _ready_fd.begin(); it != _ready_fd.end(); it++)
-            {
-                if (FD_ISSET(*it, &writing_fd_set))
-                {
-                    long ret_val = _active_servers[*it]->send(*it);
-                    if (ret_val == 0)
-                    {
-                        _ready_fd.erase(it); // erase the fd from vector when comm is over
-                    }
-                    else if
-                    {
-                        // Here we will remove the fd we catched in the error
-                        // and clear all communication and all open channels.
-                        // The fd and the active_server will be removed too
-                        FD_CLR(*it, &_active_fd_set);
-                        FD_CLR(*it, &reading_fd_set);
-                        _active_servers.erase(*it);
-                        _ready_fd.erase(it);
-                    }
-                    ret = 0;
-                    break;
-                }
-            }*/
+            // Prepare and send the response to the client
+            sendResponse(reading_fd_set, writing_fd_set, _active_fd_set, ret);
             // Processing the request received. Reading and parsing the request to prepare the response
-            requestProcess(reading_fd_set);
+            requestProcess(reading_fd_set, ret);
             // Catching the new incoming communications to prepare the channel
-            catchCommunication(reading_fd_set);
-            ret = 0;
+            catchCommunication(reading_fd_set, ret);
         }
         else
             selectErrorHandle();
     }
 }
 
-void Looper::requestProcess(fd_set &reading_fd_set)
+void Looper::sendResponse(fd_set &reading_fd_set, fd_set &writing_fd_set, fd_set &_active_fd_set, int ret)
 {
-    for (std::map<long, Server *>::iterator it = _active_servers.begin(); it != _active_servers.end(); it++)
+    for (std::vector<int>::iterator it = _ready_fd.begin(); ret && it != _ready_fd.end(); it++)
+    {
+        if (FD_ISSET(*it, &writing_fd_set))
+        {
+            long ret_val = _active_servers[*it]->send(*it);
+            if (ret_val == 0)
+            {
+                _ready_fd.erase(it); // erase the fd from vector when comm is over
+            }
+            else
+            {
+                // Here we will remove the fd we catched in the error
+                // and clear all communication and all open channels.
+                // The fd and the active_server will be removed too
+                FD_CLR(*it, &_active_fd_set);
+                FD_CLR(*it, &reading_fd_set);
+                _active_servers.erase(*it);
+                _ready_fd.erase(it);
+            }
+            ret_val = 0;
+            (void)ret;
+            break;
+        }
+    }
+}
+
+void Looper::requestProcess(fd_set &reading_fd_set, int ret)
+{
+    for (std::map<long, Server *>::iterator it = _active_servers.begin(); ret && it != _active_servers.end(); it++)
     {
         long socket = it->first;
 
         if (FD_ISSET(socket, &reading_fd_set))
         {
-            long ret_val = readFromClient(socket); // TODO: place bima's code here
+            long ret_val = readFromClient(socket);
 
-            if (ret_val == 0)
+            if (ret_val > 0)
             {
-                // if there is nothing more to read, it's time to process the request
-                // it->second->process(socket, _config); // TODO: understand this part better
                 // we store the socket fd into our ready_fd vector since we want to keep the channel open
                 _ready_fd.push_back(socket);
             }
@@ -173,14 +177,16 @@ void Looper::requestProcess(fd_set &reading_fd_set)
                 _active_servers.erase(socket);
                 it = _active_servers.begin();
             }
+            (void)ret;
+            ret_val = 0;
             break;
         }
     }
 }
 
-void Looper::catchCommunication(fd_set &reading_fd_set)
+void Looper::catchCommunication(fd_set &reading_fd_set, int ret)
 {
-    for (std::vector<Server>::iterator it = _servers.begin(); it != _servers.end(); it++)
+    for (std::vector<Server>::iterator it = _servers.begin(); ret && it != _servers.end(); it++)
     {
         long fd = (*it).getFd();
 
@@ -200,6 +206,7 @@ void Looper::catchCommunication(fd_set &reading_fd_set)
                 if (socket > _max_fd)
                     _max_fd = socket;
             }
+            ret = 0;
             break;
         }
     }

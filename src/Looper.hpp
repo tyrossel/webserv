@@ -26,8 +26,9 @@ class Looper {
         void    addServer(Server &server);
         void    log(std::string message);
         void    loop();
-        void    catchCommunication(fd_set &reading_fd_set);
-        void    requestProcess(fd_set &reading_fd_set);
+        void    catchCommunication(fd_set &reading_fd_set, int ret);
+        void    requestProcess(fd_set &reading_fd_set, int ret);
+        void    sendResponse(fd_set &reading_fd_set, fd_set &writing_fd_set, fd_set &_active_fd_set, int ret);
         void    selectErrorHandle();
 };
 
