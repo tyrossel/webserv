@@ -57,6 +57,7 @@ int Server::readFromClient(long socket)
     int		ret;
 
     ret = recv(socket, buffer, 1024, 0);
+    printf("%s", buffer);
     return (ret);
 }
 
