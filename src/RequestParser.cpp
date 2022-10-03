@@ -4,9 +4,9 @@
 /*                          CONSTRUCTORS / DESTRUCTORS                                */
 /**************************************************************************************/
 
-RequestParser::RequestParser() : _method(""), _url(""), _version(""), _headers(), _body(""), _return(0) {}
+RequestParser::RequestParser() : _method(""), _path(""), _version(""), _headers(), _body(""), _status(0) {}
 
-RequestParser::RequestParser(const RequestParser &other) : _method(other._method), _url(other._url), _version(other._version), _headers(other._headers), _body(other._body), _return(other._return) {}
+RequestParser::RequestParser(const RequestParser &other) : _method(other._method), _path(other._path), _version(other._version), _headers(other._headers), _body(other._body), _status(other._status) {}
 
 RequestParser::~RequestParser() {}
 
@@ -15,11 +15,11 @@ RequestParser &RequestParser::operator=(const RequestParser &other)
     if (this != &other)
     {
         this->_method = other._method;
-        this->_url = other._url;
+        this->_path = other._path;
         this->_version = other._version;
         this->_headers = other._headers;
         this->_body = other._body;
-        this->_return = other._return;
+        this->_status = other._status;
     }
     return (*this);
 }
@@ -58,7 +58,7 @@ int RequestParser::parseVersion(std::string &first_line, size_t &start, size_t &
     if (start == std::string::npos)
     {
         std::cout << "Error Not Found : There is no newline after version HTTP" << std::endl;
-        this->_return = BAD_REQUEST;
+        this->_status = BAD_REQUEST;
         return (-1);
     }
 
@@ -67,7 +67,7 @@ int RequestParser::parseVersion(std::string &first_line, size_t &start, size_t &
     if (format != "HTTP/")
     {
         std::cout << "Wrong HTTP format" << std::endl;
-        this->_return = BAD_REQUEST;
+        this->_status = BAD_REQUEST;
         return (-1);
     }
 
@@ -76,25 +76,25 @@ int RequestParser::parseVersion(std::string &first_line, size_t &start, size_t &
     if (this->_version != "1.0" && this->_version != "1.1")
     {
         std::cout << "Wrong HTTP version" << std::endl;
-        this->_return = BAD_REQUEST;
+        this->_status = BAD_REQUEST;
         return (-1);
     }
 
     return 0;
 }
 
-int RequestParser::parseUrl(std::string &first_line, size_t &start, size_t &end)
+int RequestParser::parsePath(std::string &first_line, size_t &start, size_t &end)
 {
     /* Stock the next spaces index in end, and check if no spaces are found */
     start = first_line.find_first_not_of(' ', end);
     if (start == std::string::npos)
     {
         std::cout << "Error Not Found : There is no spaces after URL" << std::endl;
-        this->_return = BAD_REQUEST;
+        this->_status = BAD_REQUEST;
         return (-1);
     }
     end = first_line.find_first_of(' ', start);
-    this->_url = first_line.substr(start, end - start);
+    this->_path = first_line.substr(start, end - start);
 
     return parseVersion(first_line, start, end);
 }
@@ -111,14 +111,14 @@ int RequestParser::parseFirstLine(std::string &first_line)
     if (end == std::string::npos)
     {
         std::cout << "Error Not Found : There is no spaces after method" << std::endl;
-        this->_return = BAD_REQUEST; //  server cannot or will not process the request due to something that is perceived to be a client error
+        this->_status = BAD_REQUEST; //  server cannot or will not process the request due to something that is perceived to be a client error
         return (-1);
     }
     this->_method = first_line.substr(start, end);
     if (checkMethod(this->_method) == -1)
         return -1;
 
-    return parseUrl(first_line, start, end);
+    return parsePath(first_line, start, end);
 }
 
 int RequestParser::parseRequest(const char *str)
@@ -139,12 +139,19 @@ int RequestParser::parseRequest(const char *str)
     if (this->parseFirstLine(line) == -1)
         return -1;
 
-    while((line = getNextLine(request, index)) != "\r" && line != "")
+    line = getNextLine(request, index);
+    if (line == "" || line == "\r" || line == "\r\n") {
+        this->_status = BAD_REQUEST;
+        return -1;
+    }
+
+    while (line != "\r" && line != "")
     {
         trunc = line.find_first_of(":");
         key = line.substr(0, trunc);
-
         this->_headers[key] = line.substr(trunc, line.size() - trunc);
+
+        line = getNextLine(request, index);
     }
 
     for (std::map<std::string, std::string>::iterator it = this->_headers.begin(); it != this->_headers.end(); it++) {
@@ -158,8 +165,9 @@ int RequestParser::parseRequest(const char *str)
 /*                                      GETTERS                                       */
 /**************************************************************************************/
 
+std::map<std::string, std::string>  RequestParser::getHeaders() { return (this->_headers); }
 std::string                         RequestParser::getMethod() { return (this->_method); }
-std::string                         RequestParser::getUrl() { return (this->_url); }
+std::string                         RequestParser::getPath() { return (this->_path); }
 std::string                         RequestParser::getVersion() { return (this->_version); }
 std::string                         RequestParser::getBody() { return (this->_body); }
-std::map<std::string, std::string>  RequestParser::getHeaders() { return (this->_headers); }
+int                                 RequestParser::getStatus() { return (this->_status); }
