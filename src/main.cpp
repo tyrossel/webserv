@@ -57,11 +57,28 @@ int	main(int argc, char *argv[], char *envp[])
 	}
 //	ConfigParsor parsor("
     Config config;
+    createConfig(config);
+
+    Server serv2(2020, "0.0.0.0");
+    Server serv3(3030, "0.0.0.0");
+    Server serv4(4040, "0.0.0.0");
+    Server serv5(5050, "0.0.0.0");
+    Server serv6(6060, "0.0.0.0");
+    Server serv7(7070, "0.0.0.0");
     Server serv(8080, "0.0.0.0");
+
+
+
     Looper loop;
 
-    createConfig(config);
     loop.addServer(serv);
+    loop.addServer(serv2);
+    loop.addServer(serv3);
+    loop.addServer(serv4);
+    loop.addServer(serv5);
+    loop.addServer(serv6);
+    loop.addServer(serv7);
+
     loop.setupLoop();
     loop.loop();
 
