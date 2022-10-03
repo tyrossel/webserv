@@ -43,15 +43,9 @@ int Looper::setupLoop()
         return (0);
 }
 
-void Looper::log(std::string message)
-{
-    std::cout << message << std::endl;
-}
+void Looper::log(std::string message) { std::cout << message << std::endl; }
 
-void Looper::addServer(Server &server)
-{
-    this->_servers.push_back(server);
-}
+void Looper::addServer(Server &server) { this->_servers.push_back(server); }
 
 void Looper::setMaxFd()
 {
@@ -79,17 +73,20 @@ void	*ft_memcpy(void *dst, const void *src, size_t n) {
 
 }
 
-int Looper::readFromClient(int filedes) {
-    char buffer[BUFFER_SIZE];
-    int nbytes;
+int Looper::readFromClient(long socket)
+{
+    char	buffer[BUFFER_SIZE];
+    int		ret;
+    RequestParser request;
 
-    nbytes = recv(filedes, buffer, BUFFER_SIZE, 0);
+    //TODO : Store request in Looper object
+    ret = recv(socket, buffer, BUFFER_SIZE, 0);
+    std::cout << buffer << std::endl << std::endl;
+    request.parseRequest(buffer);
 
-    RequestParser parser;
-    parser.parseRequest(buffer);
-
-    return 0;
+    return (ret);
 }
+
 
 void Looper::loop()
 {
@@ -122,31 +119,9 @@ void Looper::loop()
                 if (FD_ISSET(*it, &writing_fd_set))
                 {
                     long ret_val = _active_servers[*it]->send(*it);
-
                     if (ret_val == 0)
                     {
-<<<<<<< HEAD
                         _ready_fd.erase(it); // erase the fd from vector when comm is over
-=======
-                        /* Connection request on original socket. */
-                        int _new;
-                        size = sizeof(clientname);
-
-                        //TODO : THIS IS STATIC FOR 1 SERVER
-                        _new = accept(_servers[j].getSock(), (struct sockaddr *) &clientname,
-                                      (socklen_t * ) & size); // accept can be called like accept(socket, NULL, NULL)
-                        if (_new < 0) {
-                            log("accept failed");
-                            exit(1);
-                        }
-//                        fprintf(stderr, "new : %i\n", _new);
-//
-//                        fprintf(stderr, "Server: connect from host %s, port %hd.\n",
-//                                inet_ntoa(clientname.sin_addr),
-//                                ntohs(clientname.sin_port));
-
-                        FD_SET(_new, &_active_fd_set);
->>>>>>> parse first line done
                     }
                     else if
                     {
@@ -181,7 +156,7 @@ void Looper::requestProcess(fd_set &reading_fd_set)
 
         if (FD_ISSET(socket, &reading_fd_set))
         {
-            long ret_val = it->second->readFromClient(socket); // TODO: place bima's code here
+            long ret_val = readFromClient(socket); // TODO: place bima's code here
 
             if (ret_val == 0)
             {

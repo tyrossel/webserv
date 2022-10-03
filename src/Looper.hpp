@@ -21,6 +21,7 @@ class Looper {
         virtual ~Looper();
 
         int     setupLoop();
+        int     readFromClient(long socket);
         void    setMaxFd();
         void    addServer(Server &server);
         void    log(std::string message);
