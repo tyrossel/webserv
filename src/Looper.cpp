@@ -189,8 +189,6 @@ void Looper::catchCommunication(fd_set &reading_fd_set)
                 // and we add it into the _active_servers map with his fd as a key for the sock
                 FD_SET(socket, &_active_fd_set);
                 _active_servers.insert(std::make_pair<long int, Server *>(socket, &(*it)));
-                for (std::map<long int, Server *>::iterator it = _active_servers.begin(); it != _active_servers.end(); ++it)
-                    std::cout << (*it).first << std::endl;
                 // Setting max_fd if the new fd from the socket is greater
                 if (socket > _max_fd)
                     _max_fd = socket;
