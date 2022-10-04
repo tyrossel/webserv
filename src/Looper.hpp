@@ -26,15 +26,21 @@ class Looper {
         void    setMaxFd();
         void    addServer(Server &server);
         void    log(std::string message);
+
+        // LOOP RELATED ====================================================
         void    loop();
         void    catchCommunication(fd_set &reading_fd_set, int ret);
         void    requestProcess(fd_set &reading_fd_set);
         void    sendResponse(fd_set &reading_fd_set, fd_set &writing_fd_set, fd_set &_active_fd_set);
         void    selectErrorHandle();
+        // =================================================================
+
+        // RESPONSE CRAFTING ===============================================
         int     buildResponse(long socket, RequestParser request);
         void    addStaticBodyResponse(std::string &str);
         void    addDate(std::string &str);
         void    addBodyToResponse(std::string &str);
+        // =================================================================
 
 
 };

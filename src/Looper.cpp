@@ -15,34 +15,6 @@ Looper::~Looper() {}
 /**************************************************************************************/
 /*                                  MEMBER FUNCTIONS                                  */
 /**************************************************************************************/
-
-int Looper::setupLoop()
-{
-    long		fd;
-
-    // this is for one single listen. we will see when parsing is done for more
-    FD_ZERO(&_active_fd_set);
-    _max_fd = 0;
-
-    for (unsigned int i = 0; i < _servers.size(); i++)
-    {
-        if (_servers[i].buildServer() != -1)
-        {
-            fd = _servers[i].getFd();
-            FD_SET(fd, &_active_fd_set);
-            if (fd > _max_fd)
-                _max_fd = fd;
-        }
-    }
-    if (_max_fd == 0)
-    {
-        std::cerr << "Could not setup cluster !" << std::endl;
-        return (-1);
-    }
-    else
-        return (0);
-}
-
 void Looper::log(std::string message) { std::cout << message << std::endl; }
 
 void Looper::addServer(Server &server) { this->_servers.push_back(server); }
@@ -74,6 +46,36 @@ void	*ft_memcpy(void *dst, const void *src, size_t n)
 
 }
 
+int Looper::setupLoop()
+{
+    long		fd;
+
+    // this is for one single listen. we will see when parsing is done for more
+    FD_ZERO(&_active_fd_set);
+    _max_fd = 0;
+
+    for (unsigned int i = 0; i < _servers.size(); i++)
+    {
+        if (_servers[i].buildServer() != -1)
+        {
+            fd = _servers[i].getFd();
+            FD_SET(fd, &_active_fd_set);
+            if (fd > _max_fd)
+                _max_fd = fd;
+        }
+    }
+    if (_max_fd == 0)
+    {
+        std::cerr << "Could not setup cluster !" << std::endl;
+        return (-1);
+    }
+    else
+        return (0);
+}
+
+/**************************************************************************************/
+/*                                  RESPONSE CRAFTING                                 */
+/**************************************************************************************/
 void Looper::addStaticBodyResponse(std::string &str)
 {
     str += "HTTP/1.1 200 OK\n";
@@ -152,7 +154,9 @@ int Looper::readFromClient(long socket)
     return (ret);
 }
 
-
+/**************************************************************************************/
+/*                                  LOOP RELATED                                      */
+/**************************************************************************************/
 void Looper::loop()
 {
     while (1)
@@ -290,5 +294,3 @@ void Looper::selectErrorHandle()
     for (std::vector<Server>::iterator it = _servers.begin(); it != _servers.end(); it++)
         FD_SET((*it).getFd(), &_active_fd_set);
 }
-
-// TODO : Ask Bima how the requests are stocked. Maybe we would use a map of <long, std::string> to hold the socket
