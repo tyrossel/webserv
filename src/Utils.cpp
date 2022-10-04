@@ -41,5 +41,16 @@ namespace ft {
         while (line[index] == ' ' && line[index])
             index += 1;
     }
-}
 
+    void	bzero(void *s, size_t n)
+    {
+        size_t	count;
+
+        count = 0;
+        while (count < n)
+        {
+            ((char *)s)[count] = '\0';
+            count++;
+        }
+    }
+}
