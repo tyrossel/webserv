@@ -81,7 +81,6 @@ int Looper::readFromClient(long socket)
 
     //TODO : Store request in Looper object
     ret = recv(socket, buffer, BUFFER_SIZE, 0);
-    std::cout << buffer << std::endl << std::endl;
     request.parseRequest(buffer);
 
     return (ret);
