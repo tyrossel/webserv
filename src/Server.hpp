@@ -22,8 +22,7 @@ class Server {
         int     setupListen(); // Bind and listen socket
         int     buildServer();
         void    close(int socket);
-        int     send(long socket);
-
+        int     send(long socket, std::map<long, std::string> response);
         int     getPort();
         long    getFd();
 

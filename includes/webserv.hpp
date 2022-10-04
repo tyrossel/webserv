@@ -60,6 +60,8 @@
 #include <stack>
 #include <vector>
 #include <iostream>
+#include <fstream>
+#include <sstream>
 #include <string>
 #include <fstream>
 #include <sstream>
@@ -86,5 +88,6 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #include <arpa/inet.h>
+#include <ctime>
 
 #endif // WEBSERV_HPP

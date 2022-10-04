@@ -57,7 +57,8 @@ void Looper::setMaxFd()
     }
 }
 
-void	*ft_memcpy(void *dst, const void *src, size_t n) {
+void	*ft_memcpy(void *dst, const void *src, size_t n)
+{
     size_t i;
     unsigned char *p;
     unsigned char *q;
@@ -73,6 +74,70 @@ void	*ft_memcpy(void *dst, const void *src, size_t n) {
 
 }
 
+void Looper::addStaticBodyResponse(std::string &str)
+{
+    str += "HTTP/1.1 200 OK\n";
+    str += "Server: WetServ/1.0.0\n";
+    str += "Transfer-Encoding: identity\n";
+    str += "Content-Type: text/html\n";
+}
+
+void Looper::addDate(std::string &str)
+{
+    // current date/time based on current system
+    time_t now = time(0);
+
+    // convert now to string form
+    char* dt = ctime(&now);
+
+    std::cout << "The local date and time is: " << dt << std::endl;
+
+    // convert now to tm struct for UTC
+    tm *gmtm = gmtime(&now);
+    dt = asctime(gmtm);
+    str += "Date: ";
+    str += dt;
+}
+
+void Looper::addBodyToResponse(std::string &str)
+{
+    int i = 0;
+    std::stringstream out;
+    std::ifstream fs("src/html/index.html");
+    //std::ifstream fs(_filename.c_str()); TODO: put path recieved
+
+    if (!fs.good())
+    {
+        std::cerr << "Error stream file not found" << std::endl;
+        return ;
+    }
+    std::string text;
+    text.assign(std::istreambuf_iterator<char>(fs),
+                std::istreambuf_iterator<char>());
+    fs.close();
+    str += "Content-Length: ";
+    i = text.size();
+    out << i;
+    str += out.str();
+    str += "\n\n";
+    str += text;
+}
+
+int Looper::buildResponse(long socket, RequestParser request)
+{
+    (void)request;
+    std::string str;
+
+    _response.insert(std::make_pair<long int, std::string>(socket, ""));
+    //addHTTPHeader(str);
+    addStaticBodyResponse(str);
+    addDate(str);
+    addBodyToResponse(str);
+    _response[socket] += str;
+    std::cout << _response[socket] << std::endl;
+    return (1);
+}
+
 int Looper::readFromClient(long socket)
 {
     char	        buffer[BUFFER_SIZE];
@@ -82,7 +147,7 @@ int Looper::readFromClient(long socket)
     //TODO : Store request in Looper object
     ret = recv(socket, buffer, BUFFER_SIZE, 0);
     request.parseRequest(buffer);
-
+    buildResponse(socket, request);
     return (ret);
 }
 
@@ -114,9 +179,9 @@ void Looper::loop()
         if (ret > 0)
         {
             // Prepare and send the response to the client
-            sendResponse(reading_fd_set, writing_fd_set, _active_fd_set, ret);
+            sendResponse(reading_fd_set, writing_fd_set, _active_fd_set);
             // Processing the request received. Reading and parsing the request to prepare the response
-            requestProcess(reading_fd_set, ret);
+            requestProcess(reading_fd_set);
             // Catching the new incoming communications to prepare the channel
             catchCommunication(reading_fd_set, ret);
         }
@@ -125,15 +190,16 @@ void Looper::loop()
     }
 }
 
-void Looper::sendResponse(fd_set &reading_fd_set, fd_set &writing_fd_set, fd_set &_active_fd_set, int ret)
+void Looper::sendResponse(fd_set &reading_fd_set, fd_set &writing_fd_set, fd_set &_active_fd_set)
 {
-    for (std::vector<int>::iterator it = _ready_fd.begin(); ret && it != _ready_fd.end(); it++)
+    for (std::vector<int>::iterator it = _ready_fd.begin(); it != _ready_fd.end(); it++)
     {
         if (FD_ISSET(*it, &writing_fd_set))
         {
-            long ret_val = _active_servers[*it]->send(*it);
+            long ret_val = _active_servers[*it]->send(*it, _response);
             if (ret_val == 0)
             {
+                _response.erase(*it); // erase the response from map when comm is over
                 _ready_fd.erase(it); // erase the fd from vector when comm is over
             }
             else
@@ -147,15 +213,14 @@ void Looper::sendResponse(fd_set &reading_fd_set, fd_set &writing_fd_set, fd_set
                 _ready_fd.erase(it);
             }
             ret_val = 0;
-            (void)ret;
             break;
         }
     }
 }
 
-void Looper::requestProcess(fd_set &reading_fd_set, int ret)
+void Looper::requestProcess(fd_set &reading_fd_set)
 {
-    for (std::map<long, Server *>::iterator it = _active_servers.begin(); ret && it != _active_servers.end(); it++)
+    for (std::map<long, Server *>::iterator it = _active_servers.begin(); it != _active_servers.end(); it++)
     {
         long socket = it->first;
 
@@ -176,7 +241,6 @@ void Looper::requestProcess(fd_set &reading_fd_set, int ret)
                 _active_servers.erase(socket);
                 it = _active_servers.begin();
             }
-            (void)ret;
             ret_val = 0;
             break;
         }
