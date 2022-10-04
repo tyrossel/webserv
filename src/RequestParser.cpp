@@ -154,9 +154,12 @@ int RequestParser::parseRequest(const char *str)
         line = getNextLine(request, index);
     }
 
+    std::cout << "================== REQUEST ==================" << std::endl;
     for (std::map<std::string, std::string>::iterator it = this->_headers.begin(); it != this->_headers.end(); it++) {
-        std::cout << it->first << it->second << std::endl;
+        std::cout << CYAN << it->first << it->second << RESET << std::endl;
     }
+    std::cout << "=============================================" << std::endl;
+
 
     return 0;
 }
