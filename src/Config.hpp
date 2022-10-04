@@ -36,6 +36,7 @@ class ServerConfig {
 class Config {
     private:
         std::vector<ServerConfig> _server;
+		bool					  _isValid;
 
     public:
         // Constructors / Destructor
@@ -46,6 +47,8 @@ class Config {
         // Getters
         const std::vector<ServerConfig> getServer() const;
         int                             getNbServer( void ) const;
+		bool							isValid() const;
+		void							setValid(bool valid);
 
         // Member functions
         void        addServer(const ServerConfig &newServ);
