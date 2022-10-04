@@ -64,6 +64,7 @@ void    Server::setAddress()
 int     Server::send(long socket, std::map<long, std::string> response)
 {
     int ret = 0;
+<<<<<<< HEAD
     if (response[socket].c_str())
         ret = ::send(socket, response[socket].c_str(), response[socket].size(), 0);
     else
@@ -72,6 +73,13 @@ int     Server::send(long socket, std::map<long, std::string> response)
         return (-1);
     else
         return (0);
+=======
+    std::cout << "I am preparing an answer on socket : " << socket << std::endl;
+    if (response[socket].c_str())
+        ret = ::send(socket, response[socket].c_str(), response[socket].size(), 0);
+    std::cout << "send return : " << ret << std::endl;
+    return (0);
+>>>>>>> b0ede9b (function to craft the response are splitted and more organized. They are static for the moment. 👬)
 }
 
 int    Server::setupListen()
