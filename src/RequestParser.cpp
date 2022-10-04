@@ -36,6 +36,7 @@ int RequestParser::checkMethod(std::string &method)
         || method == "POST" || method == "PUT"
         || method == "DELETE")
         return 0;
+    this->_status = NOT_IMPLEMENTED;
     return -1;
 }
 
