@@ -204,7 +204,7 @@ int RequestParser::parsePath(std::string &first_line, size_t &start, size_t &end
 
     this->_path = first_line.substr(start, end - start);
     if (this->_path.size() > URI_MAX_SIZE)
-        return (exitStatus(BAD_REQUEST));
+        return (exitStatus(URI_TOO_LONG));
 
     return (parseVersion(first_line, start, end));
 }
@@ -234,7 +234,7 @@ int RequestParser::parseFirstLine(std::string &first_line)
 int RequestParser::parseHeaders(std::string &request, size_t &index)
 {
     std::string line, key, value;
-    size_t      trunc = 0, end_spaces = 0;
+    size_t      trunc = 0;
 
     line = getNextLine(request, index);
     if (line == "" || line == "\r" || line == "\r\n")
@@ -266,7 +266,6 @@ int RequestParser::parseHeaders(std::string &request, size_t &index)
         else
             this->_headers[key] = value;
 
-        end_spaces = 0;
         line = getNextLine(request, index);
     }
 
@@ -275,6 +274,7 @@ int RequestParser::parseHeaders(std::string &request, size_t &index)
 
 int RequestParser::parseBody(std::string &request, size_t &index)
 {
+    std::cout << RED << index << " & " << request.size() << RESET << std::endl;
     if (index != request.size())
     {
         /* A server MAY reject a request that contains a message body but not a Content-Length */
@@ -312,6 +312,7 @@ int RequestParser::parseRequest(const char *str)
 //    request.insert(inserted, to_insert);
 //    request.append("home=Cosby&favorite+flavor=flies");
 //    TODO : END OF TEST
+
 
     line = getNextLine(request, index);
     if (this->parseFirstLine(line) == -1)
@@ -355,7 +356,6 @@ std::ostream &operator<<(std::ostream &out, const RequestParser &rhs)
 
     return out;
 }
-
 /**************************************************************************************/
 /*                                      SETTERS                                       */
 /**************************************************************************************/
