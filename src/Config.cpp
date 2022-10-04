@@ -49,6 +49,8 @@ void    ServerConfig::addLocation(const std::string &key, const std::string &val
 const std::vector<ServerConfig> Config::getServer() const { return (this->_server); }
 void                            Config::addServer(const ServerConfig &newServ) { this->_server.push_back(newServ); }
 int                             Config::getNbServer() const { return (this->_server.size()); }
+bool							Config::isValid() const {return this->_isValid;}
+void							Config::setValid(bool valid) {this->_isValid = valid;}
 
 /**************************************************************************************/
 /*                                NON MEMBER FUNCTIONS                                */

@@ -6,14 +6,14 @@
 #    By: trossel <trossel@42lausanne.ch>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/04/07 17:50:59 by trossel           #+#    #+#              #
-#    Updated: 2022/09/20 15:24:31 by trossel          ###   ########.fr        #
+#    Updated: 2022/10/04 14:28:51 by trossel          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 TARGET		= webserv
 CXX			= c++
 CXXFLAGS	= -Wall -Wextra -Werror -std=c++98 -pedantic -g
-CPPFLAGS	= -Iinclude
+CPPFLAGS	= -Iincludes
 SRC_DIR		= src
 OBJS_DIR	= obj
 OBJS = 		$(patsubst %.cpp, $(OBJS_DIR)/%.o, $(SRCS))
@@ -22,7 +22,9 @@ SRCS		= main.cpp \
 			  Looper.cpp \
 			  Server.cpp \
 			  RequestParser.cpp \
-			  Utils.cpp
+			  Utils.cpp \
+			  ConfigParser.cpp \
+			  Json.cpp
 
 all: $(TARGET)
 
