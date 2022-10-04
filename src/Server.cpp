@@ -46,7 +46,7 @@ long    Server::createSocket()
 
     socket = accept(_fd, NULL, NULL);
     if (socket == -1)
-        std::cout << "Could not create socket for host " << _host << std::endl;
+        std::cout << RED << "Could not create socket for host " << _host << RESET << std::endl;
     else
         fcntl(socket, F_SETFL, O_NONBLOCK);
     return (socket);
@@ -64,10 +64,12 @@ void    Server::setAddress()
 int     Server::send(long socket, std::map<long, std::string> response)
 {
     int ret = 0;
-    std::cout << "I am preparing an answer on socket : " << socket << std::endl;
     if (response[socket].c_str())
         ret = ::send(socket, response[socket].c_str(), response[socket].size(), 0);
-    std::cout << "send return : " << ret << std::endl;
+    else
+        std::cout << "Error on sockets 🔥" << std::endl;
+    (void)ret;
+    // TODO: Better handling with ret
     return (0);
 }
 
@@ -82,7 +84,7 @@ int    Server::setupListen()
     this->setAddress();
     if (bind(_fd, (struct sockaddr *)&_addr, sizeof(_addr)) == -1)
     {
-        std::cerr <<"Could not bind port " << std::endl;
+        std::cerr << RED << "(╯‵□′)╯︵┻━┻ Could not bind port ┻━┻ ︵ ＼( °□° ＼)" << RESET << std::endl;
         return (-1);
     }
     if (listen(_fd, 1000) == -1)
