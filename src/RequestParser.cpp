@@ -323,7 +323,7 @@ int RequestParser::parseRequest(const char *str)
     if (this->parseBody(request, index) == -1)
         return (-1);
 
-    return (0);
+    return 0;
 }
 
 /**************************************************************************************/

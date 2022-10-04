@@ -233,9 +233,6 @@ void Looper::addDate(std::string &str)
 
     // convert now to string form
     char* dt = ctime(&now);
-
-    std::cout << "The local date and time is: " << dt << std::endl;
-
     // convert now to tm struct for UTC
     tm *gmtm = gmtime(&now);
     dt = asctime(gmtm);
@@ -278,7 +275,9 @@ int Looper::buildResponse(long socket, RequestParser request)
     addDate(str);
     addBodyToResponse(str);
     _response[socket] += str;
-    std::cout << _response[socket] << std::endl;
+    std::cout << "================== RESPONSE ==================" << std::endl;
+    std::cout << GREEN << _response[socket] << RESET << std::endl;
+    std::cout << "==============================================" << std::endl << std::endl;
     return (1);
 }
 
