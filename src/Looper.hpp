@@ -12,6 +12,7 @@ class Looper {
         std::vector<Server>             _servers;
         std::map<long int, Server *>    _active_servers;
         std::vector<int>                _ready_fd;
+        std::map<long int, std::string> _response;
 
         fd_set                      _active_fd_set;
 
@@ -27,9 +28,15 @@ class Looper {
         void    log(std::string message);
         void    loop();
         void    catchCommunication(fd_set &reading_fd_set, int ret);
-        void    requestProcess(fd_set &reading_fd_set, int ret);
-        void    sendResponse(fd_set &reading_fd_set, fd_set &writing_fd_set, fd_set &_active_fd_set, int ret);
+        void    requestProcess(fd_set &reading_fd_set);
+        void    sendResponse(fd_set &reading_fd_set, fd_set &writing_fd_set, fd_set &_active_fd_set);
         void    selectErrorHandle();
+        int     buildResponse(long socket, RequestParser request);
+        void    addStaticBodyResponse(std::string &str);
+        void    addDate(std::string &str);
+        void    addBodyToResponse(std::string &str);
+
+
 };
 
 #endif // LOOPER_HPP
