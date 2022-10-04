@@ -61,11 +61,12 @@ void    Server::setAddress()
     _addr.sin_port = htons(_port);
 }
 
-int     Server::send(long socket)
+int     Server::send(long socket, std::map<long, std::string> response)
 {
     int ret = 0;
     std::cout << "I am preparing an answer on socket : " << socket << std::endl;
-    ret = ::send(socket, "HTTP/1.1 200 OK\nServer: WetServ/1.0.0\nTransfer-Encoding: identity\nContent-Length: 12\nContent-Type: text/plain\n\nHello, world\0", 124, 0);
+    if (response[socket].c_str())
+        ret = ::send(socket, response[socket].c_str(), response[socket].size(), 0);
     std::cout << "send return : " << ret << std::endl;
     return (0);
 }
