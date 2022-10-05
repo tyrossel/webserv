@@ -72,16 +72,38 @@ int Looper::setupLoop()
     else
         return (0);
 }
+/**************************************************************************************/
+/*                                      CHECKERS                                      */
+/**************************************************************************************/
+int     Looper:checkCode(RequestParser request)
+{
+    if (request.getStatus() == 0)
+        return HTTP_OK;
+    else
+        return (request.getStatus());
+}
 
 /**************************************************************************************/
 /*                                  RESPONSE CRAFTING                                 */
 /**************************************************************************************/
+int Looper::addHTTPHeader(std::string &str, long socket)
+{
+    int ret = 0;
+
+    if (ret = checkCode(_request[socket]) != HTTP_OK) // checking if an error code has been parsed in request
+        return writeResponseHeader(ret);// make this return return ret so we can pass it to body
+    else if (ret = checkPath(_request[socket]) != HTTP_OK) // functions will return the code catched
+        return writeResponseHeader(ret);
+    else if (ret = checkExtension(_request[socket]) != HTTP_OK)
+        return writeResponseHeader(ret);
+}
+
 void Looper::addStaticBodyResponse(std::string &str)
 {
-    str += "HTTP/1.1 200 OK\n";
-    str += "Server: WetServ/1.0.0\n";
-    str += "Transfer-Encoding: identity\n";
-    str += "Content-Type: text/html\n";
+    str.append("HTTP/1.1 200 OK\n"); // TODO: This one won't be static in the future
+    str.append("Server: WetServ/1.0.0\n");
+    str.append("Transfer-Encoding: identity\n");
+    str.append("Content-Type: text/html\n"); // TODO: This one won't be static in the future
 }
 
 void Looper::addDate(std::string &str)
@@ -94,16 +116,16 @@ void Looper::addDate(std::string &str)
     // convert now to tm struct for UTC
     tm *gmtm = gmtime(&now);
     dt = asctime(gmtm);
-    str += "Date: ";
-    str += dt;
+    str.append("Date: ");
+    str.append(dt);
 }
 
-void Looper::addBodyToResponse(std::string &str)
+void Looper::addBodyToResponse(std::string &str) // TODO: add file to read from (std::string path)
 {
     int i = 0;
     std::stringstream out;
-    std::ifstream fs("src/html/index.html");
-    //std::ifstream fs(_filename.c_str()); TODO: put path recieved
+    std::ifstream fs("src/html/index.html"); // TODO: add the path here with .c_str() method
+    //std::ifstream fs(_filename.c_str());
 
     if (!fs.good())
     {
@@ -114,25 +136,27 @@ void Looper::addBodyToResponse(std::string &str)
     text.assign(std::istreambuf_iterator<char>(fs),
                 std::istreambuf_iterator<char>());
     fs.close();
-    str += "Content-Length: ";
+    str.append("Content-Length: ");
     i = text.size();
     out << i;
-    str += out.str();
-    str += "\n\n";
-    str += text;
+    str.append(out.str());
+    str.append("\n\n");
+    str.append(text);
 }
 
-int Looper::buildResponse(long socket, RequestParser request)
+int Looper::buildResponse(long socket)
 {
     (void)request;
     std::string str;
+    //int ret = 0;
 
     _response.insert(std::make_pair<long int, std::string>(socket, ""));
-    //addHTTPHeader(str);
+    //ret = addHTTPHeader(str, socket);
     addStaticBodyResponse(str);
     addDate(str);
+    //    addBodyToResponse(str, ret); in the future
     addBodyToResponse(str);
-    _response[socket] += str;
+    _response[socket].append(str);
     std::cout << "================== RESPONSE ==================" << std::endl;
     std::cout << GREEN << _response[socket] << RESET << std::endl;
     std::cout << "==============================================" << std::endl << std::endl;
@@ -145,10 +169,10 @@ int Looper::readFromClient(long socket)
     int		ret;
     RequestParser request;
 
-    //TODO : Store request in Looper object
     ret = recv(socket, buffer, BUFFER_SIZE, 0);
     request.parseRequest(buffer);
-    buildResponse(socket, request);
+    _request.insert(std::make_pair<long, RequestParser>(socket, request));
+    buildResponse(socket);
     return (ret);
 }
 
@@ -203,6 +227,7 @@ void Looper::sendResponse(fd_set &reading_fd_set, fd_set &writing_fd_set, fd_set
             if (ret_val == 0)
             {
                 _response.erase(*it); // erase the response from map when comm is over
+                _request.erase(*it); // erase the socket from the map
                 _ready_fd.erase(it); // erase the fd from vector when comm is over
             }
             else

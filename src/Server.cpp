@@ -68,9 +68,10 @@ int     Server::send(long socket, std::map<long, std::string> response)
         ret = ::send(socket, response[socket].c_str(), response[socket].size(), 0);
     else
         std::cout << "Error on sockets 🔥" << std::endl;
-    (void)ret;
-    // TODO: Better handling with ret
-    return (0);
+    if (ret <= 0)
+        return (-1);
+    else
+        return (0);
 }
 
 int    Server::setupListen()
