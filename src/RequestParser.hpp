@@ -24,7 +24,10 @@ class RequestParser {
         std::string                         getNextLine(std::string &str, size_t &i);
 
         void                                trimWhitespaces(std::string &value);
+        int                                 exitStatus(int exit_status);
+        int                                 isValidEncoding(std::string &to_check);
         int                                 checkMethod(std::string &method);
+        int                                 checkWhitespaceBeforeComma(std::string &line);
         int                                 checkWhitespaceBeforeColon(std::string &line, size_t &trunc);
         int                                 checkHeaders();
         int                                 appendHeaderValue(std::string &key, std::string &value);
@@ -41,6 +44,7 @@ class RequestParser {
         std::string                         getPath();
         std::string                         getVersion();
         std::string                         getBody();
+        int                                 getBodyLength();
         int                                 getStatus();
 
 };

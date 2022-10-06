@@ -22,7 +22,7 @@ SRCS		= main.cpp \
 			  Looper.cpp \
 			  Server.cpp \
 			  RequestParser.cpp \
-			  utils.cpp
+			  Utils.cpp
 
 all: $(TARGET)
 
