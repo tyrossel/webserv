@@ -40,10 +40,7 @@ int RequestParser::appendHeaderValue(std::string &key, std::string &value)
 {
     /* Multiple Content-Length is forbidden */
     if (key == "Content-Length")
-    {
-        this->_status = BAD_REQUEST;
-        return -1;
-    }
+        return (exitStatus(BAD_REQUEST));
 
     std::map<std::string, std::string>::iterator it = this->_headers.find(key);
     it->second.append(", ");
@@ -52,30 +49,81 @@ int RequestParser::appendHeaderValue(std::string &key, std::string &value)
     return 0;
 }
 
-int RequestParser::checkHeaders()
+int RequestParser::exitStatus(int exit_status)
 {
-    /* Check value of Content-Length if existing */
-    if (_headers.find("Content-Length") != _headers.end())
-    {
-        std::map<std::string, std::string>::iterator it = this->_headers.find("Content-Length");
-        this->_body_length = ft::stoi(it->second);
-        if (this->_body_length < 0)
-        {
-            _status = BAD_REQUEST;
-            return (-1);
-        }
-    }
+    this->_status = exit_status;
+    return (-1);
+}
 
+int RequestParser::isValidEncoding(std::string &to_check)
+{
+    if (to_check != "chunked" && to_check != "compress" && to_check != "deflate" && to_check != "gzip")
+        return (-1);
+    return (0);
+}
+
+int RequestParser::checkWhitespaceBeforeComma(std::string &line)
+{
+    size_t comma = 0, start = 0;
+
+    while ((comma = line.find_first_of(',', start)) != std::string::npos)
+    {
+        if (line[comma - 1] == ' ')
+            return (exitStatus(BAD_REQUEST));
+        start = comma + 1;
+    }
     return 0;
 }
 
 int RequestParser::checkWhitespaceBeforeColon(std::string &line, size_t &trunc)
 {
     if (line[trunc - 1] == ' ')
-    {
-        this->_status = BAD_REQUEST;
-        return (-1);
+        return (exitStatus(BAD_REQUEST));
+    return 0;
+}
+
+int RequestParser::checkHeaders()
+{
+    /* Check if there is whitespaces before comma */
+    for (std::map<std::string, std::string>::iterator it = _headers.begin(); it != _headers.end(); it++) {
+        if (checkWhitespaceBeforeComma(it->second) == -1)
+            return (-1);
     }
+
+    /* Check value of Content-Length if existing */
+    if (_headers.find("Content-Length") != _headers.end())
+    {
+        std::map<std::string, std::string>::iterator it = this->_headers.find("Content-Length");
+        this->_body_length = ft::stoi(it->second);
+        if (this->_body_length < 0)
+            return (exitStatus(BAD_REQUEST));
+    }
+
+    /* Check value of Transfer-Encoding if existing */
+    size_t      comma = 0, start = 0;
+    std::string to_check;
+
+    if (_headers.find("Transfer-Encoding") != _headers.end())
+    {
+        std::string encoding = _headers.find("Transfer-Encoding")->second;
+        if (encoding.find_first_of(',') != std::string::npos)
+        {
+            while ((comma = encoding.find_first_of(',', start)) != std::string::npos)
+            {
+                ft::skipWhitespaces(encoding, start);
+                to_check = encoding.substr(start, comma - start);
+
+                if (isValidEncoding(to_check) == -1)
+                    return (exitStatus(BAD_REQUEST));
+
+                start = comma + 1;
+            }
+        }
+        to_check = encoding.substr(start, comma - start);
+        if (isValidEncoding(to_check) == -1)
+            return (exitStatus(BAD_REQUEST));
+    }
+
     return 0;
 }
 
@@ -87,10 +135,10 @@ int RequestParser::checkMethod(std::string &method)
         || method == "POST" || method == "PUT"
         || method == "DELETE")
         return 0;
-    this->_status = NOT_IMPLEMENTED;
-    return -1;
+    return (exitStatus(NOT_IMPLEMENTED));
 }
 
+/* getNextLine extract the next line, removing \r\n at the end of line */
 std::string RequestParser::getNextLine(std::string &str, size_t &start)
 {
     std::string line;
@@ -99,6 +147,8 @@ std::string RequestParser::getNextLine(std::string &str, size_t &start)
     end = str.find_first_of('\n', start);
     line = str.substr(start, end - start);
     start = end + 1;
+    if (line[line.size() - 1] == '\r')
+        ft::popBack(line);
 
     return line;
 }
@@ -110,8 +160,7 @@ int RequestParser::parseVersion(std::string &first_line, size_t &start, size_t &
     if (start == std::string::npos)
     {
         std::cout << "Error Not Found : There is no newline after version HTTP" << std::endl;
-        this->_status = BAD_REQUEST;
-        return (-1);
+        return (exitStatus(BAD_REQUEST));
     }
 
     /* Get the 5 next characters. Expect that it will be HTTP/ */
@@ -119,8 +168,7 @@ int RequestParser::parseVersion(std::string &first_line, size_t &start, size_t &
     if (format != "HTTP/")
     {
         std::cout << "Wrong HTTP format" << std::endl;
-        this->_status = BAD_REQUEST;
-        return (-1);
+        return (exitStatus(BAD_REQUEST));
     }
 
     /* Extract version */
@@ -130,8 +178,7 @@ int RequestParser::parseVersion(std::string &first_line, size_t &start, size_t &
     if (this->_version != "1.1")
     {
         std::cout << "Wrong HTTP version" << std::endl;
-        this->_status = BAD_REQUEST;
-        return (-1);
+        return (exitStatus(BAD_REQUEST));
     }
 
     return 0;
@@ -144,16 +191,13 @@ int RequestParser::parsePath(std::string &first_line, size_t &start, size_t &end
     if (start == std::string::npos)
     {
         std::cout << "Error Not Found : There is no spaces after URL" << std::endl;
-        this->_status = BAD_REQUEST;
-        return (-1);
+        return (exitStatus(BAD_REQUEST));
     }
     end = first_line.find_first_of(' ', start);
+
     this->_path = first_line.substr(start, end - start);
     if (this->_path.size() > URI_MAX_SIZE)
-    {
-        this->_status = URI_TOO_LONG;
-        return (-1);
-    }
+        return (exitStatus(BAD_REQUEST));
 
     return (parseVersion(first_line, start, end));
 }
@@ -186,20 +230,15 @@ int RequestParser::parseHeaders(std::string &request, size_t &index)
     size_t      trunc = 0, end_spaces = 0;
 
     line = getNextLine(request, index);
-    if (line == "" || line == "\r" || line == "\r\n") {
-        this->_status = BAD_REQUEST;
-        return (-1);
-    }
+    if (line == "" || line == "\r" || line == "\r\n")
+        return (exitStatus(BAD_REQUEST));
 
     while (line != "\r" && line != "")
     {
         /* Check if colon is present */
         trunc = line.find_first_of(":");
         if (trunc == std::string::npos || trunc == 0)
-        {
-            this->_status = BAD_REQUEST;
-            return (-1);
-        }
+            return (exitStatus(BAD_REQUEST));
 
         /* Check if whitespace before colon */
         if (this->checkWhitespaceBeforeColon(line, trunc) == -1)
@@ -208,28 +247,24 @@ int RequestParser::parseHeaders(std::string &request, size_t &index)
         /* Get the key */
         key = line.substr(0, trunc);
 
-//        /* Trim whitespaces before and after value */
-//        this->trimWhitespaces(line, trunc, end_spaces);
-
         /* Insert key and value : append to value if key is already in map */
         value = line.substr(trunc, line.size() - trunc);
         trimWhitespaces(value);
-        //TODO : check if whitespaces before coma
 
         if (this->_headers.find(key) != _headers.end()) {
             if (appendHeaderValue(key, value) == -1)
                 return (-1);
         }
         else
-                this->_headers[key] = value;
+            this->_headers[key] = value;
 
         end_spaces = 0;
         line = getNextLine(request, index);
     }
 
-//    for (std::map<std::string, std::string>::iterator it = this->_headers.begin(); it != this->_headers.end(); it++) {
-//        std::cout << it->first << it->second << std::endl;
-//    }
+    for (std::map<std::string, std::string>::iterator it = this->_headers.begin(); it != this->_headers.end(); it++) {
+       std::cout << it->first << it->second << std::endl;
+    }
 
     return (checkHeaders());
 }
@@ -246,6 +281,13 @@ int RequestParser::parseRequest(const char *str)
     std::string line;
 
     std::string request(str);
+
+//    //TODO : Here is some tests to remove later
+//    size_t inserted = 0;
+//    inserted = request.find('\n', 100) + 1;
+//    std::string to_insert = "Transfer-Encoding: chunked , gzip\r\n";
+//    request.insert(inserted, to_insert);
+//    //TODO : END OF TEST
 
     line = getNextLine(request, index);
     if (this->parseFirstLine(line) == -1)
@@ -266,4 +308,5 @@ std::string                         RequestParser::getMethod() { return (this->_
 std::string                         RequestParser::getPath() { return (this->_path); }
 std::string                         RequestParser::getVersion() { return (this->_version); }
 std::string                         RequestParser::getBody() { return (this->_body); }
+int                                 RequestParser::getBodyLength() { return (this->_body_length); }
 int                                 RequestParser::getStatus() { return (this->_status); }
