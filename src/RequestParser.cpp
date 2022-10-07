@@ -185,7 +185,7 @@ int RequestParser::parseVersion(std::string &first_line, size_t &start, size_t &
     if (this->_version != "1.1")
     {
         std::cout << "Wrong HTTP version" << std::endl;
-        return (exitStatus(BAD_REQUEST));
+        return (exitStatus(HTTP_VERSION_UNSUPPORTED));
     }
 
     return 0;
@@ -269,10 +269,6 @@ int RequestParser::parseHeaders(std::string &request, size_t &index)
         end_spaces = 0;
         line = getNextLine(request, index);
     }
-
-//    for (std::map<std::string, std::string>::iterator it = this->_headers.begin(); it != this->_headers.end(); it++) {
-//       std::cout << it->first << it->second << std::endl;
-//    }
 
     return (checkHeaders());
 }
