@@ -29,24 +29,25 @@ RequestParser &RequestParser::operator=(const RequestParser &other)
 /*                                  MEMBER FUNCTIONS                                  */
 /**************************************************************************************/
 
+/* getNextLine extract the next line, removing \r\n at the end of line */
+std::string RequestParser::getNextLine(std::string &str, size_t &start)
+{
+    std::string line;
+    size_t      end;
+
+    end = str.find_first_of('\n', start);
+    line = str.substr(start, end - start);
+    start = end + 1;
+    if (line[line.size() - 1] == '\r')
+        ft::popBack(line);
+
+    return line;
+}
 
 void RequestParser::trimWhitespaces(std::string &str)
 {
     ft::trimLeft(str, ' ');
     ft::trimRight(str, ' ');
-}
-
-int RequestParser::appendHeaderValue(std::string &key, std::string &value)
-{
-    /* Multiple Content-Length is forbidden */
-    if (key == "Content-Length")
-        return (exitStatus(BAD_REQUEST));
-
-    std::map<std::string, std::string>::iterator it = this->_headers.find(key);
-    it->second.append(", ");
-    it->second.append(value);
-
-    return 0;
 }
 
 int RequestParser::exitStatus(int exit_status)
@@ -60,6 +61,21 @@ int RequestParser::isValidEncoding(std::string &to_check)
     if (to_check != "chunked" && to_check != "compress" && to_check != "deflate" && to_check != "gzip")
         return (-1);
     return (0);
+}
+
+/**************************************************************************************/
+/*                                      CHECKERS                                      */
+/**************************************************************************************/
+
+int RequestParser::checkMethod(std::string &method)
+{
+    // Still Connect, Options, Trace and Patch
+
+    if (method == "GET" || method == "HEAD"
+        || method == "POST" || method == "PUT"
+        || method == "DELETE")
+        return 0;
+    return (exitStatus(NOT_IMPLEMENTED));
 }
 
 int RequestParser::checkWhitespaceBeforeComma(std::string &line)
@@ -127,30 +143,21 @@ int RequestParser::checkHeaders()
     return 0;
 }
 
-int RequestParser::checkMethod(std::string &method)
+/**************************************************************************************/
+/*                                      PARSERS                                       */
+/**************************************************************************************/
+
+int RequestParser::appendHeaderValue(std::string &key, std::string &value)
 {
-    // Rest Connect, Options, Trace and Patch
+    /* Multiple Content-Length is forbidden */
+    if (key == "Content-Length")
+        return (exitStatus(BAD_REQUEST));
 
-    if (method == "GET" || method == "HEAD"
-        || method == "POST" || method == "PUT"
-        || method == "DELETE")
-        return 0;
-    return (exitStatus(NOT_IMPLEMENTED));
-}
+    std::map<std::string, std::string>::iterator it = this->_headers.find(key);
+    it->second.append(", ");
+    it->second.append(value);
 
-/* getNextLine extract the next line, removing \r\n at the end of line */
-std::string RequestParser::getNextLine(std::string &str, size_t &start)
-{
-    std::string line;
-    size_t      end;
-
-    end = str.find_first_of('\n', start);
-    line = str.substr(start, end - start);
-    start = end + 1;
-    if (line[line.size() - 1] == '\r')
-        ft::popBack(line);
-
-    return line;
+    return 0;
 }
 
 int RequestParser::parseVersion(std::string &first_line, size_t &start, size_t &end)
@@ -246,6 +253,7 @@ int RequestParser::parseHeaders(std::string &request, size_t &index)
 
         /* Get the key */
         key = line.substr(0, trunc);
+        trunc += 1;
 
         /* Insert key and value : append to value if key is already in map */
         value = line.substr(trunc, line.size() - trunc);
@@ -280,7 +288,8 @@ int RequestParser::parseBody(std::string &request, size_t &index)
         this->_body = request.substr(index, request.size() - index);
 
         //TODO : Check if its ok here | Develop for chunked body
-        if (_body_length > 0 && _body_length != _body.size())
+        // TODO : Find another way for this if, like craft stol or something like that
+        if (_body_length > 0 && _body_length != (int)_body.size())
             return (exitStatus(BAD_REQUEST));
     }
 
@@ -300,13 +309,13 @@ int RequestParser::parseRequest(const char *str)
 
     std::string request(str);
 
-    //TODO : Here is some tests to remove later
+//    TODO : Here is some tests to remove later
 //    size_t inserted = 0;
 //    inserted = request.find('\n', 100) + 1;
-//    std::string to_insert = "Transfer-Encoding: chunked , gzip\r\n";
+//    std::string to_insert = "Content-Length: 32\r\n";
 //    request.insert(inserted, to_insert);
-    request.append("home=Cosby&favorite+flavor=flies")
-    //TODO : END OF TEST
+//    request.append("home=Cosby&favorite+flavor=flies");
+//    TODO : END OF TEST
 
     line = getNextLine(request, index);
     if (this->parseFirstLine(line) == -1)
@@ -338,3 +347,21 @@ int                                 RequestParser::getStatus() { return (this->_
 /**************************************************************************************/
 
 void RequestParser::setStatus(int new_status) { this->_status = new_status; }
+
+/**************************************************************************************/
+/*                                      NON MEMBERS                                   */
+/**************************************************************************************/
+
+std::ostream &operator<<(std::ostream &out, const RequestParser &rhs)
+{
+    out << "HTTP CLIENT REQUEST : \n"
+        << rhs.getMethod() << ' ' << rhs.getPath() << ' ' << rhs.getVersion() << "\r\n";
+
+    std::map<std::string, std::string> headers = rhs.getHeaders();
+    for (std::map<std::string, std::string>::iterator it = headers.begin(); it != headers.end(); it++)
+        out << it->first << ": " << it->second << "\r\n";
+
+    out << "\r\n" << rhs.getBody();
+
+    return out;
+}
