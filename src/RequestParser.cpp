@@ -361,3 +361,9 @@ std::ostream &operator<<(std::ostream &out, const RequestParser &rhs)
 
     return out;
 }
+
+/**************************************************************************************/
+/*                                      SETTERS                                       */
+/**************************************************************************************/
+
+void RequestParser::setStatus(int new_status) { this->_status = new_status; }
