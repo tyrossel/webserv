@@ -234,7 +234,7 @@ int RequestParser::parseFirstLine(std::string &first_line)
 int RequestParser::parseHeaders(std::string &request, size_t &index)
 {
     std::string line, key, value;
-    size_t      trunc = 0, end_spaces = 0;
+    size_t      trunc = 0;
 
     line = getNextLine(request, index);
     if (line == "" || line == "\r" || line == "\r\n")
@@ -266,7 +266,6 @@ int RequestParser::parseHeaders(std::string &request, size_t &index)
         else
             this->_headers[key] = value;
 
-        end_spaces = 0;
         line = getNextLine(request, index);
     }
 
@@ -313,6 +312,7 @@ int RequestParser::parseRequest(const char *str)
 //    request.append("home=Cosby&favorite+flavor=flies");
 //    TODO : END OF TEST
 
+
     line = getNextLine(request, index);
     if (this->parseFirstLine(line) == -1)
         return (-1);
@@ -323,26 +323,20 @@ int RequestParser::parseRequest(const char *str)
     if (this->parseBody(request, index) == -1)
         return (-1);
 
-    return 0;
+    return (0);
 }
 
 /**************************************************************************************/
 /*                                      GETTERS                                       */
 /**************************************************************************************/
 
-std::map<std::string, std::string>  RequestParser::getHeaders() { return (this->_headers); }
-std::string                         RequestParser::getMethod() { return (this->_method); }
-std::string                         RequestParser::getPath() { return (this->_path); }
-std::string                         RequestParser::getVersion() { return (this->_version); }
-std::string                         RequestParser::getBody() { return (this->_body); }
-int                                 RequestParser::getBodyLength() { return (this->_body_length); }
-int                                 RequestParser::getStatus() { return (this->_status); }
-
-/**************************************************************************************/
-/*                                      SETTERS                                       */
-/**************************************************************************************/
-
-void RequestParser::setStatus(int new_status) { this->_status = new_status; }
+std::map<std::string, std::string>  RequestParser::getHeaders() const { return (this->_headers); }
+std::string                         RequestParser::getMethod() const { return (this->_method); }
+std::string                         RequestParser::getPath() const { return (this->_path); }
+std::string                         RequestParser::getVersion() const { return (this->_version); }
+std::string                         RequestParser::getBody() const { return (this->_body); }
+int                                 RequestParser::getBodyLength() const { return (this->_body_length); }
+int                                 RequestParser::getStatus() const { return (this->_status); }
 
 /**************************************************************************************/
 /*                                      NON MEMBERS                                   */
@@ -361,7 +355,6 @@ std::ostream &operator<<(std::ostream &out, const RequestParser &rhs)
 
     return out;
 }
-
 /**************************************************************************************/
 /*                                      SETTERS                                       */
 /**************************************************************************************/

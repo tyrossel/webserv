@@ -108,5 +108,3 @@ int Server::buildServer() { return (this->setupListen()); }
 int Server::getPort() { return (this->_port); }
 
 long Server::getFd() { return (this->_fd); }
-
-
