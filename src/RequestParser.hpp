@@ -23,7 +23,7 @@ class RequestParser {
 
         std::string                         getNextLine(std::string &str, size_t &i);
 
-        void                                trimWhitespaces(std::string &value);
+        void                                trimWhitespaces(std::string &str);
         int                                 exitStatus(int exit_status);
         int                                 isValidEncoding(std::string &to_check);
         int                                 checkMethod(std::string &method);
@@ -36,6 +36,7 @@ class RequestParser {
         int                                 parseVersion(std::string &first_line, size_t &start, size_t &end);
         int                                 parseFirstLine(std::string &first_line);
         int                                 parseHeaders(std::string &line, size_t &index);
+        int                                 parseBody(std::string &line, size_t &index);
         int                                 parseRequest(const char *request);
 
         /* GETTERS */

@@ -30,10 +30,10 @@ RequestParser &RequestParser::operator=(const RequestParser &other)
 /**************************************************************************************/
 
 
-void RequestParser::trimWhitespaces(std::string &value)
+void RequestParser::trimWhitespaces(std::string &str)
 {
-    ft::trimLeft(value, ' ');
-    ft::trimRight(value, ' ');
+    ft::trimLeft(str, ' ');
+    ft::trimRight(str, ' ');
 }
 
 int RequestParser::appendHeaderValue(std::string &key, std::string &value)
@@ -262,11 +262,29 @@ int RequestParser::parseHeaders(std::string &request, size_t &index)
         line = getNextLine(request, index);
     }
 
-    for (std::map<std::string, std::string>::iterator it = this->_headers.begin(); it != this->_headers.end(); it++) {
-       std::cout << it->first << it->second << std::endl;
-    }
+//    for (std::map<std::string, std::string>::iterator it = this->_headers.begin(); it != this->_headers.end(); it++) {
+//       std::cout << it->first << it->second << std::endl;
+//    }
 
     return (checkHeaders());
+}
+
+int RequestParser::parseBody(std::string &request, size_t &index)
+{
+    if (index != request.size())
+    {
+        /* A server MAY reject a request that contains a message body but not a Content-Length */
+        if (_headers.find("Content-Length") == _headers.end())
+            return (exitStatus(LENGTH_REQUIRED));
+
+        this->_body = request.substr(index, request.size() - index);
+
+        //TODO : Check if its ok here | Develop for chunked body
+        if (_body_length > 0 && _body_length != _body.size())
+            return (exitStatus(BAD_REQUEST));
+    }
+
+    return (0);
 }
 
 int RequestParser::parseRequest(const char *str)
@@ -282,18 +300,22 @@ int RequestParser::parseRequest(const char *str)
 
     std::string request(str);
 
-//    //TODO : Here is some tests to remove later
+    //TODO : Here is some tests to remove later
 //    size_t inserted = 0;
 //    inserted = request.find('\n', 100) + 1;
 //    std::string to_insert = "Transfer-Encoding: chunked , gzip\r\n";
 //    request.insert(inserted, to_insert);
-//    //TODO : END OF TEST
+    request.append("home=Cosby&favorite+flavor=flies")
+    //TODO : END OF TEST
 
     line = getNextLine(request, index);
     if (this->parseFirstLine(line) == -1)
         return (-1);
 
     if (this->parseHeaders(request, index) == -1)
+        return (-1);
+
+    if (this->parseBody(request, index) == -1)
         return (-1);
 
     return (0);
