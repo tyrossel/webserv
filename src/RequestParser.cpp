@@ -174,3 +174,9 @@ std::string                         RequestParser::getPath() { return (this->_pa
 std::string                         RequestParser::getVersion() { return (this->_version); }
 std::string                         RequestParser::getBody() { return (this->_body); }
 int                                 RequestParser::getStatus() { return (this->_status); }
+
+/**************************************************************************************/
+/*                                      SETTERS                                       */
+/**************************************************************************************/
+
+void RequestParser::setStatus(int new_status) { this->_status = new_status; }

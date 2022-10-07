@@ -39,16 +39,18 @@ class Looper {
 
         // CHECKERS ========================================================
         int     checkCode(RequestParser request);
-        int     checkPath(RequestParser request);
+        int     checkPath(long socket);
         int     checkExtension(RequestParser request);
         // =================================================================
 
         // RESPONSE CRAFTING ===============================================
         int     buildResponse(long socket);
-        void    addStaticBodyResponse(std::string &str);
-        void    addDate(std::string &str);
-        void    addBodyToResponse(std::string &str);
-        int     addHTTPHeader(std::string &str, long socket);
+        void    addStaticBodyResponse(long socket);
+        void    addDate(long socket);
+        void    addBodyToResponse(long socket);
+        int     addHTTPHeader(long socket);
+        int     writeResponseHeader(long socket);
+        void    addErrorBodyToResponse(long socket);
         // =================================================================
 
 

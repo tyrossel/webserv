@@ -34,6 +34,9 @@ class RequestParser {
         std::string                         getBody();
         int                                 getStatus();
 
+        /* SETTERS */
+        void                                setStatus(int new_status);
+
 };
 
 #endif //REQUESTPARSER_HPP
