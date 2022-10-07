@@ -75,9 +75,9 @@ void	*ft_memcpy(void *dst, const void *src, size_t n) {
 
 int Looper::readFromClient(long socket)
 {
-    char	buffer[BUFFER_SIZE];
-    int		ret;
-    RequestParser request;
+    char	        buffer[BUFFER_SIZE];
+    int		        ret;
+    RequestParser   request;
 
     //TODO : Store request in Looper object
     ret = recv(socket, buffer, BUFFER_SIZE, 0);
