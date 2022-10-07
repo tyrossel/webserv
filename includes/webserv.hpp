@@ -84,6 +84,7 @@
  ***********************************************************************************/
 #include <stdio.h>
 #include <stdlib.h>
+#include <cstdlib>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <sys/time.h>
@@ -92,9 +93,7 @@
 #include <cstring>
 #include <fcntl.h>
 
-#include <stdio.h>
 #include <errno.h>
-#include <stdlib.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>

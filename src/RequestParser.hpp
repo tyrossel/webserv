@@ -49,6 +49,9 @@ class RequestParser {
         int                                 getBodyLength() const;
         int                                 getStatus() const;
 
+        /* SETTERS */
+        void                                setStatus(int new_status);
+
 };
 
 std::ostream &operator<<(std::ostream &out, const RequestParser &rhs);

@@ -75,7 +75,7 @@ int Looper::setupLoop()
 /**************************************************************************************/
 /*                                      CHECKERS                                      */
 /**************************************************************************************/
-int     Looper:checkCode(RequestParser request)
+int     Looper::checkCode(RequestParser request)
 {
     if (request.getStatus() == 0)
         return HTTP_OK;
@@ -83,30 +83,82 @@ int     Looper:checkCode(RequestParser request)
         return (request.getStatus());
 }
 
+int     Looper::checkPath(long socket)
+{
+    std::ifstream test(_request[socket].getPath().c_str());
+    if (!test.good())
+    {
+        _request[socket].setStatus(404);
+        return NOT_FOUND;
+    }
+    else
+        return HTTP_OK;
+}
+
 /**************************************************************************************/
 /*                                  RESPONSE CRAFTING                                 */
 /**************************************************************************************/
-int Looper::addHTTPHeader(std::string &str, long socket)
+void Looper::addErrorBodyToResponse(long socket)
 {
-    int ret = 0;
+    std::string file;
+    std::stringstream out;
+    int i = 0;
 
-    if (ret = checkCode(_request[socket]) != HTTP_OK) // checking if an error code has been parsed in request
-        return writeResponseHeader(ret);// make this return return ret so we can pass it to body
-    else if (ret = checkPath(_request[socket]) != HTTP_OK) // functions will return the code catched
-        return writeResponseHeader(ret);
-    else if (ret = checkExtension(_request[socket]) != HTTP_OK)
-        return writeResponseHeader(ret);
+    file.append("src/html/error/error_");
+    i = _request[socket].getStatus();
+    out << i;
+    file.append(out.str());
+    out.str("");
+    file.append(".html");
+    std::ifstream fs(file.c_str());
+    if (!fs.good())
+        fs.open("src/html/error/error_404.html");
+    std::string text;
+    text.assign(std::istreambuf_iterator<char>(fs),
+                std::istreambuf_iterator<char>());
+    fs.close();
+    _response[socket].append("Content-Length: ");
+    i = text.size();
+    out << i;
+    _response[socket].append(out.str());
+    _response[socket].append("\n\n");
+    _response[socket].append(text);
 }
 
-void Looper::addStaticBodyResponse(std::string &str)
+int Looper::writeResponseHeader(long socket)
 {
-    str.append("HTTP/1.1 200 OK\n"); // TODO: This one won't be static in the future
-    str.append("Server: WetServ/1.0.0\n");
-    str.append("Transfer-Encoding: identity\n");
-    str.append("Content-Type: text/html\n"); // TODO: This one won't be static in the future
+    std::stringstream out;
+    int i = 0;
+
+    i = _request[socket].getStatus();
+    out << i;
+    _response[socket].append("HTTP/1.1 ");
+    if (i == 0)
+        _response[socket].append("200 OK\n");
+    else {
+        _response[socket].append(out.str());
+        _response[socket].append(" KO\n");
+    }
+    return (1);
 }
 
-void Looper::addDate(std::string &str)
+int Looper::addHTTPHeader(long socket)
+{
+    if (checkCode(_request[socket]) != HTTP_OK) // checking if an error code has been parsed in request
+        return writeResponseHeader(socket); // make this return return ret so we can pass it to body
+    else if (checkPath(socket) != HTTP_OK) // functions will return the code catched
+        return writeResponseHeader(socket);
+    return writeResponseHeader(socket);
+}
+
+void Looper::addStaticBodyResponse(long socket)
+{
+    _response[socket].append("Server: WetServ/1.0.0\n");
+    _response[socket].append("Transfer-Encoding: identity\n");
+    _response[socket].append("Content-Type: text/html\n"); // TODO: This one won't be static in the future
+}
+
+void Looper::addDate(long socket)
 {
     // current date/time based on current system
     time_t now = time(0);
@@ -116,16 +168,15 @@ void Looper::addDate(std::string &str)
     // convert now to tm struct for UTC
     tm *gmtm = gmtime(&now);
     dt = asctime(gmtm);
-    str.append("Date: ");
-    str.append(dt);
+    _response[socket].append("Date: ");
+    _response[socket].append(dt);
 }
 
-void Looper::addBodyToResponse(std::string &str) // TODO: add file to read from (std::string path)
+void Looper::addBodyToResponse(long socket) // TODO: add file to read from (std::string path)
 {
     int i = 0;
     std::stringstream out;
     std::ifstream fs("src/html/index.html"); // TODO: add the path here with .c_str() method
-    //std::ifstream fs(_filename.c_str());
 
     if (!fs.good())
     {
@@ -136,27 +187,26 @@ void Looper::addBodyToResponse(std::string &str) // TODO: add file to read from 
     text.assign(std::istreambuf_iterator<char>(fs),
                 std::istreambuf_iterator<char>());
     fs.close();
-    str.append("Content-Length: ");
+    _response[socket].append("Content-Length: ");
     i = text.size();
     out << i;
-    str.append(out.str());
-    str.append("\n\n");
-    str.append(text);
+    _response[socket].append(out.str());
+    _response[socket].append("\n\n");
+    _response[socket].append(text);
 }
 
 int Looper::buildResponse(long socket)
 {
-    (void)request;
-    std::string str;
-    //int ret = 0;
+    int             ret = 0;
 
     _response.insert(std::make_pair<long int, std::string>(socket, ""));
-    //ret = addHTTPHeader(str, socket);
-    addStaticBodyResponse(str);
-    addDate(str);
-    //    addBodyToResponse(str, ret); in the future
-    addBodyToResponse(str);
-    _response[socket].append(str);
+    ret = addHTTPHeader(socket);
+    addStaticBodyResponse(socket);
+    addDate(socket);
+    if (ret != HTTP_OK)
+        addErrorBodyToResponse(socket);
+    else
+        addBodyToResponse(socket);
     std::cout << "================== RESPONSE ==================" << std::endl;
     std::cout << GREEN << _response[socket] << RESET << std::endl;
     std::cout << "==============================================" << std::endl << std::endl;
