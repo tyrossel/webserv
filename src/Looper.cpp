@@ -291,6 +291,9 @@ int Looper::readFromClient(long socket)
     request.parseRequest(buffer);
 <<<<<<< HEAD
     _request.insert(std::make_pair<long, RequestParser>(socket, request));
+    std::cout << "================== REQUEST ==================" << std::endl;
+    std::cout << BLUE << _request[socket] << RESET;
+    std::cout << "==============================================" << std::endl;
     buildResponse(socket);
 =======
     buildResponse(socket, request);
