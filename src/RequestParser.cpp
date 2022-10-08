@@ -204,7 +204,7 @@ int RequestParser::parsePath(std::string &first_line, size_t &start, size_t &end
 
     this->_path = first_line.substr(start, end - start);
     if (this->_path.size() > URI_MAX_SIZE)
-        return (exitStatus(BAD_REQUEST));
+        return (exitStatus(URI_TOO_LONG));
 
     return (parseVersion(first_line, start, end));
 }

@@ -370,3 +370,4 @@ void Looper::selectErrorHandle()
     for (std::vector<Server>::iterator it = _servers.begin(); it != _servers.end(); it++)
         FD_SET((*it).getFd(), &_active_fd_set);
 }
+
