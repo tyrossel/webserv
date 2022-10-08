@@ -41,6 +41,7 @@ public:
     int     checkCode(RequestParser request);
     int     checkPath(long socket);
     int     checkExtension(RequestParser request);
+    int     secFetchCheck(long socket);
     // =================================================================
 
     // RESPONSE CRAFTING ===============================================

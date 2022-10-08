@@ -133,13 +133,15 @@ int Looper::writeResponseHeader(long socket)
     i = _request[socket].getStatus();
     out << i;
     _response[socket].append("HTTP/1.1 ");
-    if (i == 0)
+    if (i == 0) {
         _response[socket].append("200 OK\n");
+        return (HTTP_OK);
+    }
     else {
         _response[socket].append(out.str());
         _response[socket].append(" KO\n");
     }
-    return (1);
+    return (i);
 }
 
 int Looper::addHTTPHeader(long socket)
@@ -193,6 +195,16 @@ void Looper::addBodyToResponse(long socket) // TODO: add file to read from (std:
     _response[socket].append(out.str());
     _response[socket].append("\n\n");
     _response[socket].append(text);
+}
+
+int Looper::secFetchCheck(long socket)
+{
+    std::map<std::string, std::string> tmp = _request[socket].getHeaders();
+    if (tmp.find("Sec-Fetch-Dest") != tmp.end())
+    {
+
+    }
+    return (1);
 }
 
 int Looper::buildResponse(long socket)
@@ -277,7 +289,7 @@ void Looper::sendResponse(fd_set &reading_fd_set, fd_set &writing_fd_set, fd_set
         if (FD_ISSET(*it, &writing_fd_set))
         {
             long ret_val = _active_servers[*it]->send(*it, _response);
-            if (ret_val == 0)
+            if (ret_val >= 0)
             {
                 _response.erase(*it); // erase the response from map when comm is over
                 _request.erase(*it); // erase the socket from the map
@@ -309,7 +321,7 @@ void Looper::requestProcess(fd_set &reading_fd_set)
         {
             long ret_val = readFromClient(socket);
 
-            if (ret_val > 0)
+            if (ret_val >= 0)
             {
                 // we store the socket fd into our ready_fd vector since we want to keep the channel open
                 _ready_fd.push_back(socket);
