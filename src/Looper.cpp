@@ -83,18 +83,13 @@ int     Looper::checkCode(RequestParser request)
         return (request.getStatus());
 }
 
-void	*ft_memcpy(void *dst, const void *src, size_t n)
+int     Looper::checkPath(long socket)
 {
-    size_t i;
-    unsigned char *p;
-    unsigned char *q;
-
-    i = 0;
-    p = (unsigned char *) dst;
-    q = (unsigned char *) src;
-    while (i < n) {
-        p[i] = q[i];
-        i++;
+    std::ifstream test(_request[socket].getPath().c_str());
+    if (!test.good())
+    {
+        _request[socket].setStatus(404);
+        return NOT_FOUND;
     }
     else
         return HTTP_OK;
@@ -230,86 +225,25 @@ int Looper::buildResponse(long socket)
     return (1);
 }
 
-void Looper::addStaticBodyResponse(std::string &str)
-{
-    str += "HTTP/1.1 200 OK\n";
-    str += "Server: WetServ/1.0.0\n";
-    str += "Transfer-Encoding: identity\n";
-    str += "Content-Type: text/html\n";
-}
-
-void Looper::addDate(std::string &str)
-{
-    // current date/time based on current system
-    time_t now = time(0);
-
-    // convert now to string form
-    char* dt = ctime(&now);
-    // convert now to tm struct for UTC
-    tm *gmtm = gmtime(&now);
-    dt = asctime(gmtm);
-    str += "Date: ";
-    str += dt;
-}
-
-void Looper::addBodyToResponse(std::string &str)
-{
-    int i = 0;
-    std::stringstream out;
-    std::ifstream fs("src/html/index.html");
-    //std::ifstream fs(_filename.c_str()); TODO: put path recieved
-
-    if (!fs.good())
-    {
-        std::cerr << "Error stream file not found" << std::endl;
-        return ;
-    }
-    std::string text;
-    text.assign(std::istreambuf_iterator<char>(fs),
-                std::istreambuf_iterator<char>());
-    fs.close();
-    str += "Content-Length: ";
-    i = text.size();
-    out << i;
-    str += out.str();
-    str += "\n\n";
-    str += text;
-}
-
-int Looper::buildResponse(long socket, RequestParser request)
-{
-    (void)request;
-    std::string str;
-
-    _response.insert(std::make_pair<long int, std::string>(socket, ""));
-    //addHTTPHeader(str);
-    addStaticBodyResponse(str);
-    addDate(str);
-    addBodyToResponse(str);
-    _response[socket] += str;
-    std::cout << "================== RESPONSE ==================" << std::endl;
-    std::cout << GREEN << _response[socket] << RESET << std::endl;
-    std::cout << "==============================================" << std::endl << std::endl;
-    return (1);
-}
-
 int Looper::readFromClient(long socket)
 {
     char	        buffer[BUFFER_SIZE];
     int		        ret;
     RequestParser   request;
 
+    ft::bzero(&buffer, BUFFER_SIZE);
+
     ret = recv(socket, buffer, BUFFER_SIZE, 0);
-    request.parseRequest(buffer);
-<<<<<<< HEAD
-    _request.insert(std::make_pair<long, RequestParser>(socket, request));
-    std::cout << "================== REQUEST ==================" << std::endl;
-    std::cout << BLUE << _request[socket] << RESET;
-    std::cout << "==============================================" << std::endl;
-    buildResponse(socket);
-=======
-    buildResponse(socket, request);
->>>>>>> b0ede9b (function to craft the response are splitted and more organized. They are static for the moment. 👬)
+    if (ret > 0) {
+        request.parseRequest(buffer);
+        _request.insert(std::make_pair<long, RequestParser>(socket, request));
+
+        std::cout << "================== REQUEST ==================" << std::endl;
+        std::cout << BLUE << _request[socket] << RESET;
+        std::cout << "==============================================" << std::endl;
+
+        buildResponse(socket);
+    }
     return (ret);
 }
 
@@ -364,10 +298,7 @@ void Looper::sendResponse(fd_set &reading_fd_set, fd_set &writing_fd_set, fd_set
             if (ret_val >= 0)
             {
                 _response.erase(*it); // erase the response from map when comm is over
-<<<<<<< HEAD
                 _request.erase(*it); // erase the socket from the map
-=======
->>>>>>> b0ede9b (function to craft the response are splitted and more organized. They are static for the moment. 👬)
                 _ready_fd.erase(it); // erase the fd from vector when comm is over
             }
             else
@@ -396,12 +327,12 @@ void Looper::requestProcess(fd_set &reading_fd_set)
         {
             long ret_val = readFromClient(socket);
 
-            if (ret_val >= 0)
+            if (ret_val > 0)
             {
                 // we store the socket fd into our ready_fd vector since we want to keep the channel open
                 _ready_fd.push_back(socket);
             }
-            else if (ret_val == -1)
+            else if (ret_val <= 0)
             {
                 // in case of error, we clear as done previously
                 FD_CLR(socket, &_active_fd_set);
