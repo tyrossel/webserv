@@ -102,4 +102,6 @@
 #include <arpa/inet.h>
 #include <ctime>
 
+#include "../src/Utils.hpp"
+
 #endif // WEBSERV_HPP

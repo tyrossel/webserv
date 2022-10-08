@@ -231,12 +231,16 @@ int Looper::readFromClient(long socket)
     int		        ret;
     RequestParser   request;
 
+    ft::bzero(&buffer, BUFFER_SIZE);
+
     ret = recv(socket, buffer, BUFFER_SIZE, 0);
     request.parseRequest(buffer);
     _request.insert(std::make_pair<long, RequestParser>(socket, request));
+
     std::cout << "================== REQUEST ==================" << std::endl;
     std::cout << BLUE << _request[socket] << RESET;
     std::cout << "==============================================" << std::endl;
+
     buildResponse(socket);
     return (ret);
 }

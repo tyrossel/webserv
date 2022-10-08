@@ -2,7 +2,6 @@
 #define REQUESTPARSER_HPP
 
 #include "../includes/webserv.hpp"
-#include "../src/Utils.hpp"
 
 class RequestParser {
     private:
