@@ -34,17 +34,21 @@ std::string test_arrays[] = {
 	"[12]",
 };
 
-const std::string json_txt = "{ \"test_int\":42}";
+const std::string json_txt = "{ \"test_int\":42,}";
 
 int main()
 {
-	JsonObject json(json_txt);
-	// std::cout << "JSON NUMBERS: " << std::endl;
-	// for (const std::string &str : test_numbers)
-	// 	std::cout << "'" << str << "': " << isValidJsonNumber(str, false) << std::endl;
-	// std::cout << std::endl;
-	//
-	// std::cout << "JSON STRING: " << std::endl;
-	// for (const std::string &str : test_strings)
-	// 	std::cout << str << ": " << isValidJsonString(str, false) << std::endl;
+	try
+	{
+		JsonObject json;
+
+		json.parseObjectFromFile("tests/test_json.json");
+
+		std::cout << "---------------------" << std::endl;
+		std::cout << json << std::endl;
+	}
+	catch (const std::exception& e)
+	{
+		std::cerr << e.what() << std::endl;
+	}
 }
