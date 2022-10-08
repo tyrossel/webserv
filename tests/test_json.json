@@ -1,5 +1,6 @@
 {
 	"test_int": 42,
 	"test_string":"Hallo"  ,
-	"test_string2": "Hello\nWorld !\\",
+	"test_string2": "Hello World !\\",
+	"test_float":-42
 }
