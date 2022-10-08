@@ -2,12 +2,8 @@
 #include <exception>
 #include <vector>
 
-bool isValidJsonNumber(const std::string &s, bool checkStartOnly = false);
-bool isValidJsonString(const std::string &s, bool checkStartOnly = false);
-bool isValidJsonConstant(const std::string &s, bool checkStartOnly = false);
 bool isValidJsonArray(const std::string &s, bool checkStartOnly = false);
 bool isValidJsonObject(std::string s, bool checkStartOnly = false);
-bool isValidJsonValue(const std::string &s, bool checkStartOnly = false);
 
 class JsonObject
 {
@@ -28,11 +24,10 @@ class JsonObject
 		std::map<std::string, std::vector<std::string>> stringArrays;
 		std::map<std::string, std::vector<JsonObject>> objectsArrays;
 		std::map<std::string, std::string> strings;
+		std::map<std::string, JsonObject> objects;
 		std::map<std::string, int> ints;
 		std::map<std::string, float> floats;
 		std::map<std::string, bool> bools;
-
-	public:
 
 		std::string parseJsonKey(std::string &s);
 
@@ -40,18 +35,24 @@ class JsonObject
 		void parseJsonString(std::string &s, const std::string &key);
 		void parseJsonObject(std::string &s, const std::string &key);
 		void parseJsonArray(std::string &s, const std::string &key);
-		void parseJsonBool(std::string &s, const std::string &key);
+		void parseJsonConstant(std::string &s, const std::string &key);
+
+		friend std::ostream & operator<<(std::ostream &os, const JsonObject &json);
+
+		void	parseObjectFromString(std::string &text);
+
+	public:
 
 		JsonObject();
-		void	parseFromText(const std::string &text);
+		JsonObject(const std::string &text);
 		JsonObject(const JsonObject &rhs);
 		JsonObject &operator=(const JsonObject &rhs);
 		~JsonObject();
 
-		std::vector<std::string> getObject(std::string name);
+		void	parseObjectFromFile(const std::string &file);
 
-		template<class T>
-		T 							getValue(std::string name);
+		JsonObject getObject(std::string name);
+
 		std::vector<int>			getIntArray(std::string name);
 		std::vector<std::string>	getStringArray(std::string name);
 		std::vector<JsonObject>		getObjectArray(std::string name);
@@ -60,3 +61,5 @@ class JsonObject
 		int						 	getInt(std::string name);
 		float					 	getFloat(std::string name);
 };
+
+std::ostream & operator<<(std::ostream &os, const JsonObject &json);
