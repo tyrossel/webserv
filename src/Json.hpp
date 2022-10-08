@@ -2,9 +2,70 @@
 #include <exception>
 #include <vector>
 
-bool isValidJsonArray(const std::string &s, bool checkStartOnly = false);
-bool isValidJsonObject(std::string s, bool checkStartOnly = false);
+class JsonObject;
+class JsonArray;
 
+// TODO: DO NOT EXPOSE THOSE
+int			parseJsonInt(std::string &s, const std::string &key);
+std::string	parseJsonString(std::string &s, const std::string &key);
+JsonObject	parseJsonObject(std::string &s, const std::string &key);
+JsonArray	parseJsonArray(std::string &s, const std::string &key);
+bool		parseJsonConstant(std::string &s, const std::string &key);
+
+class JsonArray
+{
+	public:
+
+		enum ArrayType {
+			NONE,
+			INT,
+			STRING,
+			BOOL,
+			OBJECT,
+			ARRAY
+		};
+
+		JsonArray();
+		JsonArray(const std::string &text);
+		JsonArray(const JsonArray &rhs);
+		JsonArray &operator=(const JsonArray &rhs);
+		~JsonArray();
+
+		void	clear();
+
+		template<typename T>
+		std::vector<T> value()
+		{
+			throw std::logic_error("Json array error: cannot contain this type");
+		}
+		template<>
+		std::vector<int> value() { return this->ints;}
+		template<>
+		std::vector<std::string> value() { return this->strings;}
+		template<>
+		std::vector<bool> value() { return this->bools;}
+		template<>
+		std::vector<JsonObject> value() {return this->objects;}
+		template<>
+		std::vector<JsonArray> value() {return this->arrays;}
+
+		void parseFromString(std::string &s);
+
+	private:
+
+		void		parseJsonValue(std::string &s, const std::string &key);
+
+		ArrayType type;
+		std::vector<int>	ints;
+		std::vector<std::string>	strings;
+		std::vector<bool> bools;
+		std::vector<JsonObject> objects;
+		std::vector<JsonArray> arrays;
+
+		friend std::ostream & operator<<(std::ostream &os, const JsonArray &json);
+};
+
+//-------------------------------------------------------------------------------
 class JsonObject
 {
 	public:
@@ -20,9 +81,8 @@ class JsonObject
 	};
 
 	private:
-		std::map<std::string, std::vector<int>> intArrays;
-		std::map<std::string, std::vector<std::string>> stringArrays;
-		std::map<std::string, std::vector<JsonObject>> objectsArrays;
+
+		std::map<std::string, JsonArray> arrays;
 		std::map<std::string, std::string> strings;
 		std::map<std::string, JsonObject> objects;
 		std::map<std::string, int> ints;
@@ -31,15 +91,10 @@ class JsonObject
 
 		std::string parseJsonKey(std::string &s);
 
-		void parseJsonNumber(std::string &s, const std::string &key);
-		void parseJsonString(std::string &s, const std::string &key);
-		void parseJsonObject(std::string &s, const std::string &key);
-		void parseJsonArray(std::string &s, const std::string &key);
-		void parseJsonConstant(std::string &s, const std::string &key);
+		void		parseJsonValue(std::string &s, const std::string &key);
 
 		friend std::ostream & operator<<(std::ostream &os, const JsonObject &json);
 
-		void	parseObjectFromString(std::string &text);
 
 	public:
 
@@ -49,7 +104,9 @@ class JsonObject
 		JsonObject &operator=(const JsonObject &rhs);
 		~JsonObject();
 
-		void	parseObjectFromFile(const std::string &file);
+		void	clear();
+		void	parseFromString(const std::string &text);
+		void	parseFromFile(const std::string &file);
 
 		JsonObject getObject(std::string name);
 
