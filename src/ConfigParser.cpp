@@ -6,12 +6,12 @@
 /*   By: trossel <trossel@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 16:47:18 by trossel           #+#    #+#             */
-/*   Updated: 2022/10/04 16:09:08 by trossel          ###   ########.fr       */
+/*   Updated: 2022/10/09 17:20:48 by trossel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ConfigParser.hpp"
-#include "Json.hpp"
+#include "Config.hpp"
 #include <fstream>
 #include <string>
 
@@ -38,47 +38,72 @@ ConfigParsor &ConfigParsor::operator=(const ConfigParsor &rhs)
 const std::string &ConfigParsor::getFilename() const { return
 	this->_filename;}
 
+
+ServerConfig ConfigParsor::parseServer(const JsonObject &serverObject) const
+{
+    ServerConfig serverCfg;
+
+	(void)serverObject;
+
+    serverCfg.addPort(serverObject.getInt("port"));
+
+    serverCfg.addRoot(serverObject.getString("root"));
+
+	// Hosts
+	{
+		std::vector<std::string> hosts = serverObject.getArray("host").stringValues();
+		std::vector<std::string>::iterator it;
+		for (it = hosts.begin(); it != hosts.end(); it++)
+			serverCfg.addHost(*it);
+	}
+
+	// Indexes
+	{
+		std::vector<std::string> indexes = serverObject.getArray("index").stringValues();
+		std::vector<std::string>::iterator it;
+		for (it = indexes.begin(); it != indexes.end(); it++)
+			serverCfg.addIndex(*it);
+	}
+
+	// Locations
+	{
+		std::vector<JsonObject> locations = serverObject.getArray("locations").ObjectValues();
+		std::vector<JsonObject>::iterator it;
+		for (it = locations.begin(); it != locations.end(); it++)
+		{
+			// TODO: handle CGI config
+			std::string location_path = it->getString("location_path");
+			std::string root = it->getString("root");
+			serverCfg.addLocation(location_path, root);
+		}
+	}
+
+	return serverCfg;
+}
+
 Config ConfigParsor::parse() const
 {
 	Config cfg;
-	std::ifstream fs(_filename.c_str());
+	JsonObject json;
 
-	if (!fs.good())
+	cfg.setValid(false);
+	try
 	{
-		std::cerr << "Config file not found" << std::endl;
-		cfg.setValid(false);
-		return cfg;
+		json.parseFromFile(this->_filename);
+
+		JsonArray serversArray = json.getArray("servers");
+		std::vector<JsonObject> servers = serversArray.ObjectValues();
+
+		std::vector<JsonObject>::const_iterator it;
+		for(it = servers.begin(); it != servers.end(); it++)
+			cfg.addServer(parseServer(*it));
+
+		cfg.setValid(true);
 	}
-	std::string text;
-	text.assign(std::istreambuf_iterator<char>(fs),
-			std::istreambuf_iterator<char>());
-	fs.close();
-	std::cout << "text = " << text << std::endl;
-	if (!isValidJsonObject(text))
+	catch (const std::exception& e)
 	{
-		std::cerr << "Config is not valid JSON" << std::endl;
-		cfg.setValid(false);
-		return cfg;
+		std::cerr << e.what() << std::endl;
 	}
-	else
-	{
-		std::cerr << "Config is valid !" << std::endl;
-	}
-
-
-
-
-    ServerConfig server;
-    server.addHost("localhost");
-    server.addHost("mywebsite.com");
-    server.addIndex("index.html");
-    server.addIndex("index.php");
-    server.addRoot("/var/www/html");
-    server.addPort(8080);
-    server.addLocation("location_path", "");
-    server.addLocation("root", "subfolder");
-
-	cfg.addServer(server);
-	cfg.setValid(true);
+	std::cout << "Config = " << cfg << std::endl;
 	return cfg;
 }

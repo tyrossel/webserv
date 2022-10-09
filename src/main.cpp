@@ -6,7 +6,7 @@
 /*   By: trossel <trossel@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/20 15:21:50 by trossel           #+#    #+#             */
-/*   Updated: 2022/10/04 15:04:58 by trossel          ###   ########.fr       */
+/*   Updated: 2022/10/09 16:58:18 by trossel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,7 +63,8 @@ int	main(int argc, char *argv[], char *envp[])
     // Server serv7(7070, "0.0.0.0");
     // Server serv(8080, "0.0.0.0");
     //
-    // Looper loop;
+    Looper loop;
+
     //
     // loop.addServer(serv);
     // loop.addServer(serv2);

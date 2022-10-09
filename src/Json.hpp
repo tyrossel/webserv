@@ -38,16 +38,11 @@ class JsonArray
 		{
 			throw std::logic_error("Json array error: cannot contain this type");
 		}
-		template<typename T>
-		std::vector<int> value() { return this->ints;}
-		template<typename T>
-		std::vector<std::string> value() { return this->strings;}
-		template<typename T>
-		std::vector<bool> value() { return this->bools;}
-		template<typename T>
-		std::vector<JsonObject> value() {return this->objects;}
-		template<typename T>
-		std::vector<JsonArray> value() {return this->arrays;}
+		std::vector<int> intValues() { return this->ints;}
+		std::vector<std::string> stringValues() { return this->strings;}
+		std::vector<bool> boolValues() { return this->bools;}
+		std::vector<JsonObject> ObjectValues() {return this->objects;}
+		std::vector<JsonArray> arrayValues() {return this->arrays;}
 
 		void parseFromString(std::string &s);
 
@@ -108,15 +103,12 @@ class JsonObject
 		void	parseFromString(std::string &text);
 		void	parseFromFile(const std::string &file);
 
-		JsonObject getObject(std::string name);
 
-		std::vector<int>			getIntArray(std::string name);
-		std::vector<std::string>	getStringArray(std::string name);
-		std::vector<JsonObject>		getObjectArray(std::string name);
-		std::string				 	getString(std::string name);
-		bool					 	getBool(std::string name);
-		int						 	getInt(std::string name);
-		float					 	getFloat(std::string name);
+		JsonArray					getArray(const std::string &name) const;
+		JsonObject					getObject(const std::string &name) const;
+		std::string				 	getString(const std::string &name) const;
+		bool					 	getBool(const std::string &name) const;
+		int						 	getInt(const std::string &name) const;
 };
 
 std::ostream & operator<<(std::ostream &os, const JsonObject &json);
