@@ -6,13 +6,14 @@
 /*   By: trossel <trossel@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 16:37:06 by trossel           #+#    #+#             */
-/*   Updated: 2022/10/04 14:06:04 by trossel          ###   ########.fr       */
+/*   Updated: 2022/10/09 16:16:44 by trossel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <string>
 
 #include "Config.hpp"
+#include "Json.hpp"
 
 class ConfigParsor
 {
@@ -38,6 +39,7 @@ class ConfigParsor
 
 		const std::string &getFilename() const;
 
+		ServerConfig parseServer(const JsonObject &serverObject) const;
 		Config parse() const;
 
 	private:

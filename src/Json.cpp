@@ -75,16 +75,14 @@ void JsonArray::clear()
 
 void JsonArray::parseFromString(std::string &s)
 {
-	size_t i(0);
 	s = ltrim(s);
 	if (s.size() == 0 || s[0] != '[')
-		throw std::logic_error("JSON array error: not an array: s = " + s);
+		throw std::logic_error("JSON array error: not an array");
 	s = s.assign(s, 1);
 	s = ltrim(s);
 
 	do
 	{
-		std::cout << "Array: s = " << s << std::endl;
 		this->parseJsonValue(s, "");
 		s = ltrim(s);
 		if (s[0] == ',')
@@ -323,15 +321,24 @@ JsonObject parseJsonObject(std::string &s, const std::string &key)
 {
 	JsonObject json;
 
+	(void)key;
 	json.parseFromString(s);
 	return json;
+}
+
+JsonArray parseJsonArray(std::string &s, const std::string &key)
+{
+	JsonArray array;
+
+	(void)key;
+	array.parseFromString(s);
+	return array;
 }
 
 int parseJsonInt(std::string &s, const std::string &key)
 {
 	size_t i(0);
 	std::string str = s;
-	bool isFloat(false);
 	str = ltrim(rtrim(str));
 	if (str[i] == '-')
 		i++;
@@ -343,7 +350,6 @@ int parseJsonInt(std::string &s, const std::string &key)
 	{
 		if (!std::isdigit(str[i+1]))
 			throw std::logic_error("JSON error parsing key '" + key + "' (no decimal)");
-		isFloat = true;
 		i++;
 		while(std::isdigit(str[i]))
 			i++;
@@ -352,18 +358,9 @@ int parseJsonInt(std::string &s, const std::string &key)
 
 	s.assign(s, i);
 
-	// TODO TYR: Handle floats
-	// if (isFloat)
-	// {
-	// 	float valueFloat(0.0f);
-	// 	std::istringstream ( str ) >> valueFloat;
-	// }
-	// else
-	{
-		int valueInt(0);
-		std::istringstream ( str ) >> valueInt;
-		return valueInt;
-	}
+	int valueInt(0);
+	std::istringstream ( str ) >> valueInt;
+	return valueInt;
 }
 
 bool parseJsonConstant(std::string &s, const std::string &key)
@@ -390,7 +387,7 @@ bool parseJsonConstant(std::string &s, const std::string &key)
 
 std::string parseJsonString(std::string &s, const std::string &key)
 {
-	int i = 0;
+	size_t i(0);
 	std::string str(s), content;
 	size_t last_quote = 0;
 
@@ -447,20 +444,13 @@ std::string parseJsonString(std::string &s, const std::string &key)
 	return content;
 }
 
-JsonArray parseJsonArray(std::string &s, const std::string &key)
-{
-	JsonArray array;
-
-	array.parseFromString(s);
-	return array;
-}
-
 void	JsonObject::parseFromFile(const std::string &file)
 {
 	std::ifstream fs(file.c_str());
 
 	if (!fs.good())
 		throw std::logic_error("JSON error: file '" + file + "' cannot be opened");
+
 	std::string text;
 	text.assign(std::istreambuf_iterator<char>(fs),
 			std::istreambuf_iterator<char>());
@@ -471,7 +461,6 @@ void	JsonObject::parseFromFile(const std::string &file)
 
 void	JsonObject::clear()
 {
-
 	this->arrays.clear();
 	this->strings.clear();
 	this->objects.clear();
@@ -500,14 +489,68 @@ void	JsonObject::parseFromString(std::string &s)
 		if (s[0] == ',')
 			s = ltrim(s.assign(s, 1));
 		else if (s[0] != '}')
-			throw std::logic_error("JSON objet error: missing comma or closing bracket after key " + key + ": s = " + s);
-		std::cout << "Added key " + key << std::endl;
+			throw std::logic_error("JSON objet error: missing comma or closing bracket after key " + key);
 	}
 	while(!s.empty() && s[0] != '}');
 
 	if (s[0] != '}')
 		throw std::logic_error("JSON object error: no closing bracket");
 	s = ltrim(s.assign(s, 1));
+}
+
+JsonArray	JsonObject::getArray(const std::string &name) const
+{
+	std::map<std::string, JsonArray>::const_iterator it;
+	for (it = this->arrays.begin(); it != this->arrays.end(); it++)
+	{
+		if (name == it->first)
+			return it->second;
+	}
+	throw std::logic_error("JSON error: no array named " + name);
+}
+
+JsonObject	JsonObject::getObject(const std::string &name) const
+{
+	std::map<std::string, JsonObject>::const_iterator it;
+	for (it = this->objects.begin(); it != this->objects.end(); it++)
+	{
+		if (name == it->first)
+			return it->second;
+	}
+	throw std::logic_error("JSON error: no object named " + name);
+}
+
+std::string	JsonObject::getString(const std::string &name) const
+{
+	std::map<std::string, std::string>::const_iterator it;
+	for (it = this->strings.begin(); it != this->strings.end(); it++)
+	{
+		if (name == it->first)
+			return it->second;
+	}
+	throw std::logic_error("JSON error: no string named " + name);
+}
+
+int	JsonObject::getInt(const std::string &name) const
+{
+	std::map<std::string, int>::const_iterator it;
+	for (it = this->ints.begin(); it != this->ints.end(); it++)
+	{
+		if (name == it->first)
+			return it->second;
+	}
+	throw std::logic_error("JSON error: no int named " + name);
+}
+
+bool	JsonObject::getBool(const std::string &name) const
+{
+	std::map<std::string, bool>::const_iterator it;
+	for (it = this->bools.begin(); it != this->bools.end(); it++)
+	{
+		if (name == it->first)
+			return it->second;
+	}
+	throw std::logic_error("JSON error: no bool named " + name);
 }
 
 std::ostream & operator<<(std::ostream &os, const JsonObject &json)
