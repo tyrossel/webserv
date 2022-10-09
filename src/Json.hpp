@@ -38,15 +38,15 @@ class JsonArray
 		{
 			throw std::logic_error("Json array error: cannot contain this type");
 		}
-		template<>
+		template<typename T>
 		std::vector<int> value() { return this->ints;}
-		template<>
+		template<typename T>
 		std::vector<std::string> value() { return this->strings;}
-		template<>
+		template<typename T>
 		std::vector<bool> value() { return this->bools;}
-		template<>
+		template<typename T>
 		std::vector<JsonObject> value() {return this->objects;}
-		template<>
+		template<typename T>
 		std::vector<JsonArray> value() {return this->arrays;}
 
 		void parseFromString(std::string &s);
@@ -105,7 +105,7 @@ class JsonObject
 		~JsonObject();
 
 		void	clear();
-		void	parseFromString(const std::string &text);
+		void	parseFromString(std::string &text);
 		void	parseFromFile(const std::string &file);
 
 		JsonObject getObject(std::string name);

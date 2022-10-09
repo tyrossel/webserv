@@ -36,13 +36,18 @@ std::string test_arrays[] = {
 
 const std::string json_txt = "{ \"test_int\":42,}";
 
-int main()
+int main(int argc, char *argv[])
 {
+	if (argc < 2)
+	{
+		std::cerr << "Usage: ./test_json json_file" << std::endl;
+		exit(1);
+	}
 	try
 	{
 		JsonObject json;
 
-		json.parseObjectFromFile("tests/test_json.json");
+		json.parseFromFile(argv[1]);
 
 		std::cout << "---------------------" << std::endl;
 		std::cout << json << std::endl;
