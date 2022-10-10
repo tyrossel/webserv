@@ -274,7 +274,6 @@ int RequestParser::parseHeaders(std::string &request, size_t &index)
 
 int RequestParser::parseBody(std::string &request, size_t &index)
 {
-    std::cout << RED << index << " & " << request.size() << RESET << std::endl;
     if (index != request.size())
     {
         /* A server MAY reject a request that contains a message body but not a Content-Length */
