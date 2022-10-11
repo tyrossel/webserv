@@ -54,15 +54,7 @@ int	main(int argc, char *argv[], char *envp[])
 		std::cerr << "Error in config file." << std::endl;
 		return 1;
 	}
-
-    // Server serv2(2020, "0.0.0.0");
-    // Server serv3(3030, "0.0.0.0");
-    // Server serv4(4040, "0.0.0.0");
-    // Server serv5(5050, "0.0.0.0");
-    // Server serv6(6060, "0.0.0.0");
-    // Server serv7(7070, "0.0.0.0");
-    // Server serv(8080, "0.0.0.0");
-    //
+    Server()
     Looper loop;
 
     //
