@@ -341,7 +341,7 @@ int RequestParser::parseRequest(const char *str)
 std::map<std::string, std::string>  RequestParser::getHeaders() const { return (this->_headers); }
 std::string                         RequestParser::getMethod() const { return (this->_method); }
 std::string                         RequestParser::getPath() const { return (this->_path); }
-std::string                         RequestParser::getPath() const { return (this->_query); }
+std::string                         RequestParser::getQuery() const { return (this->_query); }
 std::string                         RequestParser::getVersion() const { return (this->_version); }
 std::string                         RequestParser::getBody() const { return (this->_body); }
 int                                 RequestParser::getBodyLength() const { return (this->_body_length); }
