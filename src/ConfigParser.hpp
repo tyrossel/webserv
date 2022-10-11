@@ -39,7 +39,7 @@ class ConfigParsor
 
 		const std::string &getFilename() const;
 
-		ServerConfig parseServer(const JsonObject &serverObject) const;
+		Server parseServer(const JsonObject &serverObject) const;
 		Config parse() const;
 
 	private:

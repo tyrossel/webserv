@@ -5,10 +5,17 @@
 
 class Server {
     private:
-        int             _port;
-        long            _fd;
-        unsigned int    _host;
-        sockaddr_in     _addr;
+        int                                 _port;
+        long                                _fd;
+        unsigned int                        _host;
+        std::vector<std::string>            _root;  //🌳🌳🌳🌳🌳🌳🌳🌳🌳
+        std::vector<std::string>            _index; //👆👆👆👆👆👆👆👆👆👆
+        std::vector<std::string>            _name;  //🏠🏠🏠🏠🏠🏠🏠🏠🏠
+        std::map<std::string, std::string>  _location;
+        // For the map we will have in [0][0](root) the location followed by the path
+        // The next parsed elements will go in the map in a random order and will be called with find
+
+        sockaddr_in                         _addr;
 
     public:
         Server();
@@ -23,8 +30,26 @@ class Server {
         int     buildServer();
         void    close(int socket);
         int     send(long socket, std::map<long, std::string> response);
-        int     getPort();
-        long    getFd();
+
+        // GETTERS
+        long                                        getFd() const;
+        int                                         getPort() const; // Use the const one, remove the not const
+        std::vector<std::string>                    getName() const;
+        std::vector<std::string>                    getRoot() const;
+        std::vector<std::string>                    getIndex() const;
+        std::map<std::string, std::string>          getLocation() const;
+        unsigned int                                getHost() const;
+
+
+    // ADDERS
+        void                                        addPort(int port);
+        void                                        addHost(const std::string &host);
+        void                                        addRoot(const std::string &root);
+        void                                        addIndex(const std::string &index);
+        void                                        addLocation(const std::string &key, const std::string &value);
+        void                                        addHost(const unsigned int &host);
+        void                                        addName(const std::string &name);
+
 
 };
 

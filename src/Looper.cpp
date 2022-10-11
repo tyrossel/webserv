@@ -10,6 +10,8 @@ Looper::Looper(const Looper &other) : _config(other._config), _max_fd(other._max
     *this = other;
 }
 
+Looper::Looper(const Config &cfg) { _servers = cfg.getServer(); }
+
 Looper::~Looper() {}
 
 /**************************************************************************************/

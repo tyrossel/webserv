@@ -39,9 +39,9 @@ const std::string &ConfigParsor::getFilename() const { return
 	this->_filename;}
 
 
-ServerConfig ConfigParsor::parseServer(const JsonObject &serverObject) const
+Server ConfigParsor::parseServer(const JsonObject &serverObject) const
 {
-    ServerConfig serverCfg;
+    Server serverCfg;
 
 	(void)serverObject;
 
@@ -54,7 +54,7 @@ ServerConfig ConfigParsor::parseServer(const JsonObject &serverObject) const
 		std::vector<std::string> hosts = serverObject.getArray("host").stringValues();
 		std::vector<std::string>::iterator it;
 		for (it = hosts.begin(); it != hosts.end(); it++)
-			serverCfg.addHost(*it);
+			serverCfg.addName(*it);
 	}
 
 	// Indexes

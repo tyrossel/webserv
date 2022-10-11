@@ -3,14 +3,7 @@
 /**************************************************************************************/
 /*                          CONSTRUCTORS / DESTRUCTORS                                */
 /**************************************************************************************/
-Server::Server() : _port(), _fd(), _host(), _addr() {}
-
-Server::Server(int port, std::string host) : _port(port), _fd(), _addr()
-{
-    // TODO : HOST will have to be converted to u_int32 to be sent to htonl
-    (void)host;
-    _host = htonl(INADDR_ANY);
-}
+Server::Server() : _port(), _fd(), _host(), _root(), _index(), _name(), _location(), _addr() {}
 
 Server::Server(const Server &other)
 {
@@ -101,11 +94,29 @@ void Server::close(int socket)
 {
     if (socket > 0)
         ::close(socket);
-    //we might want to erase the request here too
+    // TODO: we might want to erase the request here too
 }
 
 int Server::buildServer() { return (this->setupListen()); }
 
-int Server::getPort() { return (this->_port); }
+/**************************************************************************************/
+/*                                  GETTERS                                           */
+/**************************************************************************************/
+int                                 Server::getPort() const { return (this->_port); }
+std::vector<std::string>            Server::getName() const { return (this->_name); }
+std::vector<std::string>            Server::getRoot() const { return (this->_root); }
+std::vector<std::string>            Server::getIndex() const { return (this->_index); }
+std::map<std::string, std::string>  Server::getLocation() const { return (this->_location); }
+long                                Server::getFd() const { return (this->_fd); }
+unsigned int                        Server::getHost() const { return (this->_host); }
 
-long Server::getFd() { return (this->_fd); }
+/**************************************************************************************/
+/*                                  ADDERS                                            */
+/**************************************************************************************/
+void    Server::addPort(int port) { _port = port; }
+void    Server::addName(const std::string &name) { _name.push_back(name); }
+void    Server::addRoot(const std::string &root) { _root.push_back(root); }
+void    Server::addIndex(const std::string &index) { _index.push_back(index); }
+void    Server::addLocation(const std::string &key, const std::string &value) { _location[key] = value; }
+void    Server::addHost(const unsigned int &host) { _host = host; }
+
