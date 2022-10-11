@@ -382,10 +382,14 @@ void Looper::selectErrorHandle()
     // In this case we will close every opened sockets, clear the active_servers map and the read_fd's
     // FD_ZERO to clear the active_fd_set and re set all the sockets to restart the server
     std::cout << "Select had an issue !" << std::cout;
-    for (std::map<long, Server *>::iterator it = _active_servers.begin(); it != _active_servers.end(); it++)
+    for (std::map<long, Server *>::iterator it = _active_servers.begin(); it != _active_servers.end(); it++) {
         it->second->close(it->first);
+        _response.erase(it->first);
+        _request.erase(it->first);
+    }
     _active_servers.clear();
     _ready_fd.clear();
+
     FD_ZERO(&_active_fd_set);
     for (std::vector<Server>::iterator it = _servers.begin(); it != _servers.end(); it++)
         FD_SET((*it).getFd(), &_active_fd_set);

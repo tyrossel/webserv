@@ -94,7 +94,6 @@ void Server::close(int socket)
 {
     if (socket > 0)
         ::close(socket);
-    // TODO: we might want to erase the request here too
 }
 
 int Server::buildServer() { return (this->setupListen()); }
