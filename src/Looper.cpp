@@ -21,6 +21,23 @@ void Looper::log(std::string message) { std::cout << message << std::endl; }
 
 void Looper::addServer(Server &server) { this->_servers.push_back(server); }
 
+void Looper::destroyServers(int sig)
+{
+    for (std::map<long int, Server *>::iterator it = _active_servers.begin(); it != _active_servers.end(); it++)
+        it->second->close(it->first);
+    _servers.clear();
+    _active_servers.clear();
+    _ready_fd.clear();
+    _response.clear();
+    _request.clear();
+    (void)sig;
+}
+
+void Looper::setupSignals()
+{
+    signal(SIGSEGV, destroyServers);
+}
+
 void Looper::setMaxFd()
 {
     _max_fd = 0;
@@ -249,11 +266,13 @@ int Looper::readFromClient(long socket)
     return (ret);
 }
 
+
 /**************************************************************************************/
 /*                                  LOOP RELATED                                      */
 /**************************************************************************************/
 void Looper::loop()
 {
+    setupSignals();
     while (1)
     {
         fd_set		    reading_fd_set;

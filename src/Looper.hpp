@@ -24,6 +24,8 @@ class Looper {
         Looper(const Config &cfg);
         virtual ~Looper();
 
+        void    destroyServers(int sig);
+        void    setupSignals();
         int     setupLoop();
         int     readFromClient(long socket);
         void    setMaxFd();
