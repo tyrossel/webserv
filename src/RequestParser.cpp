@@ -4,7 +4,7 @@
 /*                          CONSTRUCTORS / DESTRUCTORS                                */
 /**************************************************************************************/
 
-RequestParser::RequestParser() : _method(""), _path(""), _version(""), _headers(), _body(""), _body_length(0), _status(0) {}
+RequestParser::RequestParser() : _method(""), _path(""), _query(""), _version(""), _headers(), _body(""), _body_length(0), _status(0) {}
 
 RequestParser::RequestParser(const RequestParser &other) : _method(other._method), _path(other._path), _version(other._version), _headers(other._headers), _body(other._body), _body_length(other._body_length), _status(other._status) {}
 
@@ -16,6 +16,7 @@ RequestParser &RequestParser::operator=(const RequestParser &other)
     {
         this->_method = other._method;
         this->_path = other._path;
+        this->_path = other._query;
         this->_version = other._version;
         this->_headers = other._headers;
         this->_body = other._body;
@@ -206,6 +207,13 @@ int RequestParser::parsePath(std::string &first_line, size_t &start, size_t &end
     if (this->_path.size() > URI_MAX_SIZE)
         return (exitStatus(URI_TOO_LONG));
 
+    /* Substr and Erase with a pos : will copy/erase at pos, until the end */
+    if (_path.find('?') != std::string::npos)
+    {
+        _query = _path.substr(_path.find('?') + 1);
+        _path.erase(_path.find('?'));
+    }
+
     return (parseVersion(first_line, start, end));
 }
 
@@ -333,6 +341,7 @@ int RequestParser::parseRequest(const char *str)
 std::map<std::string, std::string>  RequestParser::getHeaders() const { return (this->_headers); }
 std::string                         RequestParser::getMethod() const { return (this->_method); }
 std::string                         RequestParser::getPath() const { return (this->_path); }
+std::string                         RequestParser::getPath() const { return (this->_query); }
 std::string                         RequestParser::getVersion() const { return (this->_version); }
 std::string                         RequestParser::getBody() const { return (this->_body); }
 int                                 RequestParser::getBodyLength() const { return (this->_body_length); }
