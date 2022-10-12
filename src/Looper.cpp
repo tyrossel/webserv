@@ -214,9 +214,11 @@ void Looper::addBodyToResponse(long socket) // TODO: add file to read from (std:
     int i = 0;
     std::stringstream out; // _request[socket].getPath().c_str()
     std::string trim_path("src/html"); // TODO: add location path later
-    trim_path.append(_request[socket].getPath().c_str());
+    if (_request[socket].getPath() == "/")
+        trim_path.append("/error/error_404.html");
+    else
+        trim_path.append(_request[socket].getPath().c_str());
     std::ifstream fs(trim_path.c_str()); // TODO: add the path here with .c_str() method
-
     if (!fs.good())
     {
         std::cerr << "Error stream file not found" << std::endl;
