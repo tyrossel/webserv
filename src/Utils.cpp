@@ -1,6 +1,18 @@
 # include "Utils.hpp"
-
+int RUNNING;
 namespace ft {
+
+    void stopLoop(int sig)
+    {
+        RUNNING = 0;
+        (void)sig;
+    }
+
+    void setupSignals()
+    {
+        RUNNING = 1;
+        signal(SIGINT, stopLoop);
+    }
 
     int stoi(std::string &str)
     {

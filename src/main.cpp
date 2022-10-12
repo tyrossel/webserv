@@ -20,7 +20,6 @@ Config getConfig(const std::string &filename)
 	return conf;
 }
 
-
 int	main(int argc, char *argv[], char *envp[])
 {
 	(void)argc;
