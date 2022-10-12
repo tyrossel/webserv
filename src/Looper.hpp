@@ -41,13 +41,13 @@ class Looper {
         // CHECKERS ========================================================
         int     checkCode(RequestParser request);
         int     checkPath(long socket);
-        int     checkExtension(RequestParser request);
-        int     secFetchCheck(long socket);
+        int     secFetchImage(long socket);
         // =================================================================
 
         // RESPONSE CRAFTING ===============================================
         int     buildResponse(long socket);
         void    addStaticBodyResponse(long socket);
+        void    addContentType(long socket);
         void    addDate(long socket);
         void    addBodyToResponse(long socket);
         int     addHTTPHeader(long socket);
