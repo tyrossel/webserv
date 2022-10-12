@@ -12,16 +12,7 @@ Looper::Looper(const Looper &other) : _config(other._config), _max_fd(other._max
 
 Looper::Looper(const Config &cfg) { _servers = cfg.getServer(); }
 
-Looper::~Looper() {}
-
-/**************************************************************************************/
-/*                                  MEMBER FUNCTIONS                                  */
-/**************************************************************************************/
-void Looper::log(std::string message) { std::cout << message << std::endl; }
-
-void Looper::addServer(Server &server) { this->_servers.push_back(server); }
-
-void Looper::destroyServers(int sig)
+Looper::~Looper()
 {
     for (std::map<long int, Server *>::iterator it = _active_servers.begin(); it != _active_servers.end(); it++)
         it->second->close(it->first);
@@ -30,13 +21,14 @@ void Looper::destroyServers(int sig)
     _ready_fd.clear();
     _response.clear();
     _request.clear();
-    (void)sig;
 }
 
-void Looper::setupSignals()
-{
-    signal(SIGSEGV, destroyServers);
-}
+/**************************************************************************************/
+/*                                  MEMBER FUNCTIONS                                  */
+/**************************************************************************************/
+void Looper::log(std::string message) { std::cout << message << std::endl; }
+
+void Looper::addServer(Server &server) { this->_servers.push_back(server); }
 
 void Looper::setMaxFd()
 {
@@ -266,14 +258,13 @@ int Looper::readFromClient(long socket)
     return (ret);
 }
 
-
 /**************************************************************************************/
 /*                                  LOOP RELATED                                      */
 /**************************************************************************************/
 void Looper::loop()
 {
-    setupSignals();
-    while (1)
+    ft::setupSignals();
+    while (RUNNING)
     {
         fd_set		    reading_fd_set;
         fd_set		    writing_fd_set;
@@ -295,7 +286,7 @@ void Looper::loop()
             ret = select(_max_fd + 1, &reading_fd_set, &writing_fd_set, NULL, &timeout);
         }
         // ret will be greater than 0 if any valid event is catched
-        if (ret > 0)
+        if (ret > 0 && RUNNING)
         {
             // Prepare and send the response to the client
             sendResponse(reading_fd_set, writing_fd_set, _active_fd_set);
@@ -305,13 +296,16 @@ void Looper::loop()
             catchCommunication(reading_fd_set, ret);
         }
         else
-            selectErrorHandle();
+        {
+            if (RUNNING)
+                selectErrorHandle();
+        }
     }
 }
 
 void Looper::sendResponse(fd_set &reading_fd_set, fd_set &writing_fd_set, fd_set &_active_fd_set)
 {
-    for (std::vector<int>::iterator it = _ready_fd.begin(); it != _ready_fd.end(); it++)
+    for (std::vector<int>::iterator it = _ready_fd.begin(); it != _ready_fd.end() && RUNNING; it++)
     {
         if (FD_ISSET(*it, &writing_fd_set))
         {
@@ -340,7 +334,7 @@ void Looper::sendResponse(fd_set &reading_fd_set, fd_set &writing_fd_set, fd_set
 
 void Looper::requestProcess(fd_set &reading_fd_set)
 {
-    for (std::map<long, Server *>::iterator it = _active_servers.begin(); it != _active_servers.end(); it++)
+    for (std::map<long, Server *>::iterator it = _active_servers.begin(); it != _active_servers.end() && RUNNING; it++)
     {
         long socket = it->first;
 
@@ -369,7 +363,7 @@ void Looper::requestProcess(fd_set &reading_fd_set)
 
 void Looper::catchCommunication(fd_set &reading_fd_set, int ret)
 {
-    for (std::vector<Server>::iterator it = _servers.begin(); ret && it != _servers.end(); it++)
+    for (std::vector<Server>::iterator it = _servers.begin(); ret && it != _servers.end() && RUNNING; it++)
     {
         long fd = (*it).getFd();
 
