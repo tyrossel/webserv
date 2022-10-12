@@ -96,7 +96,9 @@ int     Looper::checkCode(RequestParser request)
 
 int     Looper::checkPath(long socket)
 {
-    std::ifstream test(_request[socket].getPath().c_str());
+    std::string trim_path("src/html"); // TODO: add location path later
+    trim_path.append(_request[socket].getPath().c_str());
+    std::ifstream test(trim_path.c_str());
     if (!test.good())
     {
         _request[socket].setStatus(404);
@@ -104,6 +106,18 @@ int     Looper::checkPath(long socket)
     }
     else
         return HTTP_OK;
+}
+
+int Looper::secFetchImage(long socket)
+{
+    // This function just checks if the request is for an image
+    std::map<std::string, std::string> tmp = _request[socket].getHeaders();
+    if (tmp.find("Sec-Fetch-Dest") != tmp.end())
+    {
+        if (tmp.find("Sec-Fetch-Dest")->second == "image")
+            return (0);
+    }
+    return (1);
 }
 
 /**************************************************************************************/
@@ -168,7 +182,17 @@ void Looper::addStaticBodyResponse(long socket)
 {
     _response[socket].append("Server: WetServ/1.0.0\n");
     _response[socket].append("Transfer-Encoding: identity\n");
-    _response[socket].append("Content-Type: text/html\n"); // TODO: This one won't be static in the future
+}
+
+void Looper::addContentType(long socket)
+{
+    _response[socket].append("Content-Type: ");
+    std::map<std::string, std::string> tmp = _request[socket].getHeaders();
+    if (tmp.find("Sec-Fetch-Dest") != tmp.end())
+        _response[socket].append(tmp.find("Sec-Fetch-Dest")->second);
+    else
+        _response[socket].append("NONE");
+    _response[socket].append("\n");
 }
 
 void Looper::addDate(long socket)
@@ -188,8 +212,10 @@ void Looper::addDate(long socket)
 void Looper::addBodyToResponse(long socket) // TODO: add file to read from (std::string path)
 {
     int i = 0;
-    std::stringstream out;
-    std::ifstream fs("src/html/index.html"); // TODO: add the path here with .c_str() method
+    std::stringstream out; // _request[socket].getPath().c_str()
+    std::string trim_path("src/html"); // TODO: add location path later
+    trim_path.append(_request[socket].getPath().c_str());
+    std::ifstream fs(trim_path.c_str()); // TODO: add the path here with .c_str() method
 
     if (!fs.good())
     {
@@ -208,16 +234,6 @@ void Looper::addBodyToResponse(long socket) // TODO: add file to read from (std:
     _response[socket].append(text);
 }
 
-int Looper::secFetchCheck(long socket)
-{
-    std::map<std::string, std::string> tmp = _request[socket].getHeaders();
-    if (tmp.find("Sec-Fetch-Dest") != tmp.end())
-    {
-
-    }
-    return (1);
-}
-
 int Looper::buildResponse(long socket)
 {
     int             ret = 0;
@@ -225,13 +241,17 @@ int Looper::buildResponse(long socket)
     _response.insert(std::make_pair<long int, std::string>(socket, ""));
     ret = addHTTPHeader(socket);
     addStaticBodyResponse(socket);
+    addContentType(socket);
     addDate(socket);
     if (ret != HTTP_OK)
         addErrorBodyToResponse(socket);
     else
         addBodyToResponse(socket);
     std::cout << "================== RESPONSE ==================" << std::endl;
-    std::cout << GREEN << _response[socket] << RESET << std::endl;
+    if (secFetchImage(socket))
+        std::cout << GREEN << _response[socket] << RESET << std::endl;
+    else
+        std::cout << GREEN << "We sent an image" << RESET << std::endl;
     std::cout << "==============================================" << std::endl << std::endl;
     return (1);
 }
