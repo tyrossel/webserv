@@ -5,7 +5,7 @@ namespace ft {
     void stopLoop(int sig)
     {
         RUNNING = 0;
-        (void)sig;
+        std::cout << RED << "Signal " << sig << " catched. Loop is being stopped." << RESET << std::endl;
     }
 
     void setupSignals()
