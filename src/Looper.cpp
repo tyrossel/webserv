@@ -40,23 +40,6 @@ void Looper::setMaxFd()
     }
 }
 
-void	*ft_memcpy(void *dst, const void *src, size_t n)
-{
-    size_t i;
-    unsigned char *p;
-    unsigned char *q;
-
-    i = 0;
-    p = (unsigned char *) dst;
-    q = (unsigned char *) src;
-    while (i < n) {
-        p[i] = q[i];
-        i++;
-    }
-    return (dst);
-
-}
-
 int Looper::setupLoop()
 {
     long		fd;
@@ -299,7 +282,7 @@ void Looper::loop()
             timeout.tv_sec  = 3;
             timeout.tv_usec = 0;
             // Copying the content for the reading set into the active set
-            ft_memcpy(&reading_fd_set, &_active_fd_set, sizeof(_active_fd_set));
+            ft::memcpy(&reading_fd_set, &_active_fd_set, sizeof(_active_fd_set));
             FD_ZERO(&writing_fd_set);
             // here we set the already active fd's in the writing fd's
             for (std::vector<int>::iterator it = _ready_fd.begin(); it != _ready_fd.end(); it++)

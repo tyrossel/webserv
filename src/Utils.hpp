@@ -4,7 +4,7 @@
 # include "../includes/webserv.hpp"
 
 namespace ft {
-    void    destroyServers(int sig);
+    void	*memcpy(void *dst, const void *src, size_t n);
     void    setupSignals();
     int     stoi(std::string &str);
     void    trimLeft(std::string &str, char c);
