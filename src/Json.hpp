@@ -96,12 +96,14 @@ class JsonObject
 		void	parseFromString(std::string &text);
 		void	parseFromFile(const std::string &file);
 
-
 		JsonArray					getArray(const std::string &name) const;
 		JsonObject					getObject(const std::string &name) const;
 		std::string				 	getString(const std::string &name) const;
+		std::string					getStringOrDefault(const std::string &name, const std::string &val) const;
 		bool					 	getBool(const std::string &name) const;
+		bool					 	getBoolOrDefault(const std::string &name, bool val) const;
 		int						 	getInt(const std::string &name) const;
+		int							getIntOrDefault(const std::string &name, int val) const;
 };
 
 std::ostream & operator<<(std::ostream &os, const JsonObject &json);

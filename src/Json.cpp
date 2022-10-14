@@ -462,35 +462,45 @@ JsonObject	JsonObject::getObject(const std::string &name) const
 
 std::string	JsonObject::getString(const std::string &name) const
 {
-	std::map<std::string, std::string>::const_iterator it;
-	for (it = this->strings.begin(); it != this->strings.end(); it++)
-	{
-		if (name == it->first)
-			return it->second;
-	}
-	throw std::logic_error("JSON error: no string named " + name);
+	if (this->strings.find(name) == this->strings.end())
+		throw std::logic_error("JSON error: no string named " + name);
+	return this->strings.at(name);
+}
+
+std::string	JsonObject::getStringOrDefault(const std::string &name, const std::string &val) const
+{
+	if (this->strings.find(name) == this->strings.end())
+		return val;
+	return this->strings.at(name);
 }
 
 int	JsonObject::getInt(const std::string &name) const
 {
-	std::map<std::string, int>::const_iterator it;
-	for (it = this->ints.begin(); it != this->ints.end(); it++)
-	{
-		if (name == it->first)
-			return it->second;
-	}
-	throw std::logic_error("JSON error: no int named " + name);
+	if (this->ints.find(name) == this->ints.end())
+		throw std::logic_error("JSON error: no int named " + name);
+	return this->ints.at(name);
+}
+
+int	JsonObject::getIntOrDefault(const std::string &name, int val) const
+{
+	if (this->ints.find(name) == this->ints.end())
+		return val;
+	return this->ints.at(name);
 }
 
 bool	JsonObject::getBool(const std::string &name) const
 {
-	std::map<std::string, bool>::const_iterator it;
-	for (it = this->bools.begin(); it != this->bools.end(); it++)
-	{
-		if (name == it->first)
-			return it->second;
-	}
-	throw std::logic_error("JSON error: no bool named " + name);
+	if (this->bools.find(name) == this->bools.end())
+		throw std::logic_error("JSON error: no bool named " + name);
+	return this->bools.at(name);
+
+}
+
+bool	JsonObject::getBoolOrDefault(const std::string &name, bool val) const
+{
+	if (this->bools.find(name) == this->bools.end())
+		return val;
+	return this->bools.at(name);
 }
 
 //------------------------------------------------------------------------------
