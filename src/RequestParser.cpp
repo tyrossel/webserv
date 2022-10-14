@@ -47,8 +47,8 @@ std::string RequestParser::getNextLine(std::string &str, size_t &start)
 
 void RequestParser::trimWhitespaces(std::string &str)
 {
-    ft::trimLeft(str, ' ');
-    ft::trimRight(str, ' ');
+    ft::trimLeft(str, " ");
+    ft::trimRight(str, " ");
 }
 
 int RequestParser::exitStatus(int exit_status)

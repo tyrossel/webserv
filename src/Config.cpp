@@ -1,4 +1,5 @@
 #include "Config.hpp"
+#include <vector>
 
 /** HOW TO TREAT LOCATION PATH
  * The modifier in the location block is optional. Having a modifier in the location block will allow NGINX to treat a URL differently. Few most common modifiers are:
@@ -23,9 +24,35 @@ Config::~Config() {}
 const std::vector<Server>       Config::getServer() const { return (this->_server); }
 void                            Config::addServer(const Server &newServ) { this->_server.push_back(newServ); }
 int                             Config::getNbServer() const { return (this->_server.size()); }
-bool							Config::isValid() const {return this->_isValid;}
 void							Config::setValid(bool valid) {this->_isValid = valid;}
 
+bool							Config::isValid() const
+{
+	if (_server.empty())
+		return false;
+	for (std::vector<Server>::const_iterator it = _server.begin();
+			it != _server.end(); it++)
+	{
+		if (it->getPort() < 0 || it->getPort() > 65536)
+			return false;
+
+		std::vector<std::string> names = it->getName();
+		if (names.empty())
+			return false;
+		// for (std::vector<std::string>::const_iterator it(names.begin());
+		// it != names.end(); it++)
+		// {
+			// if (!ft::is_url(*it))
+			// 	return false;
+		// }
+		if (it->getRoot().empty())
+			return false;
+
+		// TODO TYR: Check locations
+
+	}
+	return true;
+}
 /**************************************************************************************/
 /*                                NON MEMBER FUNCTIONS                                */
 /**************************************************************************************/

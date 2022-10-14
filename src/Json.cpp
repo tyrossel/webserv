@@ -1,20 +1,143 @@
 #include "Json.hpp"
+#include "Utils.hpp"
 #include <cctype>
 #include <stdexcept>
 #include <sstream>
 #include <fstream>
 #include <iomanip>
 
-static inline std::string &ltrim(std::string &s)
+static JsonObject parseJsonObject(std::string &s, const std::string &key)
 {
-	return s.erase(0, s.find_first_not_of(" \t\n\v\f\r"));
+	JsonObject json;
+
+	(void)key;
+	json.parseFromString(s);
+	return json;
 }
 
-static inline std::string &rtrim(std::string &s)
+static JsonArray parseJsonArray(std::string &s, const std::string &key)
 {
-	return s.erase(s.find_last_not_of(" \t\n\v\f\r") + 1);
+	JsonArray array;
+
+	(void)key;
+	array.parseFromString(s);
+	return array;
 }
 
+static int parseJsonInt(std::string &s, const std::string &key)
+{
+	size_t i(0);
+	std::string str = s;
+	ft::trimLeft(s);
+	ft::trimRight(s);
+	if (str[i] == '-')
+		i++;
+	if (!std::isdigit(str[i]))
+		throw std::logic_error("JSON error parsing key '" + key + "' (no digit)");
+	while(std::isdigit(str[i]))
+		i++;
+	if (str[i] == '.')
+	{
+		if (!std::isdigit(str[i+1]))
+			throw std::logic_error("JSON error parsing key '" + key + "' (no decimal)");
+		i++;
+		while(std::isdigit(str[i]))
+			i++;
+	}
+	// TODO TYR: handle scientific power
+
+	s.assign(s, i);
+
+	int valueInt(0);
+	std::istringstream ( str ) >> valueInt;
+	return valueInt;
+}
+
+static bool parseJsonConstant(std::string &s, const std::string &key)
+{
+	if (s.substr(0, 4) == "true")
+	{
+		s.assign(s, 4);
+		return true;
+	}
+	else if (s.substr(0, 5) == "false")
+	{
+		s.assign(s, 5);
+		return false;
+	}
+	else if (s.substr(0, 4) == "null")
+	{
+		// TODO TYR: Handle NULL
+		s.assign(s, 4);
+		return false;
+	}
+	else
+		throw std::logic_error("JSON error: Unknown value type for key '" + key + "' : '" + s[0] + "'");
+}
+
+static std::string parseJsonString(std::string &s, const std::string &key)
+{
+	size_t i(0);
+	std::string str(s), content;
+	size_t last_quote = 0;
+
+	ft::trimLeft(s);
+	ft::trimRight(s);
+	if (s.size() == 0 || s[0] != '"')
+		throw std::logic_error("JSON string: error parsing key '" + key + "' (no string");
+	do {
+		last_quote = str.find_first_of('"', last_quote + 1);
+	} while (last_quote != std::string::npos && str[last_quote - 1] == '\\');
+	if (last_quote == std::string::npos)
+		throw std::logic_error("JSON string: error parsing key '" + key + "' (quote not closed");
+	if(str.at(i) == '"')
+		i++;
+	while(i < s.size() && str[i] != '"')
+	{
+		if (str[i] < 32 || str[i] > 126)
+			throw std::logic_error("JSON string: error parsing key '" + key + " (non-printable character)");
+		// TODO TYR: handle "\uABCD"
+		if (str[i] == '\\')
+		{
+			switch (str[i+1])
+			{
+				case '\"':
+				case '\\':
+				case '/':
+					content += str[i+1];
+					break;
+				case 'b':
+					content += '\b';
+					break;
+				case 'f':
+					content += '\f';
+					break;
+				case 'n':
+					content += '\n';
+					break;
+				case 'r':
+					content += '\r';
+					break;
+				case 't':
+					content += '\t';
+					break;
+				default:
+					throw std::logic_error("JSON string: error parsing key '" + key + " (unknown escaped char)");
+					break;
+
+			}
+			i += 2;
+		}
+		else
+			content += str[i++];
+	}
+	s.assign(s, i + 1);
+	return content;
+}
+
+//-------------------------------------------------------------------------------
+// JsonArray
+// ------------------------------------------------------------------------------
 JsonArray::JsonArray() : type(NONE)
 {
 
@@ -75,18 +198,21 @@ void JsonArray::clear()
 
 void JsonArray::parseFromString(std::string &s)
 {
-	s = ltrim(s);
+	ft::trimLeft(s);
 	if (s.size() == 0 || s[0] != '[')
 		throw std::logic_error("JSON array error: not an array");
 	s = s.assign(s, 1);
-	s = ltrim(s);
+	ft::trimLeft(s);
 
 	do
 	{
 		this->parseJsonValue(s, "");
-		s = ltrim(s);
+		ft::trimLeft(s);
 		if (s[0] == ',')
-			s = ltrim(s.assign(s, 1));
+		{
+			s = s.assign(s, 1);
+			ft::trimLeft(s);
+		}
 		else if (s[0] != ']')
 			throw std::logic_error("JSON array error: missing comma or closing bracket : '" + s + "'");
 	}
@@ -94,7 +220,8 @@ void JsonArray::parseFromString(std::string &s)
 
 	if (s[0] != ']')
 		throw std::logic_error("JSON array error: no closing bracket");
-	s = ltrim(s.assign(s, 1));
+	s = s.assign(s, 1);
+	ft::trimLeft(s);
 }
 
 void JsonArray::parseJsonValue(std::string &s, const std::string &key)
@@ -136,74 +263,7 @@ void JsonArray::parseJsonValue(std::string &s, const std::string &key)
 		}
 }
 
-std::ostream & operator<<(std::ostream &os, const JsonArray &json)
-{
-	bool print_comma = false;
 
-	os << "[";
-	if (json.type == JsonArray::INT)
-	{
-		std::vector<int>::const_iterator it;
-		for (it = json.ints.begin(); it != json.ints.end(); it++)
-		{
-			if (!print_comma)
-				print_comma = true;
-			else
-				os << ", ";
-			os << *it;
-		}
-	}
-	else if (json.type == JsonArray::BOOL)
-	{
-		std::vector<bool>::const_iterator it;
-		for (it = json.bools.begin(); it != json.bools.end(); it++)
-		{
-			if (!print_comma)
-				print_comma = true;
-			else
-				os << ", ";
-			os << *it;
-		}
-	}
-	else if (json.type == JsonArray::STRING)
-	{
-		std::vector<std::string>::const_iterator it;
-		for (it = json.strings.begin(); it != json.strings.end(); it++)
-		{
-			if (!print_comma)
-				print_comma = true;
-			else
-				os << ", ";
-			os << "\"" << *it << "\"";
-		}
-	}
-	else if (json.type == JsonArray::ARRAY)
-	{
-		std::vector<JsonArray>::const_iterator it;
-		for (it = json.arrays.begin(); it != json.arrays.end(); it++)
-		{
-			if (!print_comma)
-				print_comma = true;
-			else
-				os << ", ";
-			os << *it;
-		}
-	}
-	else if (json.type == JsonArray::OBJECT)
-	{
-		std::vector<JsonObject>::const_iterator it;
-		for (it = json.objects.begin(); it != json.objects.end(); it++)
-		{
-			if (!print_comma)
-				print_comma = true;
-			else
-				os << ", ";
-			os << *it;
-		}
-	}
-	os << "]";
-	return os;
-}
 //-------------------------------------------------------------------------------
 // JsonObject
 // ------------------------------------------------------------------------------
@@ -273,7 +333,7 @@ std::string	JsonObject::parseJsonKey(std::string &s)
 	size_t end_of_key;
 	std::string key("");
 
-	s = ltrim(s);
+	ft::trimLeft(s);
 	if(s[0] != '"')
 		throw std::logic_error("Key doesnt start with quote:");
 	end_of_key = s.find_first_of('"', 1);
@@ -281,12 +341,14 @@ std::string	JsonObject::parseJsonKey(std::string &s)
 		throw std::logic_error("No end of key");
 	key = s.substr(1, end_of_key - 1);
 	s = s.substr(end_of_key + 1);
-	s = ltrim(s);
+	ft::trimLeft(s);
 	if (s[0] != ':')
 		throw std::logic_error("JSON error: no colon after key '" + key + "'");
-	s = ltrim(s.assign(s, 1));
+	s = s.assign(s, 1);
+	ft::trimLeft(s);
 	return key;
 }
+
 
 void JsonObject::parseJsonValue(std::string &s, const std::string &key)
 {
@@ -315,133 +377,6 @@ void JsonObject::parseJsonValue(std::string &s, const std::string &key)
 			bool b = parseJsonConstant(s, key);
 			this->bools[key] = b;
 		}
-}
-
-JsonObject parseJsonObject(std::string &s, const std::string &key)
-{
-	JsonObject json;
-
-	(void)key;
-	json.parseFromString(s);
-	return json;
-}
-
-JsonArray parseJsonArray(std::string &s, const std::string &key)
-{
-	JsonArray array;
-
-	(void)key;
-	array.parseFromString(s);
-	return array;
-}
-
-int parseJsonInt(std::string &s, const std::string &key)
-{
-	size_t i(0);
-	std::string str = s;
-	str = ltrim(rtrim(str));
-	if (str[i] == '-')
-		i++;
-	if (!std::isdigit(str[i]))
-		throw std::logic_error("JSON error parsing key '" + key + "' (no digit)");
-	while(std::isdigit(str[i]))
-		i++;
-	if (str[i] == '.')
-	{
-		if (!std::isdigit(str[i+1]))
-			throw std::logic_error("JSON error parsing key '" + key + "' (no decimal)");
-		i++;
-		while(std::isdigit(str[i]))
-			i++;
-	}
-	// TODO TYR: handle scientific power
-
-	s.assign(s, i);
-
-	int valueInt(0);
-	std::istringstream ( str ) >> valueInt;
-	return valueInt;
-}
-
-bool parseJsonConstant(std::string &s, const std::string &key)
-{
-	if (s.substr(0, 4) == "true")
-	{
-		s.assign(s, 4);
-		return true;
-	}
-	else if (s.substr(0, 5) == "false")
-	{
-		s.assign(s, 5);
-		return false;
-	}
-	else if (s.substr(0, 4) == "null")
-	{
-		// TODO TYR: Handle NULL
-		s.assign(s, 4);
-		return false;
-	}
-	else
-		throw std::logic_error("JSON error: Unknown value type for key '" + key + "' : '" + s[0] + "'");
-}
-
-std::string parseJsonString(std::string &s, const std::string &key)
-{
-	size_t i(0);
-	std::string str(s), content;
-	size_t last_quote = 0;
-
-	str = ltrim(rtrim(str));
-	if (s.size() == 0 || s[0] != '"')
-		throw std::logic_error("JSON string: error parsing key '" + key + "' (no string");
-	do {
-		last_quote = str.find_first_of('"', last_quote + 1);
-	} while (last_quote != std::string::npos && str[last_quote - 1] == '\\');
-	if (last_quote == std::string::npos)
-		throw std::logic_error("JSON string: error parsing key '" + key + "' (quote not closed");
-	if(str.at(i) == '"')
-		i++;
-	while(i < s.size() && str[i] != '"')
-	{
-		if (str[i] < 32 || str[i] > 126)
-			throw std::logic_error("JSON string: error parsing key '" + key + " (non-printable character)");
-		// TODO TYR: handle "\uABCD"
-		if (str[i] == '\\')
-		{
-			switch (str[i+1])
-			{
-				case '\"':
-				case '\\':
-				case '/':
-					content += str[i+1];
-					break;
-				case 'b':
-					content += '\b';
-					break;
-				case 'f':
-					content += '\f';
-					break;
-				case 'n':
-					content += '\n';
-					break;
-				case 'r':
-					content += '\r';
-					break;
-				case 't':
-					content += '\t';
-					break;
-				default:
-					throw std::logic_error("JSON string: error parsing key '" + key + " (unknown escaped char)");
-					break;
-
-			}
-			i += 2;
-		}
-		else
-			content += str[i++];
-	}
-	s.assign(s, i + 1);
-	return content;
 }
 
 void	JsonObject::parseFromFile(const std::string &file)
@@ -475,7 +410,8 @@ void	JsonObject::parseFromString(std::string &s)
 
 	if (s.size() == 0)
 		throw std::logic_error("JSON error : empty string");
-	s = ltrim(rtrim(s));
+	ft::trimLeft(s);
+	ft::trimRight(s);
 	if (s.size() == 0 || s[0] != '{')
 		throw std::logic_error("JSON error: not an JSON object");
 	s = s.substr(1);
@@ -485,9 +421,12 @@ void	JsonObject::parseFromString(std::string &s)
 	{
 		key = parseJsonKey(s);
 		parseJsonValue(s, key);
-		s = ltrim(s);
+		ft::trimLeft(s);
 		if (s[0] == ',')
-			s = ltrim(s.assign(s, 1));
+		{
+			s = s.assign(s, 1);
+			ft::trimLeft(s);
+		}
 		else if (s[0] != '}')
 			throw std::logic_error("JSON objet error: missing comma or closing bracket after key " + key);
 	}
@@ -495,7 +434,8 @@ void	JsonObject::parseFromString(std::string &s)
 
 	if (s[0] != '}')
 		throw std::logic_error("JSON object error: no closing bracket");
-	s = ltrim(s.assign(s, 1));
+	s = s.assign(s, 1);
+	ft::trimLeft(s);
 }
 
 JsonArray	JsonObject::getArray(const std::string &name) const
@@ -551,6 +491,79 @@ bool	JsonObject::getBool(const std::string &name) const
 			return it->second;
 	}
 	throw std::logic_error("JSON error: no bool named " + name);
+}
+
+//------------------------------------------------------------------------------
+// Operators <<
+//------------------------------------------------------------------------------
+
+std::ostream & operator<<(std::ostream &os, const JsonArray &json)
+{
+	bool print_comma = false;
+
+	os << "[";
+	if (json.type == JsonArray::INT)
+	{
+		std::vector<int>::const_iterator it;
+		for (it = json.ints.begin(); it != json.ints.end(); it++)
+		{
+			if (!print_comma)
+				print_comma = true;
+			else
+				os << ", ";
+			os << *it;
+		}
+	}
+	else if (json.type == JsonArray::BOOL)
+	{
+		std::vector<bool>::const_iterator it;
+		for (it = json.bools.begin(); it != json.bools.end(); it++)
+		{
+			if (!print_comma)
+				print_comma = true;
+			else
+				os << ", ";
+			os << *it;
+		}
+	}
+	else if (json.type == JsonArray::STRING)
+	{
+		std::vector<std::string>::const_iterator it;
+		for (it = json.strings.begin(); it != json.strings.end(); it++)
+		{
+			if (!print_comma)
+				print_comma = true;
+			else
+				os << ", ";
+			os << "\"" << *it << "\"";
+		}
+	}
+	else if (json.type == JsonArray::ARRAY)
+	{
+		std::vector<JsonArray>::const_iterator it;
+		for (it = json.arrays.begin(); it != json.arrays.end(); it++)
+		{
+			if (!print_comma)
+				print_comma = true;
+			else
+				os << ", ";
+			os << *it;
+		}
+	}
+	else if (json.type == JsonArray::OBJECT)
+	{
+		std::vector<JsonObject>::const_iterator it;
+		for (it = json.objects.begin(); it != json.objects.end(); it++)
+		{
+			if (!print_comma)
+				print_comma = true;
+			else
+				os << ", ";
+			os << *it;
+		}
+	}
+	os << "]";
+	return os;
 }
 
 std::ostream & operator<<(std::ostream &os, const JsonObject &json)

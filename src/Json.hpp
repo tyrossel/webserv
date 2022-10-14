@@ -5,13 +5,6 @@
 class JsonObject;
 class JsonArray;
 
-// TODO: DO NOT EXPOSE THOSE
-int			parseJsonInt(std::string &s, const std::string &key);
-std::string	parseJsonString(std::string &s, const std::string &key);
-JsonObject	parseJsonObject(std::string &s, const std::string &key);
-JsonArray	parseJsonArray(std::string &s, const std::string &key);
-bool		parseJsonConstant(std::string &s, const std::string &key);
-
 class JsonArray
 {
 	public:

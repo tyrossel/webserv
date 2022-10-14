@@ -44,16 +44,16 @@ namespace ft {
             throw std::exception();
     }
 
-    void trimLeft(std::string &str, char c)
+    void trimLeft(std::string &str, const std::string & chars)
     {
-        size_t startpos = str.find_first_not_of(c);
+        size_t startpos = str.find_first_not_of(chars);
         if (startpos != std::string::npos)
             str.erase(0, startpos);
     }
 
-    void trimRight(std::string &str, char c)
+    void trimRight(std::string &str, const std::string & chars)
     {
-        size_t lastpos = str.find_last_not_of(c);
+        size_t lastpos = str.find_last_not_of(chars);
         if (lastpos == std::string::npos)
             return;
         str.erase(lastpos + 1, str.length());
