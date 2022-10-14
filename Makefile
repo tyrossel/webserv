@@ -25,7 +25,8 @@ SRCS		= main.cpp \
 			  RequestParser.cpp \
 			  Utils.cpp \
 			  ConfigParser.cpp \
-			  Json.cpp
+			  Json.cpp \
+			  CommonGatewayInterface.cpp
 
 all: $(TARGET)
 
