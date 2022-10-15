@@ -6,7 +6,7 @@
 /*   By: trossel <trossel@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 16:47:18 by trossel           #+#    #+#             */
-/*   Updated: 2022/10/09 17:20:48 by trossel          ###   ########.fr       */
+/*   Updated: 2022/10/15 17:27:32 by trossel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,35 +47,30 @@ Server ConfigParsor::parseServer(const JsonObject &serverObject) const
 
     serverCfg.addPort(serverObject.getInt("port"));
 
+	serverCfg.addAddress(serverObject.getString("address"));
+
     serverCfg.addRoot(serverObject.getString("root"));
 
-	// Hosts
-	{
-		std::vector<std::string> hosts = serverObject.getArray("host").stringValues();
-		std::vector<std::string>::iterator it;
-		for (it = hosts.begin(); it != hosts.end(); it++)
-			serverCfg.addName(*it);
-	}
+	std::vector<std::string> hosts = serverObject.getArray("server_name").stringValues();
+	for(std::vector<std::string>::iterator it = hosts.begin();
+		it != hosts.end(); it++)
+		serverCfg.addName(*it);
 
 	// Indexes
-	{
-		std::vector<std::string> indexes = serverObject.getArray("index").stringValues();
-		std::vector<std::string>::iterator it;
-		for (it = indexes.begin(); it != indexes.end(); it++)
-			serverCfg.addIndex(*it);
-	}
+	std::vector<std::string> indexes = serverObject.getArray("index").stringValues();
+	for (std::vector<std::string>::iterator it = indexes.begin();
+		it != indexes.end(); it++)
+		serverCfg.addIndex(*it);
 
 	// Locations
+	std::vector<JsonObject> locations = serverObject.getArray("location").ObjectValues();
+	for(std::vector<JsonObject>::iterator it = locations.begin();
+		it != locations.end(); it++)
 	{
-		std::vector<JsonObject> locations = serverObject.getArray("locations").ObjectValues();
-		std::vector<JsonObject>::iterator it;
-		for (it = locations.begin(); it != locations.end(); it++)
-		{
-			// TODO: handle CGI config
-			std::string location_path = it->getString("location_path");
-			std::string root = it->getString("root");
-			serverCfg.addLocation(location_path, root);
-		}
+		// TODO: handle CGI config
+		std::string location_path = it->getString("location_path");
+		std::string root = it->getString("root");
+		serverCfg.addLocation(location_path, root);
 	}
 
 	return serverCfg;

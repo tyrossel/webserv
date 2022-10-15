@@ -102,6 +102,7 @@ int Server::buildServer() { return (this->setupListen()); }
 /*                                  GETTERS                                           */
 /**************************************************************************************/
 int                                 Server::getPort() const { return (this->_port); }
+std::string							Server::getAddress() const { return (this->_address); }
 std::vector<std::string>            Server::getName() const { return (this->_name); }
 std::vector<std::string>            Server::getRoot() const { return (this->_root); }
 std::vector<std::string>            Server::getIndex() const { return (this->_index); }
@@ -113,9 +114,9 @@ unsigned int                        Server::getHost() const { return (this->_hos
 /*                                  ADDERS                                            */
 /**************************************************************************************/
 void    Server::addPort(int port) { _port = port; }
+void	Server::addAddress(const std::string &address) { _address = address; }
 void    Server::addName(const std::string &name) { _name.push_back(name); }
 void    Server::addRoot(const std::string &root) { _root.push_back(root); }
 void    Server::addIndex(const std::string &index) { _index.push_back(index); }
 void    Server::addLocation(const std::string &key, const std::string &value) { _location[key] = value; }
 void    Server::addHost(const unsigned int &host) { _host = host; }
-

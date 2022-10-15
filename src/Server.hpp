@@ -5,7 +5,8 @@
 
 class Server {
     private:
-        int                                 _port;
+        int                                 _port; // where the server is listening
+		std::string							_address; // IP address where the server is listening
         long                                _fd;
         unsigned int                        _host;
         std::vector<std::string>            _root;  //🌳🌳🌳🌳🌳🌳🌳🌳🌳
@@ -33,6 +34,7 @@ class Server {
 
         // GETTERS
         long                                        getFd() const;
+		std::string									getAddress() const;
         int                                         getPort() const; // Use the const one, remove the not const
         std::vector<std::string>                    getName() const;
         std::vector<std::string>                    getRoot() const;
@@ -43,6 +45,7 @@ class Server {
 
     // ADDERS
         void                                        addPort(int port);
+		void										addAddress(const std::string &address);
         void                                        addHost(const std::string &host);
         void                                        addRoot(const std::string &root);
         void                                        addIndex(const std::string &index);
