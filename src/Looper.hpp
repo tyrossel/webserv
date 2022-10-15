@@ -2,8 +2,7 @@
 #define LOOPER_HPP
 
 #include "Config.hpp"
-#include "Server.hpp"
-#include "RequestParser.hpp"
+#include "CommonGatewayInterface.hpp"
 
 class Looper {
     private:
