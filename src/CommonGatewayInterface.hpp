@@ -10,10 +10,10 @@ class CGI {
         std::map<std::string, std::string>  _env;
         std::map<std::string, std::string>  _headers;
         std::string                         _body;
-
+        std::string                         _cwd;
+        std::string                         _cgi_path;
 
     public:
-        CGI();
         CGI(std::map<std::string, std::string> headers, std::string body);
         ~CGI();
         CGI(const CGI &rhs);

@@ -135,3 +135,8 @@ void    Server::addLocation(const std::string &key, const Location &location)
 	_location[key] = location;
 }
 void    Server::addHost(const unsigned int &host) { _host = host; }
+
+void	Server::addCGIExtension(const std::string &ext) {_cgiExtensions.push_back(ext);}
+void    Server::addIndex(const std::string &index) { _index.push_back(index); }
+void    Server::addLocation(const std::string &key, const std::string &value) { _location[key] = value; }
+void    Server::addHost(std::string &host) { _host = ft::stoi(host); }

@@ -253,6 +253,11 @@ int Looper::buildDeleteResponse(long socket)
     else
         std::cout << GREEN << "We sent an image" << RESET << std::endl;
     std::cout << "==============================================" << std::endl << std::endl;
+
+    // TODO : Remove that
+    CGI testcgi(_request[socket].getHeaders(), _request[socket].getBody());
+    testcgi.setCGIEnvironment(&_request[socket], _active_servers[socket]);
+
     return (1);
 }
 

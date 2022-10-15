@@ -4,9 +4,9 @@
 /*                          CONSTRUCTORS / DESTRUCTORS                                */
 /**************************************************************************************/
 
-CGI::CGI(std::map<std::string, std::string> headers, std::string body) : _env(), _headers(headers), _body(body) {}
+CGI::CGI(std::map<std::string, std::string> headers, std::string body) : _env(), _headers(headers), _body(body), _cwd(""), _cgi_path("") {}
 
-CGI::CGI(const CGI &rhs) : _env(rhs._env), _headers(rhs._headers), _body(rhs._body) {}
+CGI::CGI(const CGI &rhs) : _env(rhs._env), _headers(rhs._headers), _body(rhs._body), _cwd(""), _cgi_path("") {}
 
 CGI::~CGI() {}
 
@@ -17,6 +17,8 @@ CGI &CGI::operator=(const CGI &rhs)
         this->_env = rhs._env;
         this->_headers = rhs._headers;
         this->_body = rhs._body;
+        this->_cwd = rhs._cwd;
+        this->_cgi_path = rhs._cgi_path;
     }
     return (*this);
 }
@@ -27,6 +29,13 @@ CGI &CGI::operator=(const CGI &rhs)
 
 void CGI::setCGIEnvironment(const RequestParser *request, const Server *server)
 {
+    char *tmp = getcwd(NULL, 0);
+    if (!tmp)
+        return ;
+    _cwd = tmp;
+    free(tmp);
+    _cgi_path = _cwd + "/cgi-bin/php-cgi";
+
     if (_headers.find("Auth-Scheme") != _headers.end())
         _env["AUTH_TYPE"] = _headers["Authorization"];
 
@@ -38,17 +47,14 @@ void CGI::setCGIEnvironment(const RequestParser *request, const Server *server)
     _env["PATH_INFO"] = request->getPath();
     _env["PATH_TRANSLATED"] = request->getPath();
     _env["QUERY_STRING"] = request->getQuery();
-
-    _env["REMOTE_ADDR"] = server->getHost();
+    _env["REMOTE_ADDR"] = server->getAddress();
     _env["REMOTE_IDENT"] = _headers["Authorization"];
 
     //  if request required authentication using the "Basic" mechanism (AUTH_TYPE= "Basic") : value of the REMOTE_USER meta-variable is set to the user-ID supplied
     //  In all other cases the value of this meta-variable is undefined.
     _env["REMOTE_USER"] = _headers["Authorization"];
-
     _env["REQUEST_METHOD"] = request->getMethod();
-
-    //_env["SCRIPT_NAME"] = request->getPath();
+    _env["SCRIPT_NAME"] = _cgi_path;
 
     std::string host = _headers.find("Host")->second;
     _env["SERVER_NAME"] = host.substr(0, host.find(':'));
