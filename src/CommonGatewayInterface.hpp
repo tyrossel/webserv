@@ -12,6 +12,7 @@ class CGI {
         std::string                         _body;
         std::string                         _cwd;
         std::string                         _cgi_path;
+        char**                              _cgi_env;
 
     public:
         CGI(std::map<std::string, std::string> headers, std::string body);

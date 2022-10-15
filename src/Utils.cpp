@@ -87,4 +87,34 @@ namespace ft {
             count++;
         }
     }
+
+    size_t	strlen(const char *str)
+    {
+        size_t	count;
+
+        count = 0;
+        while (str[count] != '\0')
+            count++;
+        return (count);
+    }
+
+    char	*strdup(const char *s1)
+    {
+        int		size_src;
+        int		c;
+        char	*ret;
+
+        size_src = ft::strlen(s1);
+        ret = (char *)malloc(sizeof(char) * (size_src + 1));
+        if (ret == NULL)
+            return (NULL);
+        c = 0;
+        while (s1[c])
+        {
+            ret[c] = s1[c];
+            c++;
+        }
+        ret[c] = '\0';
+        return (ret);
+    }
 }

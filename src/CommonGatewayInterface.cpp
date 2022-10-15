@@ -4,9 +4,9 @@
 /*                          CONSTRUCTORS / DESTRUCTORS                                */
 /**************************************************************************************/
 
-CGI::CGI(std::map<std::string, std::string> headers, std::string body) : _env(), _headers(headers), _body(body), _cwd(""), _cgi_path("") {}
+CGI::CGI(std::map<std::string, std::string> headers, std::string body) : _env(), _headers(headers), _body(body), _cwd(""), _cgi_path(""), _cgi_env() {}
 
-CGI::CGI(const CGI &rhs) : _env(rhs._env), _headers(rhs._headers), _body(rhs._body), _cwd(""), _cgi_path("") {}
+CGI::CGI(const CGI &rhs) : _env(rhs._env), _headers(rhs._headers), _body(rhs._body), _cwd(""), _cgi_path(""), _cgi_env() {}
 
 CGI::~CGI() {}
 
@@ -19,6 +19,7 @@ CGI &CGI::operator=(const CGI &rhs)
         this->_body = rhs._body;
         this->_cwd = rhs._cwd;
         this->_cgi_path = rhs._cgi_path;
+        this->_cgi_env = rhs._cgi_env;
     }
     return (*this);
 }
@@ -62,7 +63,22 @@ void CGI::setCGIEnvironment(const RequestParser *request, const Server *server)
     _env["SERVER_PROTOCOL"] = "HTTP/" + request->getVersion();
     _env["SERVER_SOFTWARE"] = "WetServ/1.0";
 
-    // TODO : Had to transform env to char** array malloced
+    // TODO : Check if RequestHeaders have to be put in env
+
+    if (!(_cgi_env = (char **)malloc(sizeof(char *) * (_env.size() + 1))))
+        return ;
+
+    int i = 0;
+    for (std::map<std::string, std::string>::iterator it = _env.begin(); it != _env.end(); it++)
+    {
+        std::string tmp = it->first + "=" + it->second;
+
+        // TODO : FREE IF CRASH
+        if (!(_cgi_env[i] = ft::strdup(tmp.c_str())))
+            return ;
+        i++;
+    }
+    _cgi_env[i] = NULL;
 }
 
 /**************************************************************************************/
