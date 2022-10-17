@@ -98,23 +98,35 @@ namespace ft {
         return (count);
     }
 
-    char	*strdup(const char *s1)
+    char	*strdup(const char *str)
     {
         int		size_src;
         int		c;
         char	*ret;
 
-        size_src = ft::strlen(s1);
+        size_src = ft::strlen(str);
         ret = (char *)malloc(sizeof(char) * (size_src + 1));
         if (ret == NULL)
             return (NULL);
         c = 0;
-        while (s1[c])
+        while (str[c])
         {
-            ret[c] = s1[c];
+            ret[c] = str[c];
             c++;
         }
         ret[c] = '\0';
         return (ret);
+    }
+
+    void	free_array(char **array)
+    {
+        int	i;
+
+        i = 0;
+        if (!array)
+            return ;
+        while (array[i])
+            free(array[i++]);
+        free(array);
     }
 }

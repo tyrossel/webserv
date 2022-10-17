@@ -14,7 +14,8 @@ namespace ft {
     void    skipWhitespaces(std::string &line, size_t &index);
     void	bzero(void *s, size_t n);
     size_t	strlen(const char *str);
-    char	*strdup(const char *s1);
+    char	*strdup(const char *str);
+    void	free_array(char **array);
 }
 
 #endif //WEBSERV_UTILS_HPP
