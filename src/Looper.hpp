@@ -15,7 +15,6 @@ class Looper {
         std::map<long int, std::string>     _response;
         std::map<long int, RequestParser>   _request;
 
-
         fd_set                              _active_fd_set;
 
     public:
@@ -42,10 +41,15 @@ class Looper {
         int     checkCode(RequestParser request);
         int     checkPath(long socket);
         int     secFetchImage(long socket);
+        int     requestMethod(long socket);
         // =================================================================
 
         // RESPONSE CRAFTING ===============================================
         int     buildResponse(long socket);
+        int     buildGetResponse(long socket);
+        int     buildPostResponse(long socket);
+        int     buildDeleteResponse(long socket);
+
         void    addStaticBodyResponse(long socket);
         void    addContentType(long socket);
         void    addDate(long socket);
