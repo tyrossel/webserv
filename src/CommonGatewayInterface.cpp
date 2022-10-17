@@ -8,7 +8,11 @@ CGI::CGI(std::map<std::string, std::string> headers, std::string body) : _env(),
 
 CGI::CGI(const CGI &rhs) : _env(rhs._env), _headers(rhs._headers), _body(rhs._body), _cwd(""), _cgi_path(""), _cgi_env() {}
 
-CGI::~CGI() {}
+CGI::~CGI()
+{
+    if (_cgi_env)
+        ft::free_array(_cgi_env);
+}
 
 CGI &CGI::operator=(const CGI &rhs)
 {
