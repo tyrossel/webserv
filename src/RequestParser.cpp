@@ -303,7 +303,7 @@ int RequestParser::parseRequest(const char *str)
 {
     if (!str)
     {
-        std::cerr << "Wrong buffer send by recv" << std::endl;
+        std::cerr << "Wrong buffer sent by recv" << std::endl;
         return (-1);
     }
 
@@ -360,7 +360,7 @@ std::ostream &operator<<(std::ostream &out, const RequestParser &rhs)
     for (std::map<std::string, std::string>::iterator it = headers.begin(); it != headers.end(); it++)
         out << it->first << ": " << it->second << "\r\n";
 
-    out << "\r\n" << rhs.getBody();
+    out << "\r\n" << rhs.getBody() << std::endl;
 
     return out;
 }

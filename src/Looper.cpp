@@ -103,6 +103,19 @@ int Looper::secFetchImage(long socket)
     return (1);
 }
 
+int Looper::requestMethod(long socket)
+{
+    std::string method = _request[socket].getMethod();
+    if (method == "GET")
+        return GET;
+    else if (method == "POST")
+        return POST;
+    else if (method == "DELETE")
+        return DELETE;
+    else
+        return 0;
+}
+
 /**************************************************************************************/
 /*                                  RESPONSE CRAFTING                                 */
 /**************************************************************************************/
@@ -201,7 +214,7 @@ void Looper::addBodyToResponse(long socket) // TODO: add file to read from (std:
         trim_path.append("/error/error_404.html");
     else
         trim_path.append(_request[socket].getPath().c_str());
-    std::ifstream fs(trim_path.c_str()); // TODO: add the path here with .c_str() method
+    std::ifstream fs(trim_path.c_str());
     if (!fs.good())
     {
         std::cerr << "Error stream file not found" << std::endl;
@@ -219,7 +232,7 @@ void Looper::addBodyToResponse(long socket) // TODO: add file to read from (std:
     _response[socket].append(text);
 }
 
-int Looper::buildResponse(long socket)
+int Looper::buildDeleteResponse(long socket)
 {
     int             ret = 0;
 
@@ -238,6 +251,68 @@ int Looper::buildResponse(long socket)
     else
         std::cout << GREEN << "We sent an image" << RESET << std::endl;
     std::cout << "==============================================" << std::endl << std::endl;
+    return (1);
+}
+
+int Looper::buildPostResponse(long socket)
+{
+    int             ret = 0;
+
+    _response.insert(std::make_pair<long int, std::string>(socket, ""));
+    ret = addHTTPHeader(socket);
+    addStaticBodyResponse(socket);
+    addContentType(socket);
+    addDate(socket);
+    if (ret != HTTP_OK)
+        addErrorBodyToResponse(socket);
+    else
+        addBodyToResponse(socket);
+    std::cout << "================== RESPONSE ==================" << std::endl;
+    if (secFetchImage(socket))
+        std::cout << GREEN << _response[socket] << RESET << std::endl;
+    else
+        std::cout << GREEN << "We sent an image" << RESET << std::endl;
+    std::cout << "==============================================" << std::endl << std::endl;
+    return (1);
+}
+
+int Looper::buildGetResponse(long socket)
+{
+    int             ret = 0;
+
+    _response.insert(std::make_pair<long int, std::string>(socket, ""));
+    ret = addHTTPHeader(socket);
+    addStaticBodyResponse(socket);
+    addContentType(socket);
+    addDate(socket);
+    if (ret != HTTP_OK)
+        addErrorBodyToResponse(socket);
+    else
+        addBodyToResponse(socket);
+    std::cout << "================== RESPONSE ==================" << std::endl;
+    if (secFetchImage(socket))
+        std::cout << GREEN << _response[socket] << RESET << std::endl;
+    else
+        std::cout << GREEN << "We sent an image" << RESET << std::endl;
+    std::cout << "==============================================" << std::endl << std::endl;
+    return (1);
+}
+
+int Looper::buildResponse(long socket)
+{
+    switch (requestMethod(socket)){
+        case GET:
+            buildGetResponse(socket);
+            break;
+        case POST:
+            buildPostResponse(socket);
+            break;
+        case DELETE:
+            buildDeleteResponse(socket);
+            break;
+        default:
+            std::cout << RED << _request[socket].getMethod() << " is not a method that the server threats." << RESET << std::endl;
+    }
     return (1);
 }
 
