@@ -19,7 +19,8 @@ namespace ft {
 
     size_t	    strlen(const char *str);
     char	    *strdup(const char *str);
-    void	free_array(char **array);
+    void	    freeArray(char **array);
+    char        **mapToArray(std::map<std::string, std::string> map);
 }
 
 #endif //WEBSERV_UTILS_HPP

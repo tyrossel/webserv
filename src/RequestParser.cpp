@@ -70,10 +70,7 @@ int RequestParser::isValidEncoding(std::string &to_check)
 
 int RequestParser::checkMethod(std::string &method)
 {
-    // Still Connect, Options, Trace and Patch
-
-    if (method == "GET" || method == "HEAD"
-        || method == "POST" || method == "PUT"
+    if (method == "GET" || method == "POST"
         || method == "DELETE")
         return 0;
     return (exitStatus(NOT_IMPLEMENTED));
@@ -213,6 +210,9 @@ int RequestParser::parsePath(std::string &first_line, size_t &start, size_t &end
         _query = _path.substr(_path.find('?') + 1);
         _path.erase(_path.find('?'));
     }
+
+    if (_path[0] != '/')
+        return (exitStatus(BAD_REQUEST));
 
     return (parseVersion(first_line, start, end));
 }
