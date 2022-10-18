@@ -58,8 +58,6 @@ class Looper {
         int     writeResponseHeader(long socket);
         void    addErrorBodyToResponse(long socket);
         // =================================================================
-
-
 };
 
 #endif // LOOPER_HPP

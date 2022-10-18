@@ -234,6 +234,8 @@ void Looper::addBodyToResponse(long socket) // TODO: add file to read from (std:
 
 int Looper::buildDeleteResponse(long socket)
 {
+    // TODO : DO THE DELTE
+
     int             ret = 0;
 
     _response.insert(std::make_pair<long int, std::string>(socket, ""));
@@ -256,6 +258,7 @@ int Looper::buildDeleteResponse(long socket)
 
 int Looper::buildPostResponse(long socket)
 {
+    // TODO : DO THE POST
     int             ret = 0;
 
     _response.insert(std::make_pair<long int, std::string>(socket, ""));
@@ -300,7 +303,8 @@ int Looper::buildGetResponse(long socket)
 
 int Looper::buildResponse(long socket)
 {
-    switch (requestMethod(socket)){
+    // TODO : Map with func pointers later
+    switch (requestMethod(socket)) {
         case GET:
             buildGetResponse(socket);
             break;
