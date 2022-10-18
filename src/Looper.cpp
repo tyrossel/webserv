@@ -254,12 +254,6 @@ int Looper::buildDeleteResponse(long socket)
         std::cout << GREEN << "We sent an image" << RESET << std::endl;
     std::cout << "==============================================" << std::endl << std::endl;
 
-    int status;
-    CGI testcgi(_request[socket].getHeaders(), _request[socket].getBody());
-
-    status = testcgi.executeCgi(&_request[socket], _active_servers[socket]);
-    std::cout << BLUE << "Status = " << status << std::endl;
-
     return (1);
 }
 
@@ -268,22 +262,30 @@ int Looper::buildPostResponse(long socket)
     // TODO : DO THE POST
     int             ret = 0;
 
-    _response.insert(std::make_pair<long int, std::string>(socket, ""));
-    ret = addHTTPHeader(socket);
-    addStaticBodyResponse(socket);
-    addContentType(socket);
-    addDate(socket);
-    if (ret != HTTP_OK)
-        addErrorBodyToResponse(socket);
-    else
-        addBodyToResponse(socket);
+//    _response.insert(std::make_pair<long int, std::string>(socket, ""));
+//    ret = addHTTPHeader(socket);
+//    addStaticBodyResponse(socket);
+//    addContentType(socket);
+//    addDate(socket);
+//    if (ret != HTTP_OK)
+//        addErrorBodyToResponse(socket);
+//    else
+//        addBodyToResponse(socket);
+
     std::cout << "================== RESPONSE ==================" << std::endl;
-    if (secFetchImage(socket))
-        std::cout << GREEN << _response[socket] << RESET << std::endl;
-    else
-        std::cout << GREEN << "We sent an image" << RESET << std::endl;
+
+    CGI testcgi(_request[socket].getHeaders(), _request[socket].getBody());
+
+    ret = testcgi.executeCgi(&_request[socket], _active_servers[socket]);
+    std::cout << RED << "Status = " << ret << RESET << std::endl;
+
+//    if (secFetchImage(socket))
+//        std::cout << GREEN << _response[socket] << RESET << std::endl;
+//    else
+//        std::cout << GREEN << "We sent an image" << RESET << std::endl;
     std::cout << "==============================================" << std::endl << std::endl;
-    return (1);
+
+    return (ret);
 }
 
 int Looper::buildGetResponse(long socket)
@@ -295,17 +297,25 @@ int Looper::buildGetResponse(long socket)
     addStaticBodyResponse(socket);
     addContentType(socket);
     addDate(socket);
-    if (ret != HTTP_OK)
-        addErrorBodyToResponse(socket);
-    else
-        addBodyToResponse(socket);
+//    if (ret != HTTP_OK)
+//        addErrorBodyToResponse(socket);
+//    else
+//        addBodyToResponse(socket);
+    CGI testcgi(_request[socket].getHeaders(), _request[socket].getBody());
+
+    ret = testcgi.executeCgi(&_request[socket], _active_servers[socket]);
+    std::cout << RED << "Status = " << ret << RESET << std::endl;
+
     std::cout << "================== RESPONSE ==================" << std::endl;
     if (secFetchImage(socket))
         std::cout << GREEN << _response[socket] << RESET << std::endl;
     else
         std::cout << GREEN << "We sent an image" << RESET << std::endl;
     std::cout << "==============================================" << std::endl << std::endl;
-    return (1);
+
+    return (ret);
+
+    //return (1);
 }
 
 int Looper::buildResponse(long socket)
