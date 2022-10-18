@@ -94,6 +94,7 @@ namespace ft {
         str.erase(str.size() - 1);
     }
 
+
     /**************************************************************************************/
     /*                                     SIGNALS                                        */
     /**************************************************************************************/
@@ -145,7 +146,7 @@ namespace ft {
         return (ret);
     }
 
-    void	free_array(char **array)
+    void	freeArray(char **array)
     {
         int	i;
 
@@ -156,4 +157,27 @@ namespace ft {
             free(array[i++]);
         free(array);
     }
+
+    char        **mapToArray(std::map<std::string, std::string> map)
+    {
+        char **array = NULL;
+        int i = 0;
+
+        if (!(array = (char **)malloc(sizeof(char *) * (map.size() + 1))))
+            return NULL;
+
+        for (std::map<std::string, std::string>::iterator it = map.begin(); it != map.end(); it++)
+        {
+            std::string tmp = it->first + "=" + it->second;
+
+            if (!(array[i] = ft::strdup(tmp.c_str())))
+                return NULL;
+            i++;
+        }
+        array[i] = NULL;
+
+        return (array);
+    }
 }
+
+

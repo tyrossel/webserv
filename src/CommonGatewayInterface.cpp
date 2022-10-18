@@ -4,14 +4,14 @@
 /*                          CONSTRUCTORS / DESTRUCTORS                                */
 /**************************************************************************************/
 
-CGI::CGI(std::map<std::string, std::string> headers, std::string body) : _env(), _headers(headers), _body(body), _cwd(""), _cgi_path(""), _cgi_env() {}
+CGI::CGI(std::map<std::string, std::string> headers, std::string req_body) : _env(), _headers(headers), _req_body(req_body), _cwd(""), _cgi_path(""), _file_path(""), _ret_body(""), _fd_file(0), _cgi_env() {}
 
-CGI::CGI(const CGI &rhs) : _env(rhs._env), _headers(rhs._headers), _body(rhs._body), _cwd(""), _cgi_path(""), _cgi_env() {}
+CGI::CGI(const CGI &rhs) : _env(rhs._env), _headers(rhs._headers), _req_body(rhs._req_body), _cwd(""), _cgi_path(""), _file_path(""), _ret_body(""), _fd_file(0), _cgi_env() {}
 
 CGI::~CGI()
 {
     if (_cgi_env)
-        ft::free_array(_cgi_env);
+        ft::freeArray(_cgi_env);
 }
 
 CGI &CGI::operator=(const CGI &rhs)
@@ -20,9 +20,12 @@ CGI &CGI::operator=(const CGI &rhs)
     {
         this->_env = rhs._env;
         this->_headers = rhs._headers;
-        this->_body = rhs._body;
+        this->_req_body = rhs._req_body;
         this->_cwd = rhs._cwd;
         this->_cgi_path = rhs._cgi_path;
+        this->_file_path = rhs._file_path;
+        this->_ret_body = rhs._ret_body;
+        this->_fd_file = rhs._fd_file;
         this->_cgi_env = rhs._cgi_env;
     }
     return (*this);
@@ -32,14 +35,96 @@ CGI &CGI::operator=(const CGI &rhs)
 /*                                  MEMBER FUNCTIONS                                  */
 /**************************************************************************************/
 
-void CGI::setCGIEnvironment(const RequestParser *request, const Server *server)
+std::string CGI::readContent()
+{
+    std::string ret;
+    char buf[4096 + 1];
+    int readed;
+
+    lseek(_fd_file, 0, SEEK_SET);
+    while ((readed = read(_fd_file, buf, 4096)) != 0)
+    {
+        if (readed == -1)
+            return "";
+        buf[readed] = '\0';
+        ret.insert(ret.length(), buf, readed);
+    }
+    return ret;
+}
+
+int CGI::executeCgi(const RequestParser *request, const Server *server)
+{
+    char *argv[3];
+
+    // TODO : tracking error, free if necessary
+    if (setCGIEnvironment(request, server))
+        return INTERNAL_SERVER_ERROR;
+    if (!(argv[0] = ft::strdup(_cgi_path.c_str())))
+        return INTERNAL_SERVER_ERROR;
+    if (!(argv[1] = ft::strdup(_file_path.c_str())))
+        return INTERNAL_SERVER_ERROR;
+    argv[2] = NULL;
+
+    int status, pip[2];
+
+    if (pipe(pip) != 0)
+        return INTERNAL_SERVER_ERROR;
+
+    std::string _file_directory = _file_path.substr(0, _file_path.find_last_of('/'));
+    _fd_file = open("webserv_cgi", O_CREAT | O_RDWR | O_TRUNC, 00755);
+
+    pid_t pid = fork();
+
+    /* CHILD PART */
+    if (pid == 0)
+    {
+        if (chdir(_file_directory.c_str()) == -1)
+            return INTERNAL_SERVER_ERROR;
+        close(pip[1]);
+        if (dup2(pip[0], 0) == -1)
+            return INTERNAL_SERVER_ERROR;
+        if (dup2(_fd_file, 1) == -1)
+            return INTERNAL_SERVER_ERROR;
+        close(pip[0]);
+        execve(argv[0], argv, _cgi_env);
+        exit(1);
+    }
+    /* PARENT PART */
+    else if (pid > 0) 
+    {
+        close(pip[0]);
+        if (_req_body.length() && write(pip[1], _req_body.c_str(), _req_body.length()) <= 0)
+            return INTERNAL_SERVER_ERROR;
+        close(pip[1]);
+
+        if (waitpid(pid, &status, 0) == -1)
+            return INTERNAL_SERVER_ERROR;
+        if (WIFEXITED(status) && WEXITSTATUS(status))
+            return BAD_GATEWAY;
+    }
+    else
+    {
+        return 502;
+    }
+
+    _ret_body = readContent();
+    std::cout << BLUE << _ret_body << RESET << std::endl;
+
+    return 200;
+}
+
+
+int CGI::setCGIEnvironment(const RequestParser *request, const Server *server)
 {
     char *tmp = getcwd(NULL, 0);
     if (!tmp)
-        return ;
+        return 1;
     _cwd = tmp;
     free(tmp);
+
     _cgi_path = _cwd + "/cgi-bin/php-cgi";
+    _file_path = server->getRoot() + request->getPath();
+    _cgi_env = NULL;
 
     if (_headers.find("Auth-Scheme") != _headers.end())
         _env["AUTH_TYPE"] = _headers["Authorization"];
@@ -69,24 +154,10 @@ void CGI::setCGIEnvironment(const RequestParser *request, const Server *server)
 
     // TODO : Check if RequestHeaders have to be put in env
 
-    if (!(_cgi_env = (char **)malloc(sizeof(char *) * (_env.size() + 1))))
-        return ;
+    if (!(_cgi_env = ft::mapToArray(_env)))
+        return 1;
 
-    int i = 0;
-    for (std::map<std::string, std::string>::iterator it = _env.begin(); it != _env.end(); it++)
-    {
-        std::string tmp = it->first + "=" + it->second;
-
-        // TODO : FREE IF CRASH
-        if (!(_cgi_env[i] = ft::strdup(tmp.c_str())))
-            return ;
-        i++;
-    }
-    _cgi_env[i] = NULL;
-
-    i = 0;
-    while (_cgi_env[i])
-        printf("%s\n", _cgi_env[i++]);
+    return 0;
 }
 
 /**************************************************************************************/
@@ -95,4 +166,9 @@ void CGI::setCGIEnvironment(const RequestParser *request, const Server *server)
 
 std::map<std::string, std::string>  CGI::getEnv() { return (this->_env); }
 std::map<std::string, std::string>  CGI::getHeaders() { return (this->_headers); }
-std::string                         CGI::getBody() { return (this->_body); }
+std::string                         CGI::getReqBody() { return (this->_req_body); }
+std::string                         CGI::getCwd() { return (this->_cwd); }
+std::string                         CGI::getCGIPath() { return (this->_cgi_path); }
+std::string                         CGI::getFilePath() { return (this->_file_path); }
+std::string                         CGI::getRetBody() { return (this->_ret_body); }
+int                                 CGI::getFdFile() { return (this->_fd_file); }
