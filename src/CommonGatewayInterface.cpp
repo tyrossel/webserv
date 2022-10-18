@@ -63,7 +63,7 @@ void CGI::setCGIEnvironment(const RequestParser *request, const Server *server)
 
     std::string host = _headers.find("Host")->second;
     _env["SERVER_NAME"] = host.substr(0, host.find(':'));
-    _env["SERVER_PORT"] = server->getPort();
+    _env["SERVER_PORT"] = ft::to_string(server->getPort());
     _env["SERVER_PROTOCOL"] = "HTTP/" + request->getVersion();
     _env["SERVER_SOFTWARE"] = "WetServ/1.0";
 
@@ -83,6 +83,10 @@ void CGI::setCGIEnvironment(const RequestParser *request, const Server *server)
         i++;
     }
     _cgi_env[i] = NULL;
+
+    i = 0;
+    while (_cgi_env[i])
+        printf("%s\n", _cgi_env[i++]);
 }
 
 /**************************************************************************************/
