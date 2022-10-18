@@ -2,6 +2,10 @@
 int RUNNING;
 namespace ft {
 
+    /**************************************************************************************/
+    /*                                     MEMORY                                         */
+    /**************************************************************************************/
+
     void	*memcpy(void *dst, const void *src, size_t n)
     {
         size_t i;
@@ -18,17 +22,21 @@ namespace ft {
         return (dst);
     }
 
-    void stopLoop(int sig)
+    void	bzero(void *s, size_t n)
     {
-        RUNNING = 0;
-        std::cout << RED << "Signal " << sig << " catched. Loop is being stopped." << RESET << std::endl;
+        size_t	count;
+
+        count = 0;
+        while (count < n)
+        {
+            ((char *)s)[count] = '\0';
+            count++;
+        }
     }
 
-    void setupSignals()
-    {
-        RUNNING = 1;
-        signal(SIGINT, stopLoop);
-    }
+    /**************************************************************************************/
+    /*                                     STRING                                         */
+    /**************************************************************************************/
 
     int stoi(std::string &str)
     {
@@ -42,6 +50,22 @@ namespace ft {
             return (i);
         else
             throw std::exception();
+    }
+
+    std::string to_string(int number)
+    {
+        std::stringstream ss;
+
+        ss << number;
+        std::string str = ss.str();
+
+        return (str);
+    }
+
+    void skipWhitespaces(std::string &line, size_t &index)
+    {
+        while (line[index] == ' ' && line[index])
+            index += 1;
     }
 
     void trimLeft(std::string &str, const std::string & chars)
@@ -70,23 +94,26 @@ namespace ft {
         str.erase(str.size() - 1);
     }
 
-    void skipWhitespaces(std::string &line, size_t &index)
+    /**************************************************************************************/
+    /*                                     SIGNALS                                        */
+    /**************************************************************************************/
+
+    void stopLoop(int sig)
     {
-        while (line[index] == ' ' && line[index])
-            index += 1;
+        RUNNING = 0;
+        std::cout << RED << "Signal " << sig << " catched. Loop is being stopped." << RESET << std::endl;
     }
 
-    void	bzero(void *s, size_t n)
+    void setupSignals()
     {
-        size_t	count;
-
-        count = 0;
-        while (count < n)
-        {
-            ((char *)s)[count] = '\0';
-            count++;
-        }
+        RUNNING = 1;
+        signal(SIGINT, stopLoop);
     }
+
+
+    /**************************************************************************************/
+    /*                                     ARRAY                                          */
+    /**************************************************************************************/
 
     size_t	strlen(const char *str)
     {
