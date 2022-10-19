@@ -54,12 +54,11 @@ std::string CGI::readContent()
 
 int CGI::executeCgi(const RequestParser *request, const Server *server)
 {
-    char        *argv[3];
-
     if (setCGIEnvironment(request, server))
         return INTERNAL_SERVER_ERROR;
 
     std::string _path = _cwd + _file_path;
+    char        *argv[3];
 
     if (!(argv[0] = ft::strdup(_cgi_path.c_str())))
         return INTERNAL_SERVER_ERROR;
@@ -70,14 +69,14 @@ int CGI::executeCgi(const RequestParser *request, const Server *server)
     int pip[2];
 
     if (pipe(pip) != 0)
-        return 500;
+        return INTERNAL_SERVER_ERROR;
 
 
 //    std::ifstream fs(_path.c_str());
 //    if (!fs.good())
 //    {
 //        std::cerr << "Error stream file not found" << std::endl;
-//        return 500;
+//        return INTERNAL_SERVER_ERROR;
 //    }
 //    std::string text;
 //    text.assign(std::istreambuf_iterator<char>(fs),
@@ -92,46 +91,38 @@ int CGI::executeCgi(const RequestParser *request, const Server *server)
 
     pid_t pid = fork();
 
-    if (pid == 0) {
+    if (pid == 0)
+    {
         if (chdir(_path.substr(0, _path.find_last_of('/')).c_str()) == -1)
-            return 500;
+            return INTERNAL_SERVER_ERROR;
         close(pip[1]);
         if (dup2(pip[0], 0) == -1)
-            return 500;
+            return INTERNAL_SERVER_ERROR;
         if (dup2(_fd_file, 1) == -1)
-            return 500;
+            return INTERNAL_SERVER_ERROR;
         close(pip[0]);
         execve(argv[0], argv, _cgi_env);
         exit(1);
     }
-    else if (pid > 0) {
+    else if (pid > 0)
+    {
         close(pip[0]);
         if (_req_body.length() && write(pip[1], _req_body.c_str(), _req_body.length()) <= 0)
-            return 500;
+            return INTERNAL_SERVER_ERROR;
         close(pip[1]);
 
         int status;
 
         if (waitpid(pid, &status, 0) == -1)
-            return 500;
+            return INTERNAL_SERVER_ERROR;
         if (WIFEXITED(status) && WEXITSTATUS(status))
-            return 502;
+            return BAD_GATEWAY;
     }
-    else {
-        return 502;
-    }
+    else
+        return BAD_GATEWAY;
 
-    char buf[4096 + 1];
-    int ret;
+    _ret_body = readContent();
 
-    lseek(_fd_file, 0, SEEK_SET);
-    while ((ret = read(_fd_file, buf, 4096)) != 0) {
-        if (ret == -1) {
-            return 500;
-        }
-        buf[ret] = '\0';
-        _ret_body.insert(_ret_body.length(), buf, ret);
-    }
     // Here we remove HTTP EOF because the CGI we use cannot accept HTML in it.
     // If we send HTML inside the CGI he will TOUPPER the html which is.. shitty ?
     removeEOFHTTP(_ret_body);
