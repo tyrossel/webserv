@@ -36,6 +36,8 @@ class CGI {
         std::string readContent();
         int setCGIEnvironment(const RequestParser *request, const Server *server);
         int executeCgi(const RequestParser *request, const Server *server);
+
+        void removeEOFHTTP(std::string &str);
 };
 
 #endif //WEBSERV_COMMONGATEWAYINTERFACE_HPP

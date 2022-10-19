@@ -228,7 +228,7 @@ void Looper::addBodyToResponse(long socket) // TODO: add file to read from (std:
     i = text.size();
     out << i;
     _response[socket].append(out.str());
-    _response[socket].append("\n\n");
+    _response[socket].append("\r\n\r\n");
     _response[socket].append(text);
 }
 
@@ -297,17 +297,18 @@ int Looper::buildGetResponse(long socket)
     addStaticBodyResponse(socket);
     addDate(socket);
 
-    if (0) // CGI or not ?
+    if (1) // CGI or not ?
     {
         CGI cgi(_request[socket].getHeaders(), _request[socket].getBody());
-
         ret = cgi.executeCgi(&_request[socket], _active_servers[socket]);
-        if (ret == HTTP_OK)
-            _response[socket].append(cgi.getRetBody());
-
+        _response[socket].append(cgi.getRetBody());
+        if (ret != HTTP_OK)
+            addErrorBodyToResponse(socket);
+        else
+            addBodyToResponse(socket);
         std::cout << "================== CGI ==================" << std::endl;
         if (secFetchImage(socket))
-            std::cout << cgi.getRetBody() << std::endl;
+            std::cout << _response[socket] << std::endl;
         else
             std::cout << GREEN << "We sent an image" << RESET << std::endl;
         std::cout << "==============================================" << std::endl << std::endl;
