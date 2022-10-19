@@ -158,8 +158,9 @@ int CGI::setCGIEnvironment(const RequestParser *request, const Server *server)
         _env["CONTENT_TYPE"] = _headers["Content-Type"];
 
     _env["GATEWAY_INTERFACE"] = "CGI/1.1";
-    _env["PATH_INFO"] = _file_path;
-    _env["PATH_TRANSLATED"] = _file_path;
+    _env["PATH_INFO"] = _cwd + _file_path;
+    _env["REQUEST_URI"] = _cwd + _file_path;
+    _env["PATH_TRANSLATED"] = _cwd + _file_path;
     std::cout << _env["PATH_INFO"] << std::endl;
 
     _env["QUERY_STRING"] = request->getQuery();
