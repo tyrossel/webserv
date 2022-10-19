@@ -84,6 +84,7 @@ enum RequestType
  *                              LIBRARIES                                          *
  ***********************************************************************************/
 #include <map>
+#include <algorithm>
 #include <stack>
 #include <vector>
 #include <iostream>
