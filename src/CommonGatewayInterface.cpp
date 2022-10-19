@@ -54,81 +54,84 @@ std::string CGI::readContent()
 
 int CGI::executeCgi(const RequestParser *request, const Server *server)
 {
-    pid_t		pid;
-    int			saveStdin;
-    int			saveStdout;
-    std::string	_ret_body;
-//    char        *argv[3];
+    char        *argv[3];
 
     if (setCGIEnvironment(request, server))
         return INTERNAL_SERVER_ERROR;
-//    if (!(argv[0] = ft::strdup(_cgi_path.c_str())))
-//        return INTERNAL_SERVER_ERROR;
-//    if (!(argv[1] = ft::strdup(_file_path.c_str())))
-//        return INTERNAL_SERVER_ERROR;
-//    argv[2] = NULL;
 
-    // SAVING STDIN AND STDOUT IN ORDER TO TURN THEM BACK TO NORMAL LATER
-    saveStdin = dup(STDIN_FILENO);
-    saveStdout = dup(STDOUT_FILENO);
+    std::string _path = _cwd + _file_path;
 
-    FILE	*fIn = tmpfile();
-    FILE	*fOut = tmpfile();
-    long	fdIn = fileno(fIn);
-    long	fdOut = fileno(fOut);
-    int		ret = 1;
-
-    write(fdIn, _req_body.c_str(), _req_body.size());
-    lseek(fdIn, 0, SEEK_SET);
-
-    pid = fork();
-
-    if (pid == -1)
-    {
-        std::cerr << RED << "Fork crashed." << RESET << std::endl;
+    if (!(argv[0] = ft::strdup(_cgi_path.c_str())))
         return INTERNAL_SERVER_ERROR;
-    }
-    else if (!pid)
+    if (!(argv[1] = ft::strdup(_path.c_str())))
+        return INTERNAL_SERVER_ERROR;
+    argv[2] = NULL;
+
+    int pip[2];
+
+    if (pipe(pip) != 0)
+        return 500;
+
+
+    std::ifstream fs(_path.c_str());
+    if (!fs.good())
     {
-        char * const * nll = NULL;
-
-        dup2(fdIn, STDIN_FILENO);
-        dup2(fdOut, STDOUT_FILENO);
-        execve(_cgi_path.c_str(), nll, _cgi_env);
-        std::cerr << RED << "Execve crashed." << RESET << std::endl;
-        write(STDOUT_FILENO, "Status: 500\r\n\r\n", 15);
+        std::cerr << "Error stream file not found" << std::endl;
+        return 500;
     }
-    else
-    {
-        char	buffer[4096] = {0};
+    std::string text;
+    text.assign(std::istreambuf_iterator<char>(fs),
+                std::istreambuf_iterator<char>());
+    fs.close();
+    _req_body = text;
 
-        waitpid(-1, NULL, 0);
-        lseek(fdOut, 0, SEEK_SET);
 
-        ret = 1;
-        while (ret > 0)
-        {
-            memset(buffer, 0, 4096);
-            ret = read(fdOut, buffer, 4096 - 1);
-            _ret_body += buffer;
+    _fd_file = ::open("cgi_tmp", O_CREAT | O_RDWR | O_TRUNC, 00755);
+    if (_fd_file == -1)
+        std::cout << "OPEN FAILED" << std::endl;
+
+    pid_t pid = fork();
+
+    if (pid == 0) {
+        if (chdir(_path.substr(0, _path.find_last_of('/')).c_str()) == -1)
+            return 500;
+        close(pip[1]);
+        if (dup2(pip[0], 0) == -1)
+            return 500;
+        if (dup2(_fd_file, 1) == -1)
+            return 500;
+        close(pip[0]);
+        execve(argv[0], argv, _cgi_env);
+        exit(1);
+    }
+    else if (pid > 0) {
+        close(pip[0]);
+        if (_req_body.length() && write(pip[1], _req_body.c_str(), _req_body.length()) <= 0)
+            return 500;
+        close(pip[1]);
+
+        int status;
+
+        if (waitpid(pid, &status, 0) == -1)
+            return 500;
+        if (WIFEXITED(status) && WEXITSTATUS(status))
+            return 502;
+    }
+    else {
+        return 502;
+    }
+
+    char buf[4096 + 1];
+    int ret;
+
+    lseek(_fd_file, 0, SEEK_SET);
+    while ((ret = read(_fd_file, buf, 4096)) != 0) {
+        if (ret == -1) {
+            return 500;
         }
+        buf[ret] = '\0';
+        _ret_body.insert(_ret_body.length(), buf, ret);
     }
-
-    dup2(saveStdin, STDIN_FILENO);
-    dup2(saveStdout, STDOUT_FILENO);
-    fclose(fIn);
-    fclose(fOut);
-    close(fdIn);
-    close(fdOut);
-    close(saveStdin);
-    close(saveStdout);
-
-    if (!pid)
-        exit(0);
-
-    std::cout << "---------------------CGI-------------------------" << std::endl;
-    std::cout << BLUE << _ret_body << RESET << std::endl;
-    std::cout << "-------------------------------------------------" << std::endl;
 
     return (HTTP_OK);
 }
@@ -145,7 +148,6 @@ int CGI::setCGIEnvironment(const RequestParser *request, const Server *server)
 
     _cgi_path = _cwd + "/cgi-bin/ubuntu_cgi_tester";
     _file_path = server->getRoot() + request->getPath();
-    std::cout << "File path : " << _file_path << std::endl;
     _cgi_env = NULL;
 
     if (_headers.find("Auth-Scheme") != _headers.end())
@@ -154,14 +156,11 @@ int CGI::setCGIEnvironment(const RequestParser *request, const Server *server)
     if (_headers.find("Content-Length") != _headers.end())
         _env["CONTENT_LENGTH"] = _headers["Content-Length"];
 
-    if (_headers.find("Content-Type") != _headers.end())
-        _env["CONTENT_TYPE"] = _headers["Content-Type"];
-
+    _env["CONTENT_TYPE"] = _headers["Content-Type"];
     _env["GATEWAY_INTERFACE"] = "CGI/1.1";
     _env["PATH_INFO"] = _cwd + _file_path;
     _env["REQUEST_URI"] = _cwd + _file_path;
     _env["PATH_TRANSLATED"] = _cwd + _file_path;
-    std::cout << _env["PATH_INFO"] << std::endl;
 
     _env["QUERY_STRING"] = request->getQuery();
 //    _env["REMOTE_ADDR"] = server->getAddress();
@@ -169,7 +168,6 @@ int CGI::setCGIEnvironment(const RequestParser *request, const Server *server)
 
     //  if request required authentication using the "Basic" mechanism (AUTH_TYPE= "Basic") : value of the REMOTE_USER meta-variable is set to the user-ID supplied
     //  In all other cases the value of this meta-variable is undefined.
-//    _env["REMOTE_USER"] = _headers["Authorization"];
     _env["REQUEST_METHOD"] = request->getMethod();
     _env["SCRIPT_NAME"] = _cgi_path;
 
