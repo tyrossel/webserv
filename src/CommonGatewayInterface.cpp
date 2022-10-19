@@ -73,17 +73,17 @@ int CGI::executeCgi(const RequestParser *request, const Server *server)
         return 500;
 
 
-    std::ifstream fs(_path.c_str());
-    if (!fs.good())
-    {
-        std::cerr << "Error stream file not found" << std::endl;
-        return 500;
-    }
-    std::string text;
-    text.assign(std::istreambuf_iterator<char>(fs),
-                std::istreambuf_iterator<char>());
-    fs.close();
-    _req_body = text;
+//    std::ifstream fs(_path.c_str());
+//    if (!fs.good())
+//    {
+//        std::cerr << "Error stream file not found" << std::endl;
+//        return 500;
+//    }
+//    std::string text;
+//    text.assign(std::istreambuf_iterator<char>(fs),
+//                std::istreambuf_iterator<char>());
+//    fs.close();
+//    _req_body = text;
 
 
     _fd_file = ::open("cgi_tmp", O_CREAT | O_RDWR | O_TRUNC, 00755);
@@ -132,10 +132,21 @@ int CGI::executeCgi(const RequestParser *request, const Server *server)
         buf[ret] = '\0';
         _ret_body.insert(_ret_body.length(), buf, ret);
     }
+    // Here we remove HTTP EOF because the CGI we use cannot accept HTML in it.
+    // If we send HTML inside the CGI he will TOUPPER the html which is.. shitty ?
+    removeEOFHTTP(_ret_body);
 
     return (HTTP_OK);
 }
 
+void CGI::removeEOFHTTP(std::string &str)
+{
+    for (int i = 0; i < 2; i++)
+    {
+        std::string::iterator it = str.end();
+        str.erase(--it);
+    }
+}
 
 int CGI::setCGIEnvironment(const RequestParser *request, const Server *server)
 {
