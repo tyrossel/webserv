@@ -68,6 +68,11 @@ std::ostream &operator<<(std::ostream &out, const Config &rhs)
         for (size_t j = 0; j < rhs.getServer()[i].getName().size(); j++)
             out << "\nName : " << rhs.getServer()[i].getName()[j];
 
+		out << "\n CGI binary: " << rhs.getServer()[i].getCGIBin() << std::endl;
+		out << "\nCGI extensions: ";
+        for (size_t j = 0; j < rhs.getServer()[i].getCGIExtensions().size(); j++)
+            out << rhs.getServer()[i].getCGIExtensions()[j] << " ";
+
         for (size_t j = 0; j < rhs.getServer()[i].getIndex().size(); j++)
             out << "\nIndex : " << rhs.getServer()[i].getIndex()[j];
 

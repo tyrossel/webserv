@@ -6,7 +6,7 @@
 /*   By: trossel <trossel@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 16:47:18 by trossel           #+#    #+#             */
-/*   Updated: 2022/10/19 17:00:58 by trossel          ###   ########.fr       */
+/*   Updated: 2022/10/19 21:41:24 by trossel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,14 @@ Server ConfigParsor::parseServer(const JsonObject &serverObject) const
 
 	serverCfg.setRoot(serverObject.getString("root"));
 
+	serverCfg.setCGIBin(serverObject.getString("cgi_bin"));
+
+	std::vector<std::string> cgi_ext = serverObject.getArray("cgi_extensions").stringValues();
+	for(std::vector<std::string>::iterator it = cgi_ext.begin();
+		it != cgi_ext.end(); it++)
+		serverCfg.addCGIExtension(*it);
+
+
 	std::vector<std::string> hosts = serverObject.getArray("server_name").stringValues();
 	for(std::vector<std::string>::iterator it = hosts.begin();
 		it != hosts.end(); it++)
@@ -72,7 +80,6 @@ Server ConfigParsor::parseServer(const JsonObject &serverObject) const
 		std::string root = it->getString("root");
 		serverCfg.addLocation(location_path, root);
 	}
-
 	return serverCfg;
 }
 

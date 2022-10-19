@@ -11,19 +11,29 @@ Server::Server(const Server &other)
     *this = other;
 }
 
+
 Server::~Server() {}
 
 /**************************************************************************************/
 /*                                 OPERATOR OVERLOAD                                  */
 /**************************************************************************************/
-/*Server &operator=(const Server &rhs)
+Server &Server::operator=(const Server &rhs)
 {
+	if (&rhs == this)
+		return *this;
     this->_port = rhs._port;
+	this->_address = rhs._address;
     this->_fd = rhs._fd;
     this->_host = rhs._host;
+	this->_root = rhs._root;
+	this->_index = rhs._index;
+	this->_name = rhs._name;
+	this->_cgiBin = rhs._cgiBin;
+	this->_cgiExtensions = rhs._cgiExtensions;
+	this->_location = rhs._location;
     this->_addr = rhs._addr;
     return (*this);
-}*/
+}
 
 /**************************************************************************************/
 /*                                  MEMBER FUNCTIONS                                  */
@@ -105,6 +115,8 @@ int Server::buildServer() { return (this->setupListen()); }
 int                                 Server::getPort() const { return (this->_port); }
 std::string							Server::getAddress() const { return (this->_address); }
 std::vector<std::string>            Server::getName() const { return (this->_name); }
+std::string							Server::getCGIBin() const { return (this->_cgiBin); }
+std::vector<std::string>            Server::getCGIExtensions() const { return (this->_cgiExtensions); }
 std::string				            Server::getRoot() const { return (this->_root); }
 std::vector<std::string>            Server::getIndex() const { return (this->_index); }
 std::map<std::string, std::string>  Server::getLocation() const { return (this->_location); }
@@ -123,6 +135,15 @@ void    Server::setRoot(const std::string &root)
 		throw std::logic_error("Config error: cannot contains two roots");
 	_root = root;
 }
+
+void	Server::setCGIBin(const std::string &bin)
+{
+	if (!_cgiBin.empty())
+		throw std::logic_error("Config error: cannot contains two CGI binaries");
+	_cgiBin = bin;
+}
+
+void	Server::addCGIExtension(const std::string &ext) {_cgiExtensions.push_back(ext);}
 void    Server::addIndex(const std::string &index) { _index.push_back(index); }
 void    Server::addLocation(const std::string &key, const std::string &value) { _location[key] = value; }
 void    Server::addHost(const unsigned int &host) { _host = host; }

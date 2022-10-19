@@ -12,6 +12,8 @@ class Server {
 		std::string				            _root;  //🌳🌳🌳🌳🌳🌳🌳🌳🌳
         std::vector<std::string>            _index; //👆👆👆👆👆👆👆👆👆👆
         std::vector<std::string>            _name;  //🏠🏠🏠🏠🏠🏠🏠🏠🏠
+		std::string				            _cgiBin;
+        std::vector<std::string>            _cgiExtensions; // All those files are sent to the CGI
         std::map<std::string, std::string>  _location;
         // For the map we will have in [0][0](root) the location followed by the path
         // The next parsed elements will go in the map in a random order and will be called with find
@@ -22,6 +24,7 @@ class Server {
         Server();
         Server(int port, std::string host);
         Server(const Server &other);
+		Server &operator=(const Server &rhs);
         ~Server();
 
         void    log(std::string message);
@@ -37,6 +40,8 @@ class Server {
 		std::string									getAddress() const;
         int                                         getPort() const; // Use the const one, remove the not const
         std::vector<std::string>                    getName() const;
+		std::string									getCGIBin() const;
+        std::vector<std::string>                    getCGIExtensions() const;
         std::string									getRoot() const;
         std::vector<std::string>                    getIndex() const;
         std::map<std::string, std::string>          getLocation() const;
@@ -47,6 +52,8 @@ class Server {
         void                                        addPort(int port);
 		void										addAddress(const std::string &address);
         void                                        addHost(const std::string &host);
+		void										setCGIBin(const std::string& bin);
+		void										addCGIExtension(const std::string& ext);
         void                                        setRoot(const std::string &root);
         void                                        addIndex(const std::string &index);
         void                                        addLocation(const std::string &key, const std::string &value);
