@@ -9,7 +9,7 @@ class Server {
 		std::string							_address; // IP address where the server is listening
         long                                _fd;
         unsigned int                        _host;
-        std::vector<std::string>            _root;  //🌳🌳🌳🌳🌳🌳🌳🌳🌳
+		std::string				            _root;  //🌳🌳🌳🌳🌳🌳🌳🌳🌳
         std::vector<std::string>            _index; //👆👆👆👆👆👆👆👆👆👆
         std::vector<std::string>            _name;  //🏠🏠🏠🏠🏠🏠🏠🏠🏠
         std::map<std::string, std::string>  _location;
@@ -37,7 +37,7 @@ class Server {
 		std::string									getAddress() const;
         int                                         getPort() const; // Use the const one, remove the not const
         std::vector<std::string>                    getName() const;
-        std::vector<std::string>                    getRoot() const;
+        std::string									getRoot() const;
         std::vector<std::string>                    getIndex() const;
         std::map<std::string, std::string>          getLocation() const;
         unsigned int                                getHost() const;
@@ -47,7 +47,7 @@ class Server {
         void                                        addPort(int port);
 		void										addAddress(const std::string &address);
         void                                        addHost(const std::string &host);
-        void                                        addRoot(const std::string &root);
+        void                                        setRoot(const std::string &root);
         void                                        addIndex(const std::string &index);
         void                                        addLocation(const std::string &key, const std::string &value);
         void                                        addHost(const unsigned int &host);

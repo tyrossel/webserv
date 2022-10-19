@@ -6,7 +6,7 @@
 /*   By: trossel <trossel@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 16:47:18 by trossel           #+#    #+#             */
-/*   Updated: 2022/10/15 17:27:32 by trossel          ###   ########.fr       */
+/*   Updated: 2022/10/19 17:00:58 by trossel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,7 @@ Server ConfigParsor::parseServer(const JsonObject &serverObject) const
 
 	serverCfg.addAddress(serverObject.getString("address"));
 
-    serverCfg.addRoot(serverObject.getString("root"));
+	serverCfg.setRoot(serverObject.getString("root"));
 
 	std::vector<std::string> hosts = serverObject.getArray("server_name").stringValues();
 	for(std::vector<std::string>::iterator it = hosts.begin();

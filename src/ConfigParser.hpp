@@ -6,7 +6,7 @@
 /*   By: trossel <trossel@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 16:37:06 by trossel           #+#    #+#             */
-/*   Updated: 2022/10/09 16:16:44 by trossel          ###   ########.fr       */
+/*   Updated: 2022/10/19 16:38:46 by trossel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,17 +17,6 @@
 
 class ConfigParsor
 {
-
-	// 	class FileNotFoundException : public std::exception{
-	// 	const std::string _msg;
-	// 	public:
-	// 		FileNotFoundException(const ConfigParsor &c) : _msg(c.getFilename() + " cannot be read."){}
-	// 		~FileNotFoundException() throw() {}
-	// 		virtual const char * what() const throw ()
-	// 	{
-	// 		return (_msg.c_str());
-	// 	}
-	// };
 
 	public:
 

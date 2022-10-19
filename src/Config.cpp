@@ -63,7 +63,7 @@ std::ostream &operator<<(std::ostream &out, const Config &rhs)
     for (int i = 0; i < rhs.getNbServer(); i++) {
         out << "Server number : " << i
         << "\nPort : " << rhs.getServer()[i].getPort()
-        << "\nRoot : " << rhs.getServer()[i].getRoot()[0];
+        << "\nRoot : " << rhs.getServer()[i].getRoot();
 
         for (size_t j = 0; j < rhs.getServer()[i].getName().size(); j++)
             out << "\nName : " << rhs.getServer()[i].getName()[j];
