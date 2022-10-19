@@ -58,15 +58,15 @@ int CGI::executeCgi(const RequestParser *request, const Server *server)
     int			saveStdin;
     int			saveStdout;
     std::string	_ret_body;
-    char        *argv[3];
+//    char        *argv[3];
 
     if (setCGIEnvironment(request, server))
         return INTERNAL_SERVER_ERROR;
-    if (!(argv[0] = ft::strdup(_cgi_path.c_str())))
-        return INTERNAL_SERVER_ERROR;
-    if (!(argv[1] = ft::strdup(_file_path.c_str())))
-        return INTERNAL_SERVER_ERROR;
-    argv[2] = NULL;
+//    if (!(argv[0] = ft::strdup(_cgi_path.c_str())))
+//        return INTERNAL_SERVER_ERROR;
+//    if (!(argv[1] = ft::strdup(_file_path.c_str())))
+//        return INTERNAL_SERVER_ERROR;
+//    argv[2] = NULL;
 
     // SAVING STDIN AND STDOUT IN ORDER TO TURN THEM BACK TO NORMAL LATER
     saveStdin = dup(STDIN_FILENO);
@@ -86,15 +86,15 @@ int CGI::executeCgi(const RequestParser *request, const Server *server)
     if (pid == -1)
     {
         std::cerr << RED << "Fork crashed." << RESET << std::endl;
-        return (500);
+        return INTERNAL_SERVER_ERROR;
     }
     else if (!pid)
     {
-        //char * const * nll = NULL;
+        char * const * nll = NULL;
 
         dup2(fdIn, STDIN_FILENO);
         dup2(fdOut, STDOUT_FILENO);
-        execve(_cgi_path.c_str(), argv, _cgi_env);
+        execve(_cgi_path.c_str(), nll, _cgi_env);
         std::cerr << RED << "Execve crashed." << RESET << std::endl;
         write(STDOUT_FILENO, "Status: 500\r\n\r\n", 15);
     }
@@ -126,7 +126,9 @@ int CGI::executeCgi(const RequestParser *request, const Server *server)
     if (!pid)
         exit(0);
 
+    std::cout << "---------------------CGI-------------------------" << std::endl;
     std::cout << BLUE << _ret_body << RESET << std::endl;
+    std::cout << "-------------------------------------------------" << std::endl;
 
     return (HTTP_OK);
 }
@@ -143,6 +145,7 @@ int CGI::setCGIEnvironment(const RequestParser *request, const Server *server)
 
     _cgi_path = _cwd + "/cgi-bin/ubuntu_cgi_tester";
     _file_path = server->getRoot() + request->getPath();
+    std::cout << "File path : " << _file_path << std::endl;
     _cgi_env = NULL;
 
     if (_headers.find("Auth-Scheme") != _headers.end())
@@ -151,17 +154,21 @@ int CGI::setCGIEnvironment(const RequestParser *request, const Server *server)
     if (_headers.find("Content-Length") != _headers.end())
         _env["CONTENT_LENGTH"] = _headers["Content-Length"];
 
-    _env["CONTENT_TYPE"] = _headers["Content-Type"];
+    if (_headers.find("Content-Type") != _headers.end())
+        _env["CONTENT_TYPE"] = _headers["Content-Type"];
+
     _env["GATEWAY_INTERFACE"] = "CGI/1.1";
-    _env["PATH_INFO"] = _cwd + _file_path;
-    _env["PATH_TRANSLATED"] = _cwd + _file_path;
+    _env["PATH_INFO"] = _file_path;
+    _env["PATH_TRANSLATED"] = _file_path;
+    std::cout << _env["PATH_INFO"] << std::endl;
+
     _env["QUERY_STRING"] = request->getQuery();
-    _env["REMOTE_ADDR"] = server->getAddress();
-    _env["REMOTE_IDENT"] = _headers["Authorization"];
+//    _env["REMOTE_ADDR"] = server->getAddress();
+    _env["REMOTE_HOST"] = "";
 
     //  if request required authentication using the "Basic" mechanism (AUTH_TYPE= "Basic") : value of the REMOTE_USER meta-variable is set to the user-ID supplied
     //  In all other cases the value of this meta-variable is undefined.
-    _env["REMOTE_USER"] = _headers["Authorization"];
+//    _env["REMOTE_USER"] = _headers["Authorization"];
     _env["REQUEST_METHOD"] = request->getMethod();
     _env["SCRIPT_NAME"] = _cgi_path;
 
@@ -170,12 +177,20 @@ int CGI::setCGIEnvironment(const RequestParser *request, const Server *server)
     _env["SERVER_PROTOCOL"] = "HTTP/" + request->getVersion();
     _env["SERVER_SOFTWARE"] = "WetServ/1.0";
 
-    // TODO : Check if RequestHeaders have to be put in env
+    for (std::map<std::string, std::string>::iterator it = _headers.begin(); it != _headers.end(); it++)
+    {
+        if (!it->second.empty())
+        {
+            std::string header = "HTTP_" + ft::toUpper(it->first);
+            std::replace(header.begin(), header.end(), '-', '_');
+            _env[header] = it->second;
+        }
+    }
 
     if (!(_cgi_env = ft::mapToArray(_env)))
         return 1;
 
-    int i = 0;
+//    int i = 0;
 //    while (_cgi_env[i])
 //        printf("%s\n", _cgi_env[i++]);
 

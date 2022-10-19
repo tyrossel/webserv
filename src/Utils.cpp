@@ -38,6 +38,18 @@ namespace ft {
     /*                                     STRING                                         */
     /**************************************************************************************/
 
+    std::string toLower(std::string s)
+    {
+        std::transform(s.begin(), s.end(), s.begin(), ::tolower);
+        return s;
+    }
+
+    std::string toUpper(std::string s)
+    {
+        std::transform(s.begin(), s.end(), s.begin(), ::toupper);
+        return s;
+    }
+
     int stoi(std::string &str)
     {
         int i;
