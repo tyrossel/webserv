@@ -58,19 +58,11 @@ int CGI::executeCgi(const RequestParser *request, const Server *server)
         return INTERNAL_SERVER_ERROR;
 
     std::string _path = _cwd + _file_path;
-    char        *argv[3];
-
-    if (!(argv[0] = ft::strdup(_cgi_path.c_str())))
-        return INTERNAL_SERVER_ERROR;
-    if (!(argv[1] = ft::strdup(_path.c_str())))
-        return INTERNAL_SERVER_ERROR;
-    argv[2] = NULL;
 
     int pip[2];
 
     if (pipe(pip) != 0)
         return INTERNAL_SERVER_ERROR;
-
 
 //    std::ifstream fs(_path.c_str());
 //    if (!fs.good())
@@ -93,13 +85,21 @@ int CGI::executeCgi(const RequestParser *request, const Server *server)
 
     if (pid == 0)
     {
+        char        *argv[3];
+
+        if (!(argv[0] = ft::strdup(_cgi_path.c_str())))
+            exit(42);
+        if (!(argv[1] = ft::strdup(_path.c_str())))
+            exit(42);
+        argv[2] = NULL;
+
         if (chdir(_path.substr(0, _path.find_last_of('/')).c_str()) == -1)
-            return INTERNAL_SERVER_ERROR;
+            exit(42);
         close(pip[1]);
         if (dup2(pip[0], 0) == -1)
-            return INTERNAL_SERVER_ERROR;
+            exit(42);
         if (dup2(_fd_file, 1) == -1)
-            return INTERNAL_SERVER_ERROR;
+            exit(42);
         close(pip[0]);
         execve(argv[0], argv, _cgi_env);
         exit(1);
@@ -116,7 +116,12 @@ int CGI::executeCgi(const RequestParser *request, const Server *server)
         if (waitpid(pid, &status, 0) == -1)
             return INTERNAL_SERVER_ERROR;
         if (WIFEXITED(status) && WEXITSTATUS(status))
-            return BAD_GATEWAY;
+        {
+            if (WEXITSTATUS(status) == 42)
+                return INTERNAL_SERVER_ERROR;
+            else
+                return BAD_GATEWAY;
+        }
     }
     else
         return BAD_GATEWAY;
@@ -163,16 +168,11 @@ int CGI::setCGIEnvironment(const RequestParser *request, const Server *server)
     _env["PATH_INFO"] = _cwd + _file_path;
     _env["REQUEST_URI"] = _cwd + _file_path;
     _env["PATH_TRANSLATED"] = _cwd + _file_path;
-
     _env["QUERY_STRING"] = request->getQuery();
 //    _env["REMOTE_ADDR"] = server->getAddress();
     _env["REMOTE_HOST"] = "";
-
-    //  if request required authentication using the "Basic" mechanism (AUTH_TYPE= "Basic") : value of the REMOTE_USER meta-variable is set to the user-ID supplied
-    //  In all other cases the value of this meta-variable is undefined.
     _env["REQUEST_METHOD"] = request->getMethod();
     _env["SCRIPT_NAME"] = _cgi_path;
-
     _env["SERVER_NAME"] = server->getAddress();
     _env["SERVER_PORT"] = ft::to_string(server->getPort());
     _env["SERVER_PROTOCOL"] = "HTTP/" + request->getVersion();
