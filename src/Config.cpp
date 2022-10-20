@@ -76,10 +76,11 @@ std::ostream &operator<<(std::ostream &out, const Config &rhs)
         for (size_t j = 0; j < rhs.getServer()[i].getIndex().size(); j++)
             out << "\nIndex : " << rhs.getServer()[i].getIndex()[j];
 
-        std::map<std::string, std::string> location = rhs.getServer()[i].getLocation();
-        for (std::map<std::string, std::string>::iterator it = location.begin();
+        std::map<std::string, Location> location = rhs.getServer()[i].getLocations();
+        for (std::map<std::string, Location>::iterator it = location.begin();
                 it != location.end(); it++)
-            out << "\nLocation : " << (*it).first << " || " << (*it).second;
+            out << "\nLocation : " << (*it).first << " || " << (*it).second.root_dir;
+		// TODO: Reimplement it correcty for all location fields
     }
     return (out);
 }

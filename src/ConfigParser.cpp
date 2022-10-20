@@ -6,7 +6,7 @@
 /*   By: trossel <trossel@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 16:47:18 by trossel           #+#    #+#             */
-/*   Updated: 2022/10/19 21:41:24 by trossel          ###   ########.fr       */
+/*   Updated: 2022/10/20 16:01:06 by trossel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,10 +75,23 @@ Server ConfigParsor::parseServer(const JsonObject &serverObject) const
 	for(std::vector<JsonObject>::iterator it = locations.begin();
 		it != locations.end(); it++)
 	{
-		// TODO: handle CGI config
+		Location loc;
 		std::string location_path = it->getString("location_path");
-		std::string root = it->getString("root");
-		serverCfg.addLocation(location_path, root);
+
+		loc.root_dir = it->getString("root");
+
+		loc.max_client_body_size = it->getIntOrDefault("max_client_body_size", -1);
+		// TODO: Add function for getting a default empty array (and object)
+		std::vector<std::string> disabled_requests = it->getArray("disabled_methods").stringValues();
+		for (size_t i(0); i < disabled_requests.size(); i++)
+			loc.disableRequest(disabled_requests[i]);
+
+		loc.cgi_path = it->getStringOrDefault("cgi_path", "");
+		if (!loc.cgi_path.empty())
+			loc.isCGI = true;
+		// TODO TYR : Cannot set CGI and ROOT FOLDER at the same time (in is_valid ?)
+
+		serverCfg.addLocation(location_path, loc);
 	}
 	return serverCfg;
 }

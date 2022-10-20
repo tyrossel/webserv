@@ -4,7 +4,12 @@
 /**************************************************************************************/
 /*                          CONSTRUCTORS / DESTRUCTORS                                */
 /**************************************************************************************/
-Server::Server() : _port(), _fd(), _host(), _root(), _index(), _name(), _location(), _addr() {}
+Server::Server() : _port(), _fd(), _host(), _root(), _index(), _name(), _location(), _addr()
+{
+	// Add a default Location
+	// TODO: check that it is not possible to add an empty key for a location to override it!!
+	addLocation("", Location());
+}
 
 Server::Server(const Server &other)
 {
@@ -119,7 +124,7 @@ std::string							Server::getCGIBin() const { return (this->_cgiBin); }
 std::vector<std::string>            Server::getCGIExtensions() const { return (this->_cgiExtensions); }
 std::string				            Server::getRoot() const { return (this->_root); }
 std::vector<std::string>            Server::getIndex() const { return (this->_index); }
-std::map<std::string, std::string>  Server::getLocation() const { return (this->_location); }
+const std::map<std::string, Location> &Server::getLocations() const { return (this->_location); }
 long                                Server::getFd() const { return (this->_fd); }
 unsigned int                        Server::getHost() const { return (this->_host); }
 
@@ -145,5 +150,5 @@ void	Server::setCGIBin(const std::string &bin)
 
 void	Server::addCGIExtension(const std::string &ext) {_cgiExtensions.push_back(ext);}
 void    Server::addIndex(const std::string &index) { _index.push_back(index); }
-void    Server::addLocation(const std::string &key, const std::string &value) { _location[key] = value; }
+void    Server::addLocation(const std::string &key, const Location &location) { _location[key] = location; }
 void    Server::addHost(const unsigned int &host) { _host = host; }
