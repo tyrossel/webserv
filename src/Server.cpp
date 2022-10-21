@@ -130,13 +130,6 @@ std::vector<std::string>            Server::getCGIExtensions() const { return (t
 void    Server::addPort(int port) { _port = port; }
 void	Server::addAddress(const std::string &address) { _address = address; }
 void    Server::addName(const std::string &name) { _name.push_back(name); }
-void    Server::addLocation(const std::string &key, const Location &location)
-{
-	_location[key] = location;
-}
+void    Server::addLocation(const std::string &key, const Location &location) { _location[key] = location; }
 void    Server::addHost(const unsigned int &host) { _host = host; }
 
-void	Server::addCGIExtension(const std::string &ext) {_cgiExtensions.push_back(ext);}
-void    Server::addIndex(const std::string &index) { _index.push_back(index); }
-void    Server::addLocation(const std::string &key, const std::string &value) { _location[key] = value; }
-void    Server::addHost(std::string &host) { _host = ft::stoi(host); }
