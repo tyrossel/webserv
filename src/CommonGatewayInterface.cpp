@@ -126,14 +126,12 @@ int CGI::executeCgi(const RequestParser *request, const Server *server)
         return BAD_GATEWAY;
 
     _ret_body = readContent();
-
-
-
     return (HTTP_OK);
 }
 
-void CGI::removeEOFHTTP(std::string &str)
+void CGI::removeEOFHTTP()
 {
+    std::string str = this->getRetBody();
     for (int i = 0; i < 2; i++)
     {
         std::string::iterator it = str.end();
