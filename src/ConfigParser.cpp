@@ -6,7 +6,7 @@
 /*   By: trossel <trossel@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 16:47:18 by trossel           #+#    #+#             */
-/*   Updated: 2022/10/21 13:38:41 by trossel          ###   ########.fr       */
+/*   Updated: 2022/10/21 14:16:19 by trossel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,7 @@ ConfigParsor &ConfigParsor::operator=(const ConfigParsor &rhs)
 
 const std::string &ConfigParsor::getFilename() const { return this->_filename;}
 
-Location ConfigParsor::parseLocation(const JsonObject &locObject) const
+Location ConfigParsor::parseLocation(const JsonObject &locObject, const Location &defaultLoc) const
 {
 	std::map<std::string, RequestType> requests_map;
 	requests_map["GET"] = Get;
@@ -52,10 +52,12 @@ Location ConfigParsor::parseLocation(const JsonObject &locObject) const
 
 	loc.root_dir = locObject.getStringOrDefault("root", "");
 
-	loc.max_client_body_size = locObject.getIntOrDefault("max_client_body_size", 0);
+	loc.max_client_body_size = locObject.getIntOrDefault("max_client_body_size", defaultLoc.max_client_body_size);
 
 	// CGI_extensions
 	std::vector<std::string> cgi_ext = locObject.getArrayOrEmpty("cgi_extensions").stringValues();
+	if (cgi_ext.empty())
+		cgi_ext = defaultLoc.cgi_extensions;
 	for(std::vector<std::string>::iterator it = cgi_ext.begin();
 		it != cgi_ext.end(); it++)
 	{
@@ -66,6 +68,8 @@ Location ConfigParsor::parseLocation(const JsonObject &locObject) const
 
 	// Indexes
 	std::vector<std::string> indexes = locObject.getArrayOrEmpty("index").stringValues();
+	if (indexes.empty())
+		indexes = defaultLoc.indexes;
 	for (std::vector<std::string>::iterator it = indexes.begin();
 		it != indexes.end(); it++)
 	{
@@ -81,10 +85,11 @@ Location ConfigParsor::parseLocation(const JsonObject &locObject) const
 		loc.disableRequest(type);
 	}
 
-	loc.root_dir = locObject.getStringOrDefault("root", "");
 	loc.cgi_bin = locObject.getStringOrDefault("cgi_bin", "");
 	if (!loc.cgi_bin.empty())
 		loc.isCGI = true;
+	else
+		loc.cgi_bin = defaultLoc.cgi_bin;
 
 	return loc;
 }
@@ -104,7 +109,7 @@ Server ConfigParsor::parseServer(const JsonObject &serverObject) const
 		serverCfg.addName(*it);
 
 	// Default location
-	Location defaultLocation = parseLocation(serverObject);
+	Location defaultLocation = parseLocation(serverObject, Location());
 	defaultLocation.isCGI = false;
 	serverCfg.addLocation("", defaultLocation);
 
@@ -117,7 +122,7 @@ Server ConfigParsor::parseServer(const JsonObject &serverObject) const
 		ft::trim(location_path);
 		if (location_path.empty())
 			throw std::logic_error("Location error: location_path cannot be empty");
-		serverCfg.addLocation(location_path, parseLocation(*it));
+		serverCfg.addLocation(location_path, parseLocation(*it, defaultLocation));
 	}
 	return serverCfg;
 }
