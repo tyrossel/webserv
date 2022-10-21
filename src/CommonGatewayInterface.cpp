@@ -76,7 +76,6 @@ int CGI::executeCgi(const RequestParser *request, const Server *server)
 //    fs.close();
 //    _req_body = text;
 
-
     _fd_file = ::open("cgi_tmp", O_CREAT | O_RDWR | O_TRUNC, 00755);
     if (_fd_file == -1)
         std::cout << "OPEN FAILED" << std::endl;
