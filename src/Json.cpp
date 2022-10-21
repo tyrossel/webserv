@@ -325,7 +325,6 @@ JsonObject &JsonObject::operator=(const JsonObject &rhs)
 
 JsonObject::~JsonObject()
 {
-	//TODO
 }
 
 std::string	JsonObject::parseJsonKey(std::string &s)

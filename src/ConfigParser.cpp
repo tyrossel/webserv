@@ -6,7 +6,7 @@
 /*   By: trossel <trossel@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 16:47:18 by trossel           #+#    #+#             */
-/*   Updated: 2022/10/21 12:35:23 by trossel          ###   ########.fr       */
+/*   Updated: 2022/10/21 13:38:41 by trossel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,29 @@ Location ConfigParsor::parseLocation(const JsonObject &locObject) const
 
 	Location loc;
 
+	loc.root_dir = locObject.getStringOrDefault("root", "");
+
 	loc.max_client_body_size = locObject.getIntOrDefault("max_client_body_size", 0);
+
+	// CGI_extensions
+	std::vector<std::string> cgi_ext = locObject.getArrayOrEmpty("cgi_extensions").stringValues();
+	for(std::vector<std::string>::iterator it = cgi_ext.begin();
+		it != cgi_ext.end(); it++)
+	{
+		std::string ext = *it;
+		ft::trim(ext);
+		loc.cgi_extensions.push_back(ext);
+	}
+
+	// Indexes
+	std::vector<std::string> indexes = locObject.getArrayOrEmpty("index").stringValues();
+	for (std::vector<std::string>::iterator it = indexes.begin();
+		it != indexes.end(); it++)
+	{
+		std::string index = *it;
+		ft::trim(index);
+		loc.indexes.push_back(index);
+	}
 
 	std::vector<std::string> disabled_requests = locObject.getArrayOrEmpty("disabled_methods").stringValues();
 	for (size_t i(0); i < disabled_requests.size(); i++)
@@ -60,10 +82,8 @@ Location ConfigParsor::parseLocation(const JsonObject &locObject) const
 	}
 
 	loc.root_dir = locObject.getStringOrDefault("root", "");
-	loc.cgi_bin = locObject.getStringOrDefault("cgi_path", "");
-	if (!loc.cgi_bin.empty() && !loc.root_dir.empty())
-		throw std::logic_error("Cannot have a root and a cgi_bin in a location");
-	else if (!loc.cgi_bin.empty())
+	loc.cgi_bin = locObject.getStringOrDefault("cgi_bin", "");
+	if (!loc.cgi_bin.empty())
 		loc.isCGI = true;
 
 	return loc;
@@ -77,26 +97,11 @@ Server ConfigParsor::parseServer(const JsonObject &serverObject) const
 
 	serverCfg.addAddress(serverObject.getString("address"));
 
-	serverCfg.setRoot(serverObject.getString("root"));
-
-	serverCfg.setCGIBin(serverObject.getString("cgi_bin"));
-
-	std::vector<std::string> cgi_ext = serverObject.getArray("cgi_extensions").stringValues();
-	for(std::vector<std::string>::iterator it = cgi_ext.begin();
-		it != cgi_ext.end(); it++)
-		serverCfg.addCGIExtension(*it);
-
 
 	std::vector<std::string> hosts = serverObject.getArray("server_name").stringValues();
 	for(std::vector<std::string>::iterator it = hosts.begin();
 		it != hosts.end(); it++)
 		serverCfg.addName(*it);
-
-	// Indexes
-	std::vector<std::string> indexes = serverObject.getArray("index").stringValues();
-	for (std::vector<std::string>::iterator it = indexes.begin();
-		it != indexes.end(); it++)
-		serverCfg.addIndex(*it);
 
 	// Default location
 	Location defaultLocation = parseLocation(serverObject);

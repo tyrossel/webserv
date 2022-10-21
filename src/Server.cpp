@@ -4,7 +4,7 @@
 /**************************************************************************************/
 /*                          CONSTRUCTORS / DESTRUCTORS                                */
 /**************************************************************************************/
-Server::Server() : _port(), _fd(), _host(), _root(), _index(), _name(), _location(), _addr()
+Server::Server() : _port(), _fd(), _host(), _name(), _location(), _addr()
 {
 	addLocation("", Location());
 }
@@ -28,8 +28,6 @@ Server &Server::operator=(const Server &rhs)
 	this->_address = rhs._address;
     this->_fd = rhs._fd;
     this->_host = rhs._host;
-	this->_root = rhs._root;
-	this->_index = rhs._index;
 	this->_name = rhs._name;
 	this->_location = rhs._location;
     this->_addr = rhs._addr;
@@ -116,13 +114,15 @@ int Server::buildServer() { return (this->setupListen()); }
 int                                 Server::getPort() const { return (this->_port); }
 std::string							Server::getAddress() const { return (this->_address); }
 std::vector<std::string>            Server::getName() const { return (this->_name); }
-std::string							Server::getCGIBin() const { return (this->_location.at("").cgi_bin); }
-std::vector<std::string>            Server::getCGIExtensions() const { return (this->_location.at("").cgi_extensions); }
-std::string				            Server::getRoot() const { return (this->_location.at("").root_dir); }
-std::vector<std::string>            Server::getIndex() const { return (this->_location.at("").indexes); }
-const std::map<std::string, Location> &Server::getLocations() const { return (this->_location); }
 long                                Server::getFd() const { return (this->_fd); }
 unsigned int                        Server::getHost() const { return (this->_host); }
+const std::map<std::string, Location> &Server::getLocations() const { return (this->_location); }
+
+// TODO TYR: Remove
+std::string				            Server::getRoot() const { return (this->_location.at("").root_dir); }
+std::vector<std::string>            Server::getIndex() const { return (this->_location.at("").indexes); }
+std::string							Server::getCGIBin() const { return (this->_location.at("").cgi_bin); }
+std::vector<std::string>            Server::getCGIExtensions() const { return (this->_location.at("").cgi_extensions); }
 
 /**************************************************************************************/
 /*                                  ADDERS                                            */

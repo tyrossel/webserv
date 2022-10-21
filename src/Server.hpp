@@ -45,9 +45,6 @@ class Server {
     // ADDERS
         void                                        addPort(int port);
 		void										addAddress(const std::string &address);
-        void                                        addHost(const std::string &host);
-        void                                        setRoot(const std::string &root);
-        void                                        addIndex(const std::string &index);
         void                                        addLocation(const std::string &key, const Location &location);
         void                                        addHost(const unsigned int &host);
         void                                        addName(const std::string &name);

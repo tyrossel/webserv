@@ -48,8 +48,17 @@ bool							Config::isValid() const
 		if (it->getRoot().empty())
 			return false;
 
-		// TODO TYR: Check locations
+		const std::map<std::string, Location> locations = it->getLocations();
+		for(std::map<std::string, Location>::const_iterator it = locations.begin();
+				it != locations.end(); it++)
+		{
+			const std::string &loc_path = it->first;
+			const Location &loc = it->second;
 
+			if (!loc_path.empty() && !loc.cgi_bin.empty() && !loc.root_dir.empty())
+				throw std::logic_error("Location error: Cannot have a root and a cgi_bin");
+			// TODO TYR: Check if CGI, that cgi_bin is set and executable
+		}
 	}
 	return true;
 }
@@ -62,16 +71,11 @@ std::ostream &operator<<(std::ostream &out, const Config &rhs)
     out << "Configuration Servers" << std::endl;
     for (int i = 0; i < rhs.getNbServer(); i++) {
         out << "Server number : " << i
-        << "\nPort : " << rhs.getServer()[i].getPort()
-        << "\nRoot : " << rhs.getServer()[i].getRoot();
+        << "\nPort : " << rhs.getServer()[i].getPort();
 
         for (size_t j = 0; j < rhs.getServer()[i].getName().size(); j++)
             out << "\nName : " << rhs.getServer()[i].getName()[j];
 
-		out << "\n CGI binary: " << rhs.getServer()[i].getCGIBin() << std::endl;
-		out << "\nCGI extensions: ";
-        for (size_t j = 0; j < rhs.getServer()[i].getCGIExtensions().size(); j++)
-            out << rhs.getServer()[i].getCGIExtensions()[j] << " ";
 
         for (size_t j = 0; j < rhs.getServer()[i].getIndex().size(); j++)
             out << "\nIndex : " << rhs.getServer()[i].getIndex()[j] << std::endl;

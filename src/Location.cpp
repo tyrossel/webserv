@@ -6,7 +6,7 @@
 /*   By: trossel <trossel@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/21 11:11:21 by trossel           #+#    #+#             */
-/*   Updated: 2022/10/21 12:35:23 by trossel          ###   ########.fr       */
+/*   Updated: 2022/10/21 13:52:23 by trossel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,22 +34,36 @@ bool Location::isRequestAllowed(RequestType type) const
 std::ostream &operator<<(std::ostream &os, const Location &loc)
 {
 	std::string method_names[] = {"GET", "POST", "DELETE", "PUT", "HEAD", "PATCH"};
-	os << "\tmax_client_body_size : " << loc.max_client_body_size << std::endl;
+	os << "\tmax_client_body_size : " << loc.max_client_body_size;
+
 	if (loc.isCGI)
-		os << "\tCGI bin: " << loc.cgi_bin << std::endl;
+		os << "\n\tcgi_bin: " << loc.cgi_bin;
 	else
-		os << "\tRoot dir:" << loc.root_dir << std::endl;
-	os << "\tRequests allowed : ";
+		os << "\n\tRoot dir:" << loc.root_dir;
+
+	if (!loc.indexes.empty())
+	{
+		os << "\n\tIndexes: ";
+		for (size_t j = 0; j < loc.indexes.size(); j++)
+			os << loc.indexes[j] << " ";
+	}
+
+	if (!loc.cgi_extensions.empty())
+	{
+		os << "\n\tCGI extensions: ";
+		for (size_t j = 0; j < loc.cgi_extensions.size(); j++)
+			os << loc.cgi_extensions[j] << " ";
+	}
+
 	if (loc.requests_allowed < 0xFF)
 	{
+		os << "\n\tRequests disabled : ";
 		for (unsigned int i(1); i < 7; i++)
 		{
-			if (loc.isRequestAllowed((RequestType)i))
-				os << method_names[i - 1] << ", ";
+			if (!loc.isRequestAllowed((RequestType)i))
+				os << method_names[i - 1] << " ";
 		}
 	}
-	else
-		os << "all";
 	os << std::endl;
 	return os;
 }
