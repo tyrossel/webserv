@@ -6,7 +6,7 @@
 #    By: trossel <trossel@42lausanne.ch>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/04/07 17:50:59 by trossel           #+#    #+#              #
-#    Updated: 2022/10/04 14:28:51 by trossel          ###   ########.fr        #
+#    Updated: 2022/10/21 11:34:10 by trossel          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -21,6 +21,7 @@ SRCS		= main.cpp \
 			  Config.cpp \
 			  Looper.cpp \
 			  Server.cpp \
+			  Location.cpp \
 			  RequestParser.cpp \
 			  Utils.cpp \
 			  ConfigParser.cpp \

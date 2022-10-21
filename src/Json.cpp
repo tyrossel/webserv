@@ -449,6 +449,17 @@ JsonArray	JsonObject::getArray(const std::string &name) const
 	throw std::logic_error("JSON error: no array named " + name);
 }
 
+JsonArray	JsonObject::getArrayOrEmpty(const std::string &name) const
+{
+	std::map<std::string, JsonArray>::const_iterator it;
+	for (it = this->arrays.begin(); it != this->arrays.end(); it++)
+	{
+		if (name == it->first)
+			return it->second;
+	}
+	return JsonArray();
+}
+
 JsonObject	JsonObject::getObject(const std::string &name) const
 {
 	std::map<std::string, JsonObject>::const_iterator it;

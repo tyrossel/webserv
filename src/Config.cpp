@@ -74,13 +74,15 @@ std::ostream &operator<<(std::ostream &out, const Config &rhs)
             out << rhs.getServer()[i].getCGIExtensions()[j] << " ";
 
         for (size_t j = 0; j < rhs.getServer()[i].getIndex().size(); j++)
-            out << "\nIndex : " << rhs.getServer()[i].getIndex()[j];
+            out << "\nIndex : " << rhs.getServer()[i].getIndex()[j] << std::endl;
 
         std::map<std::string, Location> location = rhs.getServer()[i].getLocations();
         for (std::map<std::string, Location>::iterator it = location.begin();
                 it != location.end(); it++)
-            out << "\nLocation : " << (*it).first << " || " << (*it).second.root_dir;
-		// TODO: Reimplement it correcty for all location fields
+		{
+			out << "Location: " << (it->first.empty() ? "DEFAULT" : it->first)
+				<< std::endl << it->second;
+		}
     }
     return (out);
 }

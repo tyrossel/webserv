@@ -7,8 +7,7 @@
 Server::Server() : _port(), _fd(), _host(), _root(), _index(), _name(), _location(), _addr()
 {
 	// Add a default Location
-	// TODO: check that it is not possible to add an empty key for a location to override it!!
-	addLocation("", Location());
+	_location[""] = Location();
 }
 
 Server::Server(const Server &other)
@@ -150,5 +149,9 @@ void	Server::setCGIBin(const std::string &bin)
 
 void	Server::addCGIExtension(const std::string &ext) {_cgiExtensions.push_back(ext);}
 void    Server::addIndex(const std::string &index) { _index.push_back(index); }
-void    Server::addLocation(const std::string &key, const Location &location) { _location[key] = location; }
+void    Server::addLocation(const std::string &key, const Location &location)
+{
+	if (key != "")
+		_location[key] = location;
+}
 void    Server::addHost(const unsigned int &host) { _host = host; }

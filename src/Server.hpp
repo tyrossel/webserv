@@ -2,48 +2,8 @@
 #define SERVER_HPP
 
 #include "../includes/webserv.hpp"
+#include "Location.hpp"
 #include <stdexcept>
-
-enum RequestAllowedType
-{
-	Get = 1,
-	Post = 1 << 1,
-	Delete = 1 << 2,
-	Put = 1 << 3,
-	Head = 1 << 4
-};
-
-struct Location
-{
-	Location() :
-		max_client_body_size(-1),
-		requests_allowed(0xFF),
-		isCGI(false),
-		root_dir(""),
-		cgi_path("")
-	{}
-
-	void disableRequest(const std::string &type)
-	{
-		// TODO: implement
-		throw std::logic_error("NOT IMPLEMENTED");
-		if (type == "GET")
-		{
-			// this->requests_allowed |= requestType;
-		}
-		// else if ....
-		else
-		{
-			// Unknown request
-		}
-	}
-
-	int		max_client_body_size;
-	int		requests_allowed;
-	bool	isCGI;
-	std::string	root_dir;
-	std::string	cgi_path;
-};
 
 class Server {
     private:

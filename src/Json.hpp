@@ -97,6 +97,7 @@ class JsonObject
 		void	parseFromFile(const std::string &file);
 
 		JsonArray					getArray(const std::string &name) const;
+		JsonArray					getArrayOrEmpty(const std::string &name) const;
 		JsonObject					getObject(const std::string &name) const;
 		std::string				 	getString(const std::string &name) const;
 		std::string					getStringOrDefault(const std::string &name, const std::string &val) const;

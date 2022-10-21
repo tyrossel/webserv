@@ -6,7 +6,7 @@
 /*   By: trossel <trossel@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 16:37:06 by trossel           #+#    #+#             */
-/*   Updated: 2022/10/19 16:38:46 by trossel          ###   ########.fr       */
+/*   Updated: 2022/10/21 11:58:57 by trossel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,10 +28,12 @@ class ConfigParsor
 
 		const std::string &getFilename() const;
 
-		Server parseServer(const JsonObject &serverObject) const;
 		Config parse() const;
 
 	private:
+
+		Location parseLocation(const JsonObject &locObject) const;
+		Server parseServer(const JsonObject &serverObject) const;
 
 		std::string	_filename;
 

@@ -6,13 +6,14 @@
 /*   By: trossel <trossel@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 16:47:18 by trossel           #+#    #+#             */
-/*   Updated: 2022/10/20 16:01:06 by trossel          ###   ########.fr       */
+/*   Updated: 2022/10/21 11:59:08 by trossel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ConfigParser.hpp"
 #include "Config.hpp"
 #include <fstream>
+#include <stdexcept>
 #include <string>
 
 ConfigParsor::ConfigParsor(const std::string &filename)
@@ -35,15 +36,42 @@ ConfigParsor &ConfigParsor::operator=(const ConfigParsor &rhs)
 	return (*this);
 }
 
-const std::string &ConfigParsor::getFilename() const { return
-	this->_filename;}
+const std::string &ConfigParsor::getFilename() const { return this->_filename;}
 
+Location ConfigParsor::parseLocation(const JsonObject &locObject) const
+{
+	std::map<std::string, RequestType> requests_map;
+	requests_map["GET"] = Get;
+	requests_map["POST"] = Post;
+	requests_map["DELETE"] = Delete;
+	requests_map["PUT"] = Put;
+	requests_map["HEAD"] = Head;
+	requests_map["PATCH"] = Patch;
+
+	Location loc;
+
+	loc.max_client_body_size = locObject.getIntOrDefault("max_client_body_size", 0);
+
+	std::vector<std::string> disabled_requests = locObject.getArrayOrEmpty("disabled_methods").stringValues();
+	for (size_t i(0); i < disabled_requests.size(); i++)
+	{
+		RequestType type = requests_map[disabled_requests[i]];
+		loc.disableRequest(type);
+	}
+
+	loc.root_dir = locObject.getStringOrDefault("root", "");
+	loc.cgi_path = locObject.getStringOrDefault("cgi_path", "");
+	if (!loc.cgi_path.empty() && !loc.root_dir.empty())
+		throw std::logic_error("Cannot have a root and a cgi_bin in a location");
+	else if (!loc.cgi_path.empty())
+		loc.isCGI = true;
+
+	return loc;
+}
 
 Server ConfigParsor::parseServer(const JsonObject &serverObject) const
 {
     Server serverCfg;
-
-	(void)serverObject;
 
     serverCfg.addPort(serverObject.getInt("port"));
 
@@ -71,27 +99,12 @@ Server ConfigParsor::parseServer(const JsonObject &serverObject) const
 		serverCfg.addIndex(*it);
 
 	// Locations
-	std::vector<JsonObject> locations = serverObject.getArray("location").ObjectValues();
+	std::vector<JsonObject> locations = serverObject.getArray("locations").ObjectValues();
 	for(std::vector<JsonObject>::iterator it = locations.begin();
 		it != locations.end(); it++)
 	{
-		Location loc;
 		std::string location_path = it->getString("location_path");
-
-		loc.root_dir = it->getString("root");
-
-		loc.max_client_body_size = it->getIntOrDefault("max_client_body_size", -1);
-		// TODO: Add function for getting a default empty array (and object)
-		std::vector<std::string> disabled_requests = it->getArray("disabled_methods").stringValues();
-		for (size_t i(0); i < disabled_requests.size(); i++)
-			loc.disableRequest(disabled_requests[i]);
-
-		loc.cgi_path = it->getStringOrDefault("cgi_path", "");
-		if (!loc.cgi_path.empty())
-			loc.isCGI = true;
-		// TODO TYR : Cannot set CGI and ROOT FOLDER at the same time (in is_valid ?)
-
-		serverCfg.addLocation(location_path, loc);
+		serverCfg.addLocation(location_path, parseLocation(*it));
 	}
 	return serverCfg;
 }
