@@ -10,6 +10,8 @@ namespace ft {
 
     std::string toLower(std::string s);
     std::string toUpper(std::string s);
+
+    size_t      hexToInt(std::string &hex_str);
     int         stoi(std::string &str);
     std::string to_string(int number);
     void        skipWhitespaces(std::string &line, size_t &index);
