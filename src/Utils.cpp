@@ -59,6 +59,12 @@ namespace ft {
         str.erase(lastpos + 1, str.length());
     }
 
+	void	trim(std::string &str, const std::string &chars)
+	{
+		trimLeft(str, chars);
+		trimRight(str, chars);
+	}
+
     void popBack(std::string &str)
     {
         str.erase(str.size() - 1);

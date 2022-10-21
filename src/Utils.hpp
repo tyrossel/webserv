@@ -9,6 +9,7 @@ namespace ft {
     int     stoi(std::string &str);
     void    trimLeft(std::string &str, const std::string &chars = " \t\n\f\v\r");
     void    trimRight(std::string &str, const std::string &chars = " \t\n\f\v\r");
+	void	trim(std::string &str, const std::string &chars = " \t\n\f\v\r");
     void    popBack(std::string &str);
     void    skipWhitespaces(std::string &line, size_t &index);
     void	bzero(void *s, size_t n);
