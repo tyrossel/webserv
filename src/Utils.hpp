@@ -13,6 +13,7 @@ namespace ft {
     int         stoi(std::string &str);
     std::string to_string(int number);
     void        skipWhitespaces(std::string &line, size_t &index);
+    void	    trim(std::string &str, const std::string &chars = " \t\n\f\v\r");
     void        trimLeft(std::string &str, const std::string &chars = " \t\n\f\v\r");
     void        trimRight(std::string &str, const std::string &chars = " \t\n\f\v\r");
     void        popBack(std::string &str);
