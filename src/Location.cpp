@@ -6,7 +6,7 @@
 /*   By: trossel <trossel@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/21 11:11:21 by trossel           #+#    #+#             */
-/*   Updated: 2022/10/21 14:32:46 by trossel          ###   ########.fr       */
+/*   Updated: 2022/10/21 16:31:52 by trossel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,8 +16,33 @@ Location::Location() :
 		max_client_body_size(0),
 		requests_allowed(0xFF),
 		isCGI(false),
+		auto_index(false),
+		directory_listing(false),
 		root_dir(""),
 		cgi_bin("")
+{
+}
+
+Location::Location(const Location &rhs)
+{
+	*this = rhs;
+}
+
+Location &Location::operator=(const Location &rhs)
+{
+	if (&rhs == this)
+		return *this;
+	max_client_body_size = rhs.max_client_body_size;
+	requests_allowed = rhs.requests_allowed;
+	isCGI = rhs.isCGI;
+	auto_index = rhs.auto_index;
+	directory_listing = rhs.directory_listing;
+	root_dir = rhs.root_dir;
+	cgi_bin = rhs.cgi_bin;
+	return *this;
+}
+
+Location::~Location()
 {
 }
 
@@ -63,7 +88,11 @@ std::ostream &operator<<(std::ostream &os, const Location &loc)
 	else
 		os << "none";
 
-	os << YELLOW << "\n\tRequests disabled : " << RESET;
+	os << YELLOW << "\n\tauto_index: " << RESET << (loc.auto_index ? "true" : "false");
+
+	os << YELLOW << "\n\tdirectory_listing: " << RESET << (loc.directory_listing ? "true" : "false");
+
+	os << YELLOW << "\n\tRequests disabled: " << RESET;
 	if (loc.requests_allowed < 0xFF)
 	{
 		for (unsigned int i(1); i < 7; i++)
