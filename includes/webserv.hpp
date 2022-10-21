@@ -38,6 +38,7 @@
 # define UNAUTHORIZED 401                       // client must authenticate itself to get the requested response
 # define FORBIDDEN 403                          // client does not have access rights to the content. Unlike 401 Unauthorized, the client's identity is known to the server
 # define NOT_FOUND 404                          // server can not find the requested resource
+# define METHOD_NOT_ALLOWED 405                 // server can not deal with this HTTP method
 # define PROXY_AUTHENTICATION 407               // similar to 401 Unauthorized but authentication is needed to be done by a proxy
 # define REQUEST_TIMEOUT 408                    // server would like to shut down this unused connection
 # define CONFLICT 409                           // request conflicts with the current state of the server
