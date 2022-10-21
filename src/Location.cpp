@@ -6,7 +6,7 @@
 /*   By: trossel <trossel@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/21 11:11:21 by trossel           #+#    #+#             */
-/*   Updated: 2022/10/21 12:00:00 by trossel          ###   ########.fr       */
+/*   Updated: 2022/10/21 12:35:23 by trossel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@ Location::Location() :
 		requests_allowed(0xFF),
 		isCGI(false),
 		root_dir(""),
-		cgi_path("")
+		cgi_bin("")
 {
 }
 
@@ -36,7 +36,7 @@ std::ostream &operator<<(std::ostream &os, const Location &loc)
 	std::string method_names[] = {"GET", "POST", "DELETE", "PUT", "HEAD", "PATCH"};
 	os << "\tmax_client_body_size : " << loc.max_client_body_size << std::endl;
 	if (loc.isCGI)
-		os << "\tCGI bin: " << loc.cgi_path << std::endl;
+		os << "\tCGI bin: " << loc.cgi_bin << std::endl;
 	else
 		os << "\tRoot dir:" << loc.root_dir << std::endl;
 	os << "\tRequests allowed : ";

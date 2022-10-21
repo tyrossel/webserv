@@ -6,7 +6,7 @@
 /*   By: trossel <trossel@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/21 11:08:24 by trossel           #+#    #+#             */
-/*   Updated: 2022/10/21 11:47:25 by trossel          ###   ########.fr       */
+/*   Updated: 2022/10/21 12:37:40 by trossel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,9 @@ struct Location
 	int		requests_allowed;
 	bool	isCGI;
 	std::string	root_dir;
-	std::string	cgi_path;
+	std::string	cgi_bin;
+	std::vector<std::string>	cgi_extensions;
+	std::vector<std::string>	indexes;
 };
 
 std::ostream &operator<<(std::ostream &os, const Location &loc);

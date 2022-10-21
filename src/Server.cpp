@@ -6,8 +6,7 @@
 /**************************************************************************************/
 Server::Server() : _port(), _fd(), _host(), _root(), _index(), _name(), _location(), _addr()
 {
-	// Add a default Location
-	_location[""] = Location();
+	addLocation("", Location());
 }
 
 Server::Server(const Server &other)
@@ -32,8 +31,6 @@ Server &Server::operator=(const Server &rhs)
 	this->_root = rhs._root;
 	this->_index = rhs._index;
 	this->_name = rhs._name;
-	this->_cgiBin = rhs._cgiBin;
-	this->_cgiExtensions = rhs._cgiExtensions;
 	this->_location = rhs._location;
     this->_addr = rhs._addr;
     return (*this);
@@ -119,10 +116,10 @@ int Server::buildServer() { return (this->setupListen()); }
 int                                 Server::getPort() const { return (this->_port); }
 std::string							Server::getAddress() const { return (this->_address); }
 std::vector<std::string>            Server::getName() const { return (this->_name); }
-std::string							Server::getCGIBin() const { return (this->_cgiBin); }
-std::vector<std::string>            Server::getCGIExtensions() const { return (this->_cgiExtensions); }
-std::string				            Server::getRoot() const { return (this->_root); }
-std::vector<std::string>            Server::getIndex() const { return (this->_index); }
+std::string							Server::getCGIBin() const { return (this->_location.at("").cgi_bin); }
+std::vector<std::string>            Server::getCGIExtensions() const { return (this->_location.at("").cgi_extensions); }
+std::string				            Server::getRoot() const { return (this->_location.at("").root_dir); }
+std::vector<std::string>            Server::getIndex() const { return (this->_location.at("").indexes); }
 const std::map<std::string, Location> &Server::getLocations() const { return (this->_location); }
 long                                Server::getFd() const { return (this->_fd); }
 unsigned int                        Server::getHost() const { return (this->_host); }
@@ -133,25 +130,8 @@ unsigned int                        Server::getHost() const { return (this->_hos
 void    Server::addPort(int port) { _port = port; }
 void	Server::addAddress(const std::string &address) { _address = address; }
 void    Server::addName(const std::string &name) { _name.push_back(name); }
-void    Server::setRoot(const std::string &root)
-{
-	if (!_root.empty())
-		throw std::logic_error("Config error: cannot contains two roots");
-	_root = root;
-}
-
-void	Server::setCGIBin(const std::string &bin)
-{
-	if (!_cgiBin.empty())
-		throw std::logic_error("Config error: cannot contains two CGI binaries");
-	_cgiBin = bin;
-}
-
-void	Server::addCGIExtension(const std::string &ext) {_cgiExtensions.push_back(ext);}
-void    Server::addIndex(const std::string &index) { _index.push_back(index); }
 void    Server::addLocation(const std::string &key, const Location &location)
 {
-	if (key != "")
-		_location[key] = location;
+	_location[key] = location;
 }
 void    Server::addHost(const unsigned int &host) { _host = host; }

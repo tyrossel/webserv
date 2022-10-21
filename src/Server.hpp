@@ -11,15 +11,8 @@ class Server {
 		std::string							_address; // IP address where the server is listening
         long                                _fd;
         unsigned int                        _host;
-		std::string				            _root;  //🌳🌳🌳🌳🌳🌳🌳🌳🌳
-        std::vector<std::string>            _index; //👆👆👆👆👆👆👆👆👆👆
         std::vector<std::string>            _name;  //🏠🏠🏠🏠🏠🏠🏠🏠🏠
-		std::string				            _cgiBin;
-        std::vector<std::string>            _cgiExtensions; // All those files are sent to the CGI
-        std::map<std::string, Location> 	 _location;
-        // For the map we will have in [0][0](root) the location followed by the path
-        // The next parsed elements will go in the map in a random order and will be called with find
-
+        std::map<std::string, Location>     _location;
         sockaddr_in                         _addr;
 
     public:
@@ -53,8 +46,6 @@ class Server {
         void                                        addPort(int port);
 		void										addAddress(const std::string &address);
         void                                        addHost(const std::string &host);
-		void										setCGIBin(const std::string& bin);
-		void										addCGIExtension(const std::string& ext);
         void                                        setRoot(const std::string &root);
         void                                        addIndex(const std::string &index);
         void                                        addLocation(const std::string &key, const Location &location);

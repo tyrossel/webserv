@@ -6,7 +6,7 @@
 /*   By: trossel <trossel@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 16:47:18 by trossel           #+#    #+#             */
-/*   Updated: 2022/10/21 12:12:42 by trossel          ###   ########.fr       */
+/*   Updated: 2022/10/21 12:35:23 by trossel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,10 +60,10 @@ Location ConfigParsor::parseLocation(const JsonObject &locObject) const
 	}
 
 	loc.root_dir = locObject.getStringOrDefault("root", "");
-	loc.cgi_path = locObject.getStringOrDefault("cgi_path", "");
-	if (!loc.cgi_path.empty() && !loc.root_dir.empty())
+	loc.cgi_bin = locObject.getStringOrDefault("cgi_path", "");
+	if (!loc.cgi_bin.empty() && !loc.root_dir.empty())
 		throw std::logic_error("Cannot have a root and a cgi_bin in a location");
-	else if (!loc.cgi_path.empty())
+	else if (!loc.cgi_bin.empty())
 		loc.isCGI = true;
 
 	return loc;
@@ -98,7 +98,12 @@ Server ConfigParsor::parseServer(const JsonObject &serverObject) const
 		it != indexes.end(); it++)
 		serverCfg.addIndex(*it);
 
-	// Locations
+	// Default location
+	Location defaultLocation = parseLocation(serverObject);
+	defaultLocation.isCGI = false;
+	serverCfg.addLocation("", defaultLocation);
+
+	// Other locations
 	std::vector<JsonObject> locations = serverObject.getArray("locations").ObjectValues();
 	for(std::vector<JsonObject>::iterator it = locations.begin();
 		it != locations.end(); it++)
