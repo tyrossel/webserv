@@ -125,6 +125,8 @@ enum RequestType
  ***********************************************************************************/
 extern int RUNNING;
 
+#define VERBOSE 0
+
 #include "../src/Utils.hpp"
 
 #endif // WEBSERV_HPP

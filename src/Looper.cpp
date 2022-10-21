@@ -297,7 +297,7 @@ int Looper::buildGetResponse(long socket)
     addStaticBodyResponse(socket);
     addDate(socket);
 
-    if (1) // CGI or not ?
+    if (0) // CGI or not ?
     {
         CGI cgi(_request[socket].getHeaders(), _request[socket].getBody());
         ret = cgi.executeCgi(&_request[socket], _active_servers[socket]);
@@ -306,12 +306,14 @@ int Looper::buildGetResponse(long socket)
             addErrorBodyToResponse(socket);
         else
             addBodyToResponse(socket);
-        std::cout << "================== CGI ==================" << std::endl;
-        if (secFetchImage(socket))
-            std::cout << _response[socket] << std::endl;
-        else
-            std::cout << GREEN << "We sent an image" << RESET << std::endl;
-        std::cout << "==============================================" << std::endl << std::endl;
+        if (VERBOSE) {
+            std::cout << "================== CGI ==================" << std::endl;
+            if (secFetchImage(socket))
+                std::cout << _response[socket] << std::endl;
+            else
+                std::cout << GREEN << "We sent an image" << RESET << std::endl;
+            std::cout << "==============================================" << std::endl << std::endl;
+        }
     }
     else
     {
@@ -320,12 +322,14 @@ int Looper::buildGetResponse(long socket)
             addErrorBodyToResponse(socket);
         else
             addBodyToResponse(socket);
-        std::cout << "================== RESPONSE ==================" << std::endl;
-        if (secFetchImage(socket))
-            std::cout << GREEN << _response[socket] << RESET << std::endl;
-        else
-            std::cout << GREEN << "We sent an image" << RESET << std::endl;
-        std::cout << "==============================================" << std::endl << std::endl;
+        if (VERBOSE) {
+            std::cout << "================== RESPONSE ==================" << std::endl;
+            if (secFetchImage(socket))
+                std::cout << GREEN << _response[socket] << RESET << std::endl;
+            else
+                std::cout << GREEN << "We sent an image" << RESET << std::endl;
+            std::cout << "==============================================" << std::endl << std::endl;
+        }
 
     }
     return (ret);
@@ -363,9 +367,11 @@ int Looper::readFromClient(long socket)
         request.parseRequest(buffer);
         _request.insert(std::make_pair<long, RequestParser>(socket, request));
 
-        std::cout << "================== REQUEST ==================" << std::endl;
-        std::cout << BLUE << _request[socket] << RESET;
-        std::cout << "==============================================" << std::endl;
+        if (VERBOSE) {
+            std::cout << "================== REQUEST ==================" << std::endl;
+            std::cout << BLUE << _request[socket] << RESET;
+            std::cout << "==============================================" << std::endl;
+        }
 
         buildResponse(socket);
     }
@@ -467,6 +473,7 @@ void Looper::requestProcess(fd_set &reading_fd_set)
                 FD_CLR(socket, &_active_fd_set);
                 FD_CLR(socket, &reading_fd_set);
                 _active_servers.erase(socket);
+                close(socket);
                 it = _active_servers.begin();
             }
             ret_val = 0;

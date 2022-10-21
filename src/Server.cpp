@@ -49,7 +49,7 @@ long    Server::createSocket()
 
     socket = accept(_fd, NULL, NULL);
     if (socket == -1)
-        std::cout << RED << "Could not create socket for host " << _host << RESET << std::endl;
+        std::cout << RED << "Could not create socket for host " << _host << " socket return : " << socket << RESET << std::endl;
     else
         fcntl(socket, F_SETFL, O_NONBLOCK);
     return (socket);
@@ -71,7 +71,7 @@ int     Server::send(long socket, std::map<long, std::string> response)
         ret = ::send(socket, response[socket].c_str(), response[socket].size(), 0);
     else
         std::cout << "Error on sockets 🔥" << std::endl;
-    std::cout << YELLOW << "SENDING " << ret << " BYTES TO " << socket << RESET << std::endl;
+    std::cout << YELLOW << "SENDING " << ret << " BYTES TO SOCKET " << socket << RESET << std::endl;
     if (ret <= 0)
         return (-1);
     else
