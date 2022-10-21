@@ -177,7 +177,7 @@ int Looper::addHTTPHeader(long socket)
 void Looper::addStaticBodyResponse(long socket)
 {
     _response[socket].append("Server: WetServ/1.0.0\n");
-    _response[socket].append("Transfer-Encoding: identity\n");
+//    _response[socket].append("Transfer-Encoding: identity\n");
 }
 
 void Looper::addContentType(long socket)
@@ -288,6 +288,7 @@ int Looper::buildGetResponse(long socket)
     _response.insert(std::make_pair<long int, std::string>(socket, ""));
     ret = addHTTPHeader(socket);
     addStaticBodyResponse(socket);
+    _response[socket].append("Transfer-Encoding: identity\n");
     addDate(socket);
 
     if (0) // CGI or not ?
@@ -296,7 +297,7 @@ int Looper::buildGetResponse(long socket)
         ret = cgi.executeCgi(&_request[socket], _active_servers[socket]);
         // Here we remove HTTP EOF because the CGI we use cannot accept HTML in it.
         // If we send HTML inside the CGI he will TOUPPER the html which is.. shitty ?
-        cgi.removeEOFHTTP(cgi.getRetBody());
+        cgi.removeEOFHTTP();
         _response[socket].append(cgi.getRetBody());
         if (ret != HTTP_OK)
             addErrorBodyToResponse(socket);
