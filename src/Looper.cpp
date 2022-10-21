@@ -259,33 +259,26 @@ int Looper::buildDeleteResponse(long socket)
 
 int Looper::buildPostResponse(long socket)
 {
-    // TODO : DO THE POST
-    int             ret = 0;
+    int ret = 0;
 
-//    _response.insert(std::make_pair<long int, std::string>(socket, ""));
-//    ret = addHTTPHeader(socket);
-//    addStaticBodyResponse(socket);
-//    addContentType(socket);
-//    addDate(socket);
-//    if (ret != HTTP_OK)
-//        addErrorBodyToResponse(socket);
-//    else
-//        addBodyToResponse(socket);
-
-    std::cout << "================== RESPONSE ==================" << std::endl;
-
-    CGI testcgi(_request[socket].getHeaders(), _request[socket].getBody());
-
-    ret = testcgi.executeCgi(&_request[socket], _active_servers[socket]);
-    std::cout << RED << "Status = " << ret << RESET << std::endl;
-
-//    if (secFetchImage(socket))
-//        std::cout << GREEN << _response[socket] << RESET << std::endl;
-//    else
-//        std::cout << GREEN << "We sent an image" << RESET << std::endl;
+    _response.insert(std::make_pair<long int, std::string>(socket, ""));
+    ret = addHTTPHeader(socket);
+    addStaticBodyResponse(socket);
+    addDate(socket);
+    _response[socket].append("Content-Length: ");
+    _response[socket].append(_request[socket].getHeaders().find("Content-Length")->second);
+    _response[socket].append("\n");
+    (void)ret;
+    CGI cgi(_request[socket].getHeaders(), _request[socket].getBody());
+    ret = cgi.executeCgi(&_request[socket], _active_servers[socket]);
+    _response[socket].append(cgi.getRetBody());
+    std::cout << "================== CGI ==================" << std::endl;
+    if (secFetchImage(socket))
+        std::cout << _response[socket] << std::endl;
+    else
+        std::cout << GREEN << "We sent an image" << RESET << std::endl;
     std::cout << "==============================================" << std::endl << std::endl;
-
-    return (ret);
+    return (1);
 }
 
 int Looper::buildGetResponse(long socket)
@@ -301,6 +294,9 @@ int Looper::buildGetResponse(long socket)
     {
         CGI cgi(_request[socket].getHeaders(), _request[socket].getBody());
         ret = cgi.executeCgi(&_request[socket], _active_servers[socket]);
+        // Here we remove HTTP EOF because the CGI we use cannot accept HTML in it.
+        // If we send HTML inside the CGI he will TOUPPER the html which is.. shitty ?
+        cgi.removeEOFHTTP(cgi.getRetBody());
         _response[socket].append(cgi.getRetBody());
         if (ret != HTTP_OK)
             addErrorBodyToResponse(socket);
