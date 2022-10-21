@@ -70,21 +70,18 @@ std::ostream &operator<<(std::ostream &out, const Config &rhs)
 {
     out << "Configuration Servers" << std::endl;
     for (int i = 0; i < rhs.getNbServer(); i++) {
-        out << "Server number : " << i
-        << "\nPort : " << rhs.getServer()[i].getPort();
+        out << YELLOW << "Server number : " << RESET << i
+        << YELLOW << "\nPort : " << RESET << rhs.getServer()[i].getPort();
 
+		out << YELLOW << "\nName : " << RESET;
         for (size_t j = 0; j < rhs.getServer()[i].getName().size(); j++)
-            out << "\nName : " << rhs.getServer()[i].getName()[j];
-
-
-        for (size_t j = 0; j < rhs.getServer()[i].getIndex().size(); j++)
-            out << "\nIndex : " << rhs.getServer()[i].getIndex()[j] << std::endl;
+            out << rhs.getServer()[i].getName()[j] << " ";
 
         std::map<std::string, Location> location = rhs.getServer()[i].getLocations();
         for (std::map<std::string, Location>::iterator it = location.begin();
                 it != location.end(); it++)
 		{
-			out << "Location: " << (it->first.empty() ? "DEFAULT" : it->first)
+			out << YELLOW << "\nLocation: " << RESET << (it->first.empty() ? "DEFAULT" : it->first)
 				<< std::endl << it->second;
 		}
     }

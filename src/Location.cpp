@@ -6,7 +6,7 @@
 /*   By: trossel <trossel@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/21 11:11:21 by trossel           #+#    #+#             */
-/*   Updated: 2022/10/21 13:52:23 by trossel          ###   ########.fr       */
+/*   Updated: 2022/10/21 14:32:46 by trossel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,36 +34,46 @@ bool Location::isRequestAllowed(RequestType type) const
 std::ostream &operator<<(std::ostream &os, const Location &loc)
 {
 	std::string method_names[] = {"GET", "POST", "DELETE", "PUT", "HEAD", "PATCH"};
-	os << "\tmax_client_body_size : " << loc.max_client_body_size;
 
+	os << YELLOW << "\ttype: " << RESET;
 	if (loc.isCGI)
-		os << "\n\tcgi_bin: " << loc.cgi_bin;
+		os << "CGI PROXY";
 	else
-		os << "\n\tRoot dir:" << loc.root_dir;
+	{
+		os << "STANDART";
+		os << YELLOW << "\n\troot_dir:" << RESET << loc.root_dir;
+	}
+
+	os << YELLOW << "\n\tmax_client_body_size : " << RESET << loc.max_client_body_size;
 
 	if (!loc.indexes.empty())
 	{
-		os << "\n\tIndexes: ";
+		os << YELLOW << "\n\tindexes: " << RESET;
 		for (size_t j = 0; j < loc.indexes.size(); j++)
 			os << loc.indexes[j] << " ";
 	}
 
+	os << YELLOW << "\n\tcgi_bin: " << RESET << loc.cgi_bin;
+	os << YELLOW << "\n\tcgi_extensions: " << RESET;
 	if (!loc.cgi_extensions.empty())
 	{
-		os << "\n\tCGI extensions: ";
 		for (size_t j = 0; j < loc.cgi_extensions.size(); j++)
 			os << loc.cgi_extensions[j] << " ";
 	}
+	else
+		os << "none";
 
+	os << YELLOW << "\n\tRequests disabled : " << RESET;
 	if (loc.requests_allowed < 0xFF)
 	{
-		os << "\n\tRequests disabled : ";
 		for (unsigned int i(1); i < 7; i++)
 		{
 			if (!loc.isRequestAllowed((RequestType)i))
 				os << method_names[i - 1] << " ";
 		}
 	}
+	else
+		os << "none";
 	os << std::endl;
 	return os;
 }
