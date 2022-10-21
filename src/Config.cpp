@@ -55,7 +55,9 @@ bool							Config::isValid() const
 			const std::string &loc_path = it->first;
 			const Location &loc = it->second;
 
-			if (!loc_path.empty() && !loc.cgi_bin.empty() && !loc.root_dir.empty())
+			if (loc_path.empty() && loc.root_dir.empty())
+				throw std::logic_error("Server error: cannot have an empty root_dir");
+			if (loc.isCGI && !loc.root_dir.empty())
 				throw std::logic_error("Location error: Cannot have a root and a cgi_bin");
 			// TODO TYR: Check if CGI, that cgi_bin is set and executable
 		}
