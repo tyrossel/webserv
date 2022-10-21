@@ -127,9 +127,7 @@ int CGI::executeCgi(const RequestParser *request, const Server *server)
 
     _ret_body = readContent();
 
-    // Here we remove HTTP EOF because the CGI we use cannot accept HTML in it.
-    // If we send HTML inside the CGI he will TOUPPER the html which is.. shitty ?
-    removeEOFHTTP(_ret_body);
+
 
     return (HTTP_OK);
 }
