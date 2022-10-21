@@ -133,7 +133,7 @@ int RequestParser::checkHeaders()
                 start = comma + 1;
             }
         }
-        to_check = encoding.substr(start, comma - start);
+        to_check = encoding.substr(start, encoding.size() - start);
         if (isValidEncoding(to_check) == -1)
             return (exitStatus(BAD_REQUEST));
     }
@@ -281,28 +281,46 @@ int RequestParser::parseHeaders(std::string &request, size_t &index)
 
 int RequestParser::parseChunkedBody(std::string &request, size_t &index)
 {
+    size_t end_line;
+    index = request.find_first_not_of("\r\n", index);
 
+    while ((end_line = request.find_first_of("\r\n", index)) != std::string::npos)
+    {
+        std::string chunk_size = request.substr(index, end_line - index);
+        int size = ft::hexToInt(chunk_size);
+        if (size == 0)
+            return 0;
+
+        index = request.find_first_not_of("\r\n", end_line);
+        _body += request.substr(index, size);
+
+        index += size;
+        end_line = request.find_first_of("\r\n", index);
+        index = request.find_first_not_of("\r\n", end_line);
+    }
+    return -1;
 }
 
 int RequestParser::parseBody(std::string &request, size_t &index)
 {
     if (index != request.size())
     {
-        /* A server MAY reject a request that contains a message body but not a Content-Length */
-        if (_headers.find("Content-Length") == _headers.end())
-            return (exitStatus(LENGTH_REQUIRED));
-
-        // TODO : chunked body or not ?
-        if (_headers.find("Transfer-Encoding")->second == "chunked")
+        if (_headers.find("Transfer-Encoding") != _headers.end() && _headers["Transfer-Encoding"] == "chunked")
         {
             if (parseChunkedBody(request, index) == -1)
                 return -1;
         }
         else
+        {
+            /* A server MAY reject a request that contains a message body but not a Content-Length */
+            if (_headers.find("Content-Length") == _headers.end())
+                return (exitStatus(LENGTH_REQUIRED));
+
             this->_body = request.substr(index, request.size() - index);
 
-        if (_body_length > 0 && _body_length != (int)_body.size())
-            return (exitStatus(BAD_REQUEST));
+            if (_body_length > 0 && _body_length != (int)_body.size())
+                return (exitStatus(BAD_REQUEST));
+        }
     }
 
     return (0);
@@ -324,9 +342,9 @@ int RequestParser::parseRequest(const char *str)
 //    TODO : Here is some tests to remove later
 //    size_t inserted = 0;
 //    inserted = request.find('\n', 100) + 1;
-//    std::string to_insert = "Content-Length: 32\r\n";
+//    std::string to_insert = "Transfer-Encoding: chunked\r\n";
 //    request.insert(inserted, to_insert);
-//    request.append("home=Cosby&favorite+flavor=flies");
+//    request.append("8\r\nMamacita\r\nE\r\nYvan suce bien\r\n0\r\n\r\n");
 //    TODO : END OF TEST
 
 

@@ -50,6 +50,20 @@ namespace ft {
         return s;
     }
 
+    size_t  hexToInt(std::string &hex_str)
+    {
+        if (hex_str.empty())
+            return 0;
+
+        std::stringstream stream;
+        size_t hex;
+
+        stream << std::hex << hex_str;
+        stream >> hex;
+
+        return hex;
+    }
+
     int stoi(std::string &str)
     {
         int i;
