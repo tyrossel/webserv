@@ -6,7 +6,7 @@
 /*   By: trossel <trossel@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 16:47:18 by trossel           #+#    #+#             */
-/*   Updated: 2022/10/21 11:59:08 by trossel          ###   ########.fr       */
+/*   Updated: 2022/10/21 12:12:42 by trossel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,6 +104,9 @@ Server ConfigParsor::parseServer(const JsonObject &serverObject) const
 		it != locations.end(); it++)
 	{
 		std::string location_path = it->getString("location_path");
+		ft::trim(location_path);
+		if (location_path.empty())
+			throw std::logic_error("Location error: location_path cannot be empty");
 		serverCfg.addLocation(location_path, parseLocation(*it));
 	}
 	return serverCfg;
