@@ -37,6 +37,7 @@ public:
     int                                 parseVersion(std::string &first_line, size_t &start, size_t &end);
     int                                 parseFirstLine(std::string &first_line);
     int                                 parseHeaders(std::string &line, size_t &index);
+    int                                 parseChunkedBody(std::string &request, size_t &index);
     int                                 parseBody(std::string &line, size_t &index);
     int                                 parseRequest(const char *request);
 

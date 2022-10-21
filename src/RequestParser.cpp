@@ -179,7 +179,6 @@ int RequestParser::parseVersion(std::string &first_line, size_t &start, size_t &
     /* Extract version */
     this->_version = first_line.substr(start + 5, 3);
 
-    //TODO : Accept 1.0 ??
     if (this->_version != "1.1")
     {
         std::cout << "Wrong HTTP version" << std::endl;
@@ -280,6 +279,11 @@ int RequestParser::parseHeaders(std::string &request, size_t &index)
     return (checkHeaders());
 }
 
+int RequestParser::parseChunkedBody(std::string &request, size_t &index)
+{
+
+}
+
 int RequestParser::parseBody(std::string &request, size_t &index)
 {
     if (index != request.size())
@@ -288,10 +292,15 @@ int RequestParser::parseBody(std::string &request, size_t &index)
         if (_headers.find("Content-Length") == _headers.end())
             return (exitStatus(LENGTH_REQUIRED));
 
-        this->_body = request.substr(index, request.size() - index);
+        // TODO : chunked body or not ?
+        if (_headers.find("Transfer-Encoding")->second == "chunked")
+        {
+            if (parseChunkedBody(request, index) == -1)
+                return -1;
+        }
+        else
+            this->_body = request.substr(index, request.size() - index);
 
-        //TODO : Check if its ok here | Develop for chunked body
-        // TODO : Find another way for this if, like craft stol or something like that
         if (_body_length > 0 && _body_length != (int)_body.size())
             return (exitStatus(BAD_REQUEST));
     }
