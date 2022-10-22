@@ -372,6 +372,8 @@ int Looper::readFromClient(long socket)
             std::cout << "==============================================" << std::endl;
         }
 
+        //TODO : body.length() > max_body_size => ERROR after get the right Location
+
         buildResponse(socket);
     }
     return (ret);
