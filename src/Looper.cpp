@@ -375,7 +375,10 @@ int Looper::readFromClient(long socket)
         //TODO : body.length() > max_body_size => ERROR after get the right Location
 
 		const Server &srv = request.FindServer(_servers);
-		request.FindLocation(srv);
+		const Location &loc = request.FindLocation(srv);
+
+		// TODO TYR: convert method from string to enum
+		// if(loc.isRequestAllowed(request.getMethod())
 
         buildResponse(socket);
     }

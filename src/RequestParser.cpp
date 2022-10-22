@@ -441,20 +441,23 @@ const Server & RequestParser::FindServer(const std::vector<Server> &servers) con
 		RESET << std::endl;
 
 
-	// for(std::vector<Server>::const_iterator it_srv = servers.begin(); it_srv !=
-	// 		servers.end(); it_srv++)
-	// {
-	// 	// TODO: check port
-	// 	const std::vector<std::string> &server_names = it_srv->getName();
-	// 	for (std::vector<std::string>::const_iterator it_names = server_names.begin();
-	// 		it_names != server_names.end(); it_names++)
-	// 	{
-	//
-	// 		if (*it_names == requestHost && it_srv->getPort() == requestPort)
-	// 			return *it_srv;
-	// 	}
-	// 	// const Server &srv = *it;
-	// }
+	for(std::vector<Server>::const_iterator it_srv = servers.begin(); it_srv !=
+			servers.end(); it_srv++)
+	{
+		if (requestPort != it_srv->getPort())
+			continue;
+
+		const std::vector<std::string> &server_names = it_srv->getName();
+		if (server_names.empty())
+
+		for (std::vector<std::string>::const_iterator it_names = server_names.begin();
+			it_names != server_names.end(); it_names++)
+		{
+			if (*it_names == requestHost && it_srv->getPort() == requestPort)
+				return *it_srv;
+		}
+		// const Server &srv = *it;
+	}
 
 	return servers[0];
 }
