@@ -272,12 +272,14 @@ int Looper::buildPostResponse(long socket)
     CGI cgi(_request[socket].getHeaders(), _request[socket].getBody());
     ret = cgi.executeCgi(&_request[socket], _active_servers[socket]);
     _response[socket].append(cgi.getRetBody());
-    std::cout << "================== CGI ==================" << std::endl;
-    if (secFetchImage(socket))
-        std::cout << _response[socket] << std::endl;
-    else
-        std::cout << GREEN << "We sent an image" << RESET << std::endl;
-    std::cout << "==============================================" << std::endl << std::endl;
+    if (VERBOSE) {
+        std::cout << "================== CGI ==================" << std::endl;
+        if (secFetchImage(socket))
+            std::cout << _response[socket] << std::endl;
+        else
+            std::cout << GREEN << "We sent an image" << RESET << std::endl;
+        std::cout << "==============================================" << std::endl << std::endl;
+    }
     return (1);
 }
 
