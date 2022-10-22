@@ -177,7 +177,6 @@ int Looper::addHTTPHeader(long socket)
 void Looper::addStaticBodyResponse(long socket)
 {
     _response[socket].append("Server: WetServ/1.0.0\n");
-//    _response[socket].append("Transfer-Encoding: identity\n");
 }
 
 void Looper::addContentType(long socket)
@@ -233,8 +232,7 @@ void Looper::addBodyToResponse(long socket) // TODO: add file to read from (std:
 
 int Looper::buildDeleteResponse(long socket)
 {
-    // TODO : DO THE DELTE
-
+    // TODO : DO THE DELETE
     int             ret = 0;
 
     _response.insert(std::make_pair<long int, std::string>(socket, ""));
@@ -256,18 +254,22 @@ int Looper::buildDeleteResponse(long socket)
     return (1);
 }
 
+void Looper::addContentLengthPOST(long socket)
+{
+    _response[socket].append("Content-Length: ");
+    _response[socket].append(_request[socket].getHeaders().find("Content-Length")->second);
+    _response[socket].append("\n");
+}
+
 int Looper::buildPostResponse(long socket)
 {
     int ret = 0;
 
     _response.insert(std::make_pair<long int, std::string>(socket, ""));
-    ret = addHTTPHeader(socket);
+    ret += addHTTPHeader(socket);
     addStaticBodyResponse(socket);
     addDate(socket);
-    _response[socket].append("Content-Length: ");
-    _response[socket].append(_request[socket].getHeaders().find("Content-Length")->second);
-    _response[socket].append("\n");
-    (void)ret;
+    addContentLengthPOST(socket);
     CGI cgi(_request[socket].getHeaders(), _request[socket].getBody());
     ret = cgi.executeCgi(&_request[socket], _active_servers[socket]);
     _response[socket].append(cgi.getRetBody());
@@ -289,7 +291,6 @@ int Looper::buildGetResponse(long socket)
     _response.insert(std::make_pair<long int, std::string>(socket, ""));
     ret = addHTTPHeader(socket);
     addStaticBodyResponse(socket);
-    _response[socket].append("Transfer-Encoding: identity\n");
     addDate(socket);
 
     if (0) // CGI or not ?
