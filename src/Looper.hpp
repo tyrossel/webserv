@@ -49,7 +49,7 @@ class Looper {
         int     buildPostResponse(long socket);
         int     buildDeleteResponse(long socket);
 
-        void    addStaticBodyResponse(long socket);
+        void    addServerHeaderResponse(long socket);
         void    addContentType(long socket);
         void    addDate(long socket);
         void    addBodyToResponse(long socket);
