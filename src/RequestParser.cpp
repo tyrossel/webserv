@@ -113,6 +113,9 @@ int RequestParser::checkHeaders()
             return (exitStatus(BAD_REQUEST));
     }
 
+    if (_headers.find("Host") == _headers.end())
+        return (exitStatus(BAD_REQUEST));
+
     /* Check value of Transfer-Encoding if existing */
     size_t      comma = 0, start = 0;
     std::string to_check;
@@ -284,6 +287,7 @@ int RequestParser::parseChunkedBody(std::string &request, size_t &index)
     size_t end_line;
     index = request.find_first_not_of("\r\n", index);
 
+    //TODO : detect errors
     while ((end_line = request.find_first_of("\r\n", index)) != std::string::npos)
     {
         std::string chunk_size = request.substr(index, end_line - index);
@@ -298,6 +302,8 @@ int RequestParser::parseChunkedBody(std::string &request, size_t &index)
         end_line = request.find_first_of("\r\n", index);
         index = request.find_first_not_of("\r\n", end_line);
     }
+
+    //TODO : body.length() > max_body_size => ERROR
     return -1;
 }
 
@@ -340,13 +346,12 @@ int RequestParser::parseRequest(const char *str)
     std::string request(str);
 
 //    TODO : Here is some tests to remove later
-//    size_t inserted = 0;
-//    inserted = request.find('\n', 100) + 1;
-//    std::string to_insert = "Transfer-Encoding: chunked\r\n";
-//    request.insert(inserted, to_insert);
-//    request.append("8\r\nMamacita\r\nE\r\nYvan suce bien\r\n0\r\n\r\n");
+    size_t inserted = 0;
+    inserted = request.find('\n', 100) + 1;
+    std::string to_insert = "Transfer-Encoding: chunked\r\n";
+    request.insert(inserted, to_insert);
+    request.append("8\r\nMamacita\r\nE\r\nYvan suce bien\r\n0\r\n\r\n");
 //    TODO : END OF TEST
-
 
     line = getNextLine(request, index);
     if (this->parseFirstLine(line) == -1)
