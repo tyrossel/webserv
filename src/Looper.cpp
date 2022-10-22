@@ -174,7 +174,7 @@ int Looper::addHTTPHeader(long socket)
     return writeResponseHeader(socket);
 }
 
-void Looper::addStaticBodyResponse(long socket)
+void Looper::addServerHeaderResponse(long socket)
 {
     _response[socket].append("Server: WetServ/1.0.0\n");
 }
@@ -237,7 +237,7 @@ int Looper::buildDeleteResponse(long socket)
 
     _response.insert(std::make_pair<long int, std::string>(socket, ""));
     ret = addHTTPHeader(socket);
-    addStaticBodyResponse(socket);
+    addServerHeaderResponse(socket);
     addContentType(socket);
     addDate(socket);
     if (ret != HTTP_OK)
@@ -267,7 +267,7 @@ int Looper::buildPostResponse(long socket)
 
     _response.insert(std::make_pair<long int, std::string>(socket, ""));
     ret += addHTTPHeader(socket);
-    addStaticBodyResponse(socket);
+    addServerHeaderResponse(socket);
     addDate(socket);
     addContentLengthPOST(socket);
     CGI cgi(_request[socket].getHeaders(), _request[socket].getBody());
@@ -290,7 +290,7 @@ int Looper::buildGetResponse(long socket)
 
     _response.insert(std::make_pair<long int, std::string>(socket, ""));
     ret = addHTTPHeader(socket);
-    addStaticBodyResponse(socket);
+    addServerHeaderResponse(socket);
     addDate(socket);
 
     if (0) // CGI or not ?
@@ -329,14 +329,13 @@ int Looper::buildGetResponse(long socket)
                 std::cout << GREEN << "We sent an image" << RESET << std::endl;
             std::cout << "==============================================" << std::endl << std::endl;
         }
-
     }
     return (ret);
 }
 
 int Looper::buildResponse(long socket)
 {
-    // TODO : Map with func pointers later
+    // TODO : Map with func pointers later ? Or use Tyrossel enum
     switch (requestMethod(socket)) {
         case GET:
             buildGetResponse(socket);
