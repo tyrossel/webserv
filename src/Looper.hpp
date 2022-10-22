@@ -54,6 +54,8 @@ class Looper {
         void    addDate(long socket);
         void    addBodyToResponse(long socket);
         int     addHTTPHeader(long socket);
+        void    addContentLengthPOST(long socket);
+
         int     writeResponseHeader(long socket);
         void    addErrorBodyToResponse(long socket);
         // =================================================================
