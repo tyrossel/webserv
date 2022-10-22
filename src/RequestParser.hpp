@@ -11,6 +11,7 @@ private:
     std::string                         _version;
     std::map<std::string, std::string>  _headers;
     std::string                         _body;
+    std::string                         _request;
     int                                 _body_length;
     int                                 _status;
 
@@ -36,9 +37,10 @@ public:
     int                                 parsePath(std::string &first_line, size_t &start, size_t &end);
     int                                 parseVersion(std::string &first_line, size_t &start, size_t &end);
     int                                 parseFirstLine(std::string &first_line);
-    int                                 parseHeaders(std::string &line, size_t &index);
-    int                                 parseChunkedBody(std::string &request, size_t &index);
-    int                                 parseBody(std::string &line, size_t &index);
+    int                                 parseHeaders(size_t &index);
+    int                                 parseTrailer(size_t &index);
+    int                                 parseChunkedBody(size_t &index);
+    int                                 parseBody(size_t &index);
     int                                 parseRequest(const char *request);
 
     /* GETTERS */
