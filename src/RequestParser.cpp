@@ -4,9 +4,9 @@
 /*                          CONSTRUCTORS / DESTRUCTORS                                */
 /**************************************************************************************/
 
-RequestParser::RequestParser() : _method(""), _path(""), _query(""), _version(""), _headers(), _body(""), _body_length(0), _status(0) {}
+RequestParser::RequestParser() : _method(""), _path(""), _query(""), _version(""), _headers(), _body(""), _request(""), _body_length(0), _status(0) {}
 
-RequestParser::RequestParser(const RequestParser &other) : _method(other._method), _path(other._path), _version(other._version), _headers(other._headers), _body(other._body), _body_length(other._body_length), _status(other._status) {}
+RequestParser::RequestParser(const RequestParser &other) : _method(other._method), _path(other._path), _version(other._version), _headers(other._headers), _body(other._body), _request(other._request), _body_length(other._body_length), _status(other._status) {}
 
 RequestParser::~RequestParser() {}
 
@@ -20,6 +20,7 @@ RequestParser &RequestParser::operator=(const RequestParser &other)
         this->_version = other._version;
         this->_headers = other._headers;
         this->_body = other._body;
+        this->_request = other._request;
         this->_body_length = other._body_length;
         this->_status = other._status;
     }
@@ -241,12 +242,12 @@ int RequestParser::parseFirstLine(std::string &first_line)
     return parsePath(first_line, start, end);
 }
 
-int RequestParser::parseHeaders(std::string &request, size_t &index)
+int RequestParser::parseHeaders(size_t &index)
 {
     std::string line, key, value;
     size_t      trunc = 0;
 
-    line = getNextLine(request, index);
+    line = getNextLine(_request, index);
     if (line == "" || line == "\r" || line == "\r\n")
         return (exitStatus(BAD_REQUEST));
 
@@ -276,53 +277,92 @@ int RequestParser::parseHeaders(std::string &request, size_t &index)
         else
             this->_headers[key] = value;
 
-        line = getNextLine(request, index);
+        line = getNextLine(_request, index);
     }
 
     return (checkHeaders());
 }
 
-int RequestParser::parseChunkedBody(std::string &request, size_t &index)
+int RequestParser::parseTrailer(size_t &index)
+{
+    _request.erase(0, index);
+
+    if (_request.substr(0, 5).compare("0\r\n\r\n") == 0)
+        return 0;
+
+    _request.erase(0, 3);
+
+    size_t colon, end_line;
+    while ((end_line = _request.find("\r\n")) != std::string::npos)
+    {
+        if (_request.find("\r\n") == 0)
+            return 0;
+        if ((colon = _request.find(':', 0)) != std::string::npos)
+        {
+            std::string key = _request.substr(0, colon);
+            std::string value = _request.substr(colon + 1, end_line - colon);
+            ft::trim(value);
+
+            _headers[key] = value;
+        }
+        else
+            return (exitStatus(BAD_REQUEST));
+
+        _request.erase(0, end_line + 2);
+        if (_request.empty())
+            return 0;
+    }
+    return (exitStatus(BAD_REQUEST));
+}
+
+int RequestParser::parseChunkedBody(size_t &index)
 {
     size_t end_line;
-    index = request.find_first_not_of("\r\n", index);
+    index = _request.find_first_not_of("\r\n", index);
 
-    //TODO : detect errors
-    while ((end_line = request.find_first_of("\r\n", index)) != std::string::npos)
+    while ((end_line = _request.find("\r\n", index)) != std::string::npos)
     {
-        std::string chunk_size = request.substr(index, end_line - index);
-        int size = ft::hexToInt(chunk_size);
+        std::string chunk_size = _request.substr(index, end_line - index);
+        size_t size = ft::hexToInt(chunk_size);
         if (size == 0)
+        {
+            if (parseTrailer(index) == -1)
+                return -1;
             return 0;
+        }
 
-        index = request.find_first_not_of("\r\n", end_line);
-        _body += request.substr(index, size);
+        index = _request.find_first_not_of("\r\n", end_line);
+        end_line = _request.find("\r\n", index);
+        if (size != end_line - index)
+            return (exitStatus(BAD_REQUEST));
+        else
+            _body += _request.substr(index, size);
 
         index += size;
-        end_line = request.find_first_of("\r\n", index);
-        index = request.find_first_not_of("\r\n", end_line);
+        index = _request.find_first_not_of("\r\n", end_line);
     }
 
     //TODO : body.length() > max_body_size => ERROR
+
     return -1;
 }
 
-int RequestParser::parseBody(std::string &request, size_t &index)
+int RequestParser::parseBody(size_t &index)
 {
-    if (index != request.size())
+    if (index != _request.size())
     {
         if (_headers.find("Transfer-Encoding") != _headers.end() && _headers["Transfer-Encoding"] == "chunked")
         {
-            if (parseChunkedBody(request, index) == -1)
+            if (parseChunkedBody(index) == -1)
                 return -1;
         }
         else
         {
-            /* A server MAY reject a request that contains a message body but not a Content-Length */
+            /* A server MAY reject a _request that contains a message body but not a Content-Length */
             if (_headers.find("Content-Length") == _headers.end())
                 return (exitStatus(LENGTH_REQUIRED));
 
-            this->_body = request.substr(index, request.size() - index);
+            this->_body = _request.substr(index, _request.size() - index);
 
             if (_body_length > 0 && _body_length != (int)_body.size())
                 return (exitStatus(BAD_REQUEST));
@@ -332,9 +372,9 @@ int RequestParser::parseBody(std::string &request, size_t &index)
     return (0);
 }
 
-int RequestParser::parseRequest(const char *str)
+int RequestParser::parseRequest(const char *request)
 {
-    if (!str)
+    if (!request)
     {
         std::cerr << "Wrong buffer sent by recv" << std::endl;
         return (-1);
@@ -343,24 +383,17 @@ int RequestParser::parseRequest(const char *str)
     size_t      index = 0;
     std::string line;
 
-    std::string request(str);
+    std::string req_str(request);
+    _request = req_str;
 
-//    TODO : Here is some tests to remove later
-    size_t inserted = 0;
-    inserted = request.find('\n', 100) + 1;
-    std::string to_insert = "Transfer-Encoding: chunked\r\n";
-    request.insert(inserted, to_insert);
-    request.append("8\r\nMamacita\r\nE\r\nYvan suce bien\r\n0\r\n\r\n");
-//    TODO : END OF TEST
-
-    line = getNextLine(request, index);
+    line = getNextLine(_request, index);
     if (this->parseFirstLine(line) == -1)
         return (-1);
 
-    if (this->parseHeaders(request, index) == -1)
+    if (this->parseHeaders(index) == -1)
         return (-1);
 
-    if (this->parseBody(request, index) == -1)
+    if (this->parseBody(index) == -1)
         return (-1);
 
     return (0);
