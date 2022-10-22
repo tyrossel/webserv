@@ -63,19 +63,6 @@ int CGI::executeCgi(const RequestParser *request, const Server *server)
 
     if (pipe(pip) != 0)
         return INTERNAL_SERVER_ERROR;
-
-//    std::ifstream fs(_path.c_str());
-//    if (!fs.good())
-//    {
-//        std::cerr << "Error stream file not found" << std::endl;
-//        return INTERNAL_SERVER_ERROR;
-//    }
-//    std::string text;
-//    text.assign(std::istreambuf_iterator<char>(fs),
-//                std::istreambuf_iterator<char>());
-//    fs.close();
-//    _req_body = text;
-
     _fd_file = ::open("cgi_tmp", O_CREAT | O_RDWR | O_TRUNC, 00755);
     if (_fd_file == -1)
         std::cout << "OPEN FAILED" << std::endl;
@@ -185,11 +172,6 @@ int CGI::setCGIEnvironment(const RequestParser *request, const Server *server)
 
     if (!(_cgi_env = ft::mapToArray(_env)))
         return 1;
-
-//    int i = 0;
-//    while (_cgi_env[i])
-//        printf("%s\n", _cgi_env[i++]);
-
     return 0;
 }
 
