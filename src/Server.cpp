@@ -6,7 +6,7 @@
 /**************************************************************************************/
 Server::Server() : _port(), _fd(), _host(), _name(), _location(), _addr()
 {
-	addLocation("", Location());
+	addLocation("/", Location());
 }
 
 Server::Server(const Server &other)
@@ -129,10 +129,10 @@ unsigned int                        Server::getHost() const { return (this->_hos
 const std::map<std::string, Location> &Server::getLocations() const { return (this->_location); }
 
 // TODO TYR: Remove
-std::string				            Server::getRoot() const { return (this->_location.at("").root_dir); }
-std::vector<std::string>            Server::getIndex() const { return (this->_location.at("").indexes); }
-std::string							Server::getCGIBin() const { return (this->_location.at("").cgi_bin); }
-std::vector<std::string>            Server::getCGIExtensions() const { return (this->_location.at("").cgi_extensions); }
+std::string				            Server::getRoot() const { return (this->_location.at("/").root_dir); }
+std::vector<std::string>            Server::getIndex() const { return (this->_location.at("/").indexes); }
+std::string							Server::getCGIBin() const { return (this->_location.at("/").cgi_bin); }
+std::vector<std::string>            Server::getCGIExtensions() const { return (this->_location.at("/").cgi_extensions); }
 
 /**************************************************************************************/
 /*                                  ADDERS                                            */

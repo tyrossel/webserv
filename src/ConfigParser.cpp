@@ -6,7 +6,7 @@
 /*   By: trossel <trossel@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 16:47:18 by trossel           #+#    #+#             */
-/*   Updated: 2022/10/21 15:49:02 by trossel          ###   ########.fr       */
+/*   Updated: 2022/10/22 14:04:04 by trossel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -114,7 +114,7 @@ Server ConfigParsor::parseServer(const JsonObject &serverObject) const
 	// Default location
 	Location defaultLocation = parseLocation(serverObject, Location());
 	defaultLocation.isCGI = false;
-	serverCfg.addLocation("", defaultLocation);
+	serverCfg.addLocation("/", defaultLocation);
 
 	// Other locations
 	std::vector<JsonObject> locations = serverObject.getArray("locations").ObjectValues();

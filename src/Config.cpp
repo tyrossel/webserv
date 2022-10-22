@@ -55,7 +55,7 @@ bool							Config::isValid() const
 			const std::string &loc_path = it->first;
 			const Location &loc = it->second;
 
-			if (loc_path.empty() && loc.root_dir.empty())
+			if (loc_path == "/" && loc.root_dir.empty())
 				throw std::logic_error("Server error: cannot have an empty root_dir");
 			if (loc.isCGI && !loc.root_dir.empty())
 				throw std::logic_error("Location error: Cannot have a root and a cgi_bin");
@@ -83,8 +83,7 @@ std::ostream &operator<<(std::ostream &out, const Config &rhs)
         for (std::map<std::string, Location>::iterator it = location.begin();
                 it != location.end(); it++)
 		{
-			out << YELLOW << "\nLocation: " << RESET << (it->first.empty() ? "DEFAULT" : it->first)
-				<< std::endl << it->second;
+			out << YELLOW << "\nLocation: " << RESET << it->first << std::endl << it->second;
 		}
     }
     return (out);

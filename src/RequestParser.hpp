@@ -3,6 +3,9 @@
 
 #include "../includes/webserv.hpp"
 
+class Server;
+class Location;
+
 class RequestParser {
 private:
     std::string                         _method;
@@ -42,6 +45,9 @@ public:
     int                                 parseChunkedBody(size_t &index);
     int                                 parseBody(size_t &index);
     int                                 parseRequest(const char *request);
+
+    const Location &                    FindLocation(const Server &server) const;
+    const Server &                    FindServer(const std::vector<Server> &servers) const;
 
     /* GETTERS */
     std::map<std::string, std::string>  getHeaders() const;
