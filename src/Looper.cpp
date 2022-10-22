@@ -195,7 +195,6 @@ void Looper::addDate(long socket)
 {
     // current date/time based on current system
     time_t now = time(0);
-
     // convert now to string form
     char* dt = ctime(&now);
     // convert now to tm struct for UTC
