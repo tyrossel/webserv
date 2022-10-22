@@ -342,7 +342,7 @@ int RequestParser::parseChunkedBody(size_t &index)
         index = _request.find_first_not_of("\r\n", end_line);
     }
 
-    //TODO : body.length() > max_body_size => ERROR
+
 
     return -1;
 }
