@@ -6,7 +6,7 @@
 /*   By: trossel <trossel@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 16:47:18 by trossel           #+#    #+#             */
-/*   Updated: 2022/10/22 14:04:04 by trossel          ###   ########.fr       */
+/*   Updated: 2022/10/22 15:27:28 by trossel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,12 +101,11 @@ Server ConfigParsor::parseServer(const JsonObject &serverObject) const
 {
     Server serverCfg;
 
-    serverCfg.addPort(serverObject.getInt("port"));
+    serverCfg.addPort(serverObject.getIntOrDefault("port", 80));
 
-	serverCfg.addAddress(serverObject.getString("address"));
+	serverCfg.addAddress(serverObject.getStringOrDefault("address", "0.0.0.0"));
 
-
-	std::vector<std::string> hosts = serverObject.getArray("server_name").stringValues();
+	std::vector<std::string> hosts = serverObject.getArrayOrEmpty("server_name").stringValues();
 	for(std::vector<std::string>::iterator it = hosts.begin();
 		it != hosts.end(); it++)
 		serverCfg.addName(*it);
