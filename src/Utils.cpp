@@ -22,6 +22,30 @@ namespace ft {
         return (dst);
     }
 
+//    unsigned int strToIp(std::string str)
+//    {
+//        char c_str[3];
+//        int n = 0;
+//
+//        for (int i = 0; i < str.size(); i++) {
+//            i += digitToDot(str.c_str(), i + 1);
+//            c_str[n++] = substr(x, x, );
+//        }
+//    }
+//
+//    int digitToDot(char *str, int occurence)
+//    {
+//        int ret = (occurence * -1) + 1;
+//        for (int i = 0; str[i] != '.' && occurence; i++)
+//        {
+//            if (str[i] == '.')
+//                occurence--;
+//        }
+//        ret = i;
+//        return (ret);
+//    }
+
+
     void	bzero(void *s, size_t n)
     {
         size_t	count;
