@@ -96,6 +96,12 @@ int    Server::setupListen()
         std::cerr << "Could not create server." << std::endl;
         return (-1);
     }
+	int true_var = true;
+	if (setsockopt(_fd,SOL_SOCKET,SO_REUSEADDR,&true_var,sizeof(int)) == -1)
+	{
+		std::cerr << "setsockopt error" << std::endl;
+		return (-1);
+	}
     this->setAddress();
     if (bind(_fd, (struct sockaddr *)&_addr, sizeof(_addr)) == -1)
     {
