@@ -67,17 +67,25 @@ void    Server::setAddress()
 
 int     Server::send(long socket, std::map<long, std::string> response)
 {
-    int ret = 0;
+    int bytes_sent_total = 0;
+    int bytes_sent_now = 0;
 
-    if (response[socket].c_str())
-        ret = ::send(socket, response[socket].c_str(), response[socket].size(), 0);
-    else
-        std::cout << "Error on sockets 🔥" << std::endl;
-    std::cout << YELLOW << "SENDING " << ret << " BYTES TO SOCKET " << socket << RESET << std::endl;
-    if (ret <= 0)
+    while (bytes_sent_total < (int)response[socket].size())
+    {
+        bytes_sent_now = ::send(socket, response[socket].c_str() + bytes_sent_total, response[socket].size() - bytes_sent_total, 0);
+        std::cout << YELLOW << "SENDING " << bytes_sent_now << " BYTES TO SOCKET " << socket << RESET << std::endl;
+        if (bytes_sent_now == -1)
+        {
+            std::cout << "Error on sockets 🔥. Send failed" << std::endl;
+            break;
+        }
+        bytes_sent_total += bytes_sent_now;
+        usleep(100);
+    }
+    if (bytes_sent_total <= 0)
         return (-1);
     else
-        return (ret);
+        return (bytes_sent_total);
 }
 
 int    Server::setupListen()
