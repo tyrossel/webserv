@@ -33,8 +33,11 @@ bool							Config::isValid() const
 	for (std::vector<Server>::const_iterator it = _server.begin();
 			it != _server.end(); it++)
 	{
-		if (it->getPort() < 0 || it->getPort() > 65536)
+		if (it->getPort() < 1 || it->getPort() > 65535)
+		{
+			std::cerr << "Port is not valid: " << it->getPort() << std::endl;
 			return false;
+		}
 
 		std::vector<std::string> names = it->getName();
 		if (names.empty())
