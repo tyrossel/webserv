@@ -6,7 +6,7 @@
 /*   By: trossel <trossel@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 16:47:18 by trossel           #+#    #+#             */
-/*   Updated: 2022/10/22 15:27:28 by trossel          ###   ########.fr       */
+/*   Updated: 2022/10/24 15:36:25 by trossel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,7 +103,10 @@ Server ConfigParsor::parseServer(const JsonObject &serverObject) const
 
     serverCfg.addPort(serverObject.getIntOrDefault("port", 80));
 
-	serverCfg.addAddress(serverObject.getStringOrDefault("address", "0.0.0.0"));
+	std::string address = serverObject.getStringOrDefault("address", "0.0.0.0");
+	if (address == "localhost")
+		address = "127.0.0.1";
+	serverCfg.addAddress(address);
 
 	std::vector<std::string> hosts = serverObject.getArrayOrEmpty("server_name").stringValues();
 	for(std::vector<std::string>::iterator it = hosts.begin();
