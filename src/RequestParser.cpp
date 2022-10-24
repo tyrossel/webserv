@@ -289,18 +289,19 @@ int RequestParser::parseTrailer(size_t &index)
 
     if (_request.substr(0, 5).compare("0\r\n\r\n") == 0)
         return 0;
-
-    _request.erase(0, 3);
+    else if (_request.substr(0, 3).compare("0\r\n") == 0)
+        _request.erase(0, 3);
+    else
+        return (exitStatus(BAD_REQUEST));
 
     size_t colon, end_line;
     while ((end_line = _request.find("\r\n")) != std::string::npos)
     {
-        if (_request.find("\r\n") == 0)
-            return 0;
         if ((colon = _request.find(':', 0)) != std::string::npos)
         {
             std::string key = _request.substr(0, colon);
             std::string value = _request.substr(colon + 1, end_line - colon);
+            ft::trim(key);
             ft::trim(value);
 
             _headers[key] = value;
@@ -341,8 +342,6 @@ int RequestParser::parseChunkedBody(size_t &index)
         index += size;
         index = _request.find_first_not_of("\r\n", end_line);
     }
-
-
 
     return -1;
 }
