@@ -135,7 +135,7 @@ int CGI::setCGIEnvironment(const RequestParser *request, const Server *server)
     _cwd = tmp;
     free(tmp);
 
-    _cgi_path = _cwd + "/cgi-bin/ubuntu_cgi_tester";
+    _cgi_path = _cwd + "/cgi-bin/cgi_tester";
     _file_path = server->getRoot() + request->getPath();
     _cgi_env = NULL;
 
