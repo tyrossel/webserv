@@ -60,7 +60,7 @@ int Looper::setupLoop()
     }
     if (_max_fd == 0)
     {
-        std::cerr << "Could not setup cluster !" << std::endl;
+        std::cerr << "Could not setup looper !" << std::endl;
         return (-1);
     }
     else
@@ -142,7 +142,7 @@ void Looper::addErrorBodyToResponse(long socket)
     i = text.size();
     out << i;
     _response[socket].append(out.str());
-    _response[socket].append("\n\n");
+    _response[socket].append("\r\n\r\n");
     _response[socket].append(text);
 }
 
@@ -155,12 +155,12 @@ int Looper::writeResponseHeader(long socket)
     out << i;
     _response[socket].append("HTTP/1.1 ");
     if (i == 0) {
-        _response[socket].append("200 OK\n");
+        _response[socket].append("200 OK\r\n");
         return (HTTP_OK);
     }
     else {
         _response[socket].append(out.str());
-        _response[socket].append(" KO\n");
+        _response[socket].append(" KO\r\n");
     }
     return (i);
 }
@@ -176,7 +176,7 @@ int Looper::addHTTPHeader(long socket)
 
 void Looper::addServerHeaderResponse(long socket)
 {
-    _response[socket].append("Server: WetServ/1.0.0\n");
+    _response[socket].append("Server: WetServ/1.0.0\r\n");
 }
 
 void Looper::addContentType(long socket)
@@ -187,7 +187,7 @@ void Looper::addContentType(long socket)
         _response[socket].append(tmp.find("Sec-Fetch-Dest")->second);
     else
         _response[socket].append("NONE");
-    _response[socket].append("\n");
+    _response[socket].append("\r\n");
 }
 
 void Looper::addDate(long socket)
@@ -224,6 +224,7 @@ void Looper::addBodyToResponse(long socket) // TODO: add file to read from (std:
     fs.close();
     _response[socket].append("Content-Length: ");
     i = text.size();
+    std::cout << text.size() << std::endl;
     out << i;
     _response[socket].append(out.str());
     _response[socket].append("\r\n\r\n");
@@ -258,7 +259,7 @@ void Looper::addContentLengthPOST(long socket)
 {
     _response[socket].append("Content-Length: ");
     _response[socket].append(_request[socket].getHeaders().find("Content-Length")->second);
-    _response[socket].append("\n");
+    _response[socket].append("\r\n");
 }
 
 int Looper::buildPostResponse(long socket)

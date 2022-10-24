@@ -68,6 +68,7 @@ void    Server::setAddress()
 int     Server::send(long socket, std::map<long, std::string> response)
 {
     int ret = 0;
+
     if (response[socket].c_str())
         ret = ::send(socket, response[socket].c_str(), response[socket].size(), 0);
     else
@@ -81,7 +82,7 @@ int     Server::send(long socket, std::map<long, std::string> response)
 
 int    Server::setupListen()
 {
-    _fd = socket(AF_INET, SOCK_STREAM, 0);
+    _fd = socket(PF_INET, SOCK_STREAM, 0);
     if (_fd == -1)
     {
         std::cerr << "Could not create server." << std::endl;
