@@ -6,12 +6,13 @@
 /*   By: trossel <trossel@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 16:47:18 by trossel           #+#    #+#             */
-/*   Updated: 2022/10/24 15:36:25 by trossel          ###   ########.fr       */
+/*   Updated: 2022/10/25 19:38:36 by trossel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ConfigParser.hpp"
 #include "Config.hpp"
+#include "Utils.hpp"
 #include <fstream>
 #include <stdexcept>
 #include <string>
@@ -40,14 +41,6 @@ const std::string &ConfigParsor::getFilename() const { return this->_filename;}
 
 Location ConfigParsor::parseLocation(const JsonObject &locObject, const Location &defaultLoc) const
 {
-	std::map<std::string, RequestType> requests_map;
-	requests_map["GET"] = Get;
-	requests_map["POST"] = Post;
-	requests_map["DELETE"] = Delete;
-	requests_map["PUT"] = Put;
-	requests_map["HEAD"] = Head;
-	requests_map["PATCH"] = Patch;
-
 	Location loc;
 
 	loc.root_dir = locObject.getStringOrDefault("root", "");
@@ -84,7 +77,7 @@ Location ConfigParsor::parseLocation(const JsonObject &locObject, const Location
 	std::vector<std::string> disabled_requests = locObject.getArrayOrEmpty("disabled_methods").stringValues();
 	for (size_t i(0); i < disabled_requests.size(); i++)
 	{
-		RequestType type = requests_map[disabled_requests[i]];
+		RequestType type = ft::RequestFromString(disabled_requests[i]);
 		loc.disableRequest(type);
 	}
 
