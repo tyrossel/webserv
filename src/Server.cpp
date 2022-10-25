@@ -61,7 +61,7 @@ void    Server::setAddress()
 
     //TODO : _host = strToIp(_address);
     _addr.sin_family = AF_INET;
-    _addr.sin_addr.s_addr = htonl(_host);
+    _addr.sin_addr.s_addr = inet_addr(_address.c_str());
     _addr.sin_port = htons(_port);
 }
 
