@@ -493,14 +493,13 @@ bool	RequestParser::isValid(const Location &loc) const
 
 void	RequestParser::updatePathWithLocation(const Location &loc)
 {
-	_path = loc.root_dir + _path;
+	_path = loc.root_dir + "/" + _path.erase(0, loc.path.length());
 
 	if (loc.isCGI)
 		return ;
 
 	if (!ft::isDirectory(_path))
 		return ;
-
 
 	if (loc.auto_index)
 	{
