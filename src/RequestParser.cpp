@@ -469,12 +469,24 @@ const Server & RequestParser::FindServer(const std::vector<Server> &servers, in_
 
 bool	RequestParser::isValid(const Location &loc) const
 {
+	if (_headers.find("Host") == _headers.end())
+	{
+		std::cerr << RED << "Request has no Host header" << RESET << std::endl;
+		return false;
+	}
+
 	RequestType req_type = ft::RequestFromString(_method);
 	if (!loc.isRequestAllowed(req_type))
+	{
+		std::cerr << RED << "Method " << _method << " not allowed in location " << loc.path << RESET << std::endl;
 		return false;
+	}
 
-	if (_body_length > loc.max_client_body_size)
+	if (loc.max_client_body_size != 0 && _body_length > loc.max_client_body_size)
+	{
+		std::cerr << RED << "Client body size too big for location " << loc.path << RESET << std::endl;
 		return false;
+	}
 
 	return true;
 }
