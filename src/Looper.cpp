@@ -82,7 +82,7 @@ int     Looper::checkCode(RequestParser request)
 
 int     Looper::checkPath(long socket)
 {
-	const std::string path = _request[socket].getPath();
+	const std::string path = _request[socket].getLocation();
 	if (ft::isDirectory(path))
 	{
 		return HTTP_OK;
@@ -201,17 +201,18 @@ void Looper::addBodyToResponse(long socket) // TODO: add file to read from (std:
     std::string text;
     int i = 0;
     std::stringstream out;
+	std::string loc = _request[socket].getLocation();
 	std::string path = _request[socket].getPath();
 
-	if (ft::isDirectory(path))
+	if (ft::isDirectory(loc))
 	{
 		// TODO TYR: we should send the path requested by the client in order
 		// not to expose the physical architecture of our server
-		text = createDirectoryListingBody(path, path);
+		text = createDirectoryListingBody(path, loc);
 	}
 	else
 	{
-		std::ifstream fs(path.c_str());
+		std::ifstream fs(loc.c_str());
 		if (!fs.good())
 		{
 			std::cerr << "Error stream file not found" << std::endl;

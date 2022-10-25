@@ -23,6 +23,7 @@ RequestParser &RequestParser::operator=(const RequestParser &other)
     {
         this->_method = other._method;
         this->_path = other._path;
+		this->_location = other._location;
         this->_query = other._query;
         this->_version = other._version;
         this->_headers = other._headers;
@@ -493,12 +494,12 @@ bool	RequestParser::isValid(const Location &loc) const
 
 void	RequestParser::updatePathWithLocation(const Location &loc)
 {
-	_path = loc.root_dir + "/" + _path.erase(0, loc.path.length());
+	_location = loc.root_dir + "/" + _path.substr(loc.path.length());
 
 	if (loc.isCGI)
 		return ;
 
-	if (!ft::isDirectory(_path))
+	if (!ft::isDirectory(_location))
 		return ;
 
 	if (loc.auto_index)
@@ -506,11 +507,11 @@ void	RequestParser::updatePathWithLocation(const Location &loc)
 		std::vector<std::string>::const_iterator it = loc.indexes.begin();
 		for (;it != loc.indexes.end(); it++)
 		{
-			std::string new_path = _path + *it;
-			std::ifstream test_stream(new_path.c_str());
+			std::string new_location = _location + *it;
+			std::ifstream test_stream(new_location.c_str());
 			if (test_stream.is_open())
 			{
-				_path = new_path;
+				_location = new_location;
 				return ;
 			}
 			test_stream.close();
@@ -526,6 +527,7 @@ void	RequestParser::updatePathWithLocation(const Location &loc)
 std::map<std::string, std::string>  RequestParser::getHeaders() const { return (this->_headers); }
 std::string                         RequestParser::getMethod() const { return (this->_method); }
 std::string                         RequestParser::getPath() const { return (this->_path); }
+std::string                         RequestParser::getLocation() const { return (this->_location); }
 std::string                         RequestParser::getQuery() const { return (this->_query); }
 std::string                         RequestParser::getVersion() const { return (this->_version); }
 std::string                         RequestParser::getBody() const { return (this->_body); }

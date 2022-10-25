@@ -9,7 +9,8 @@ struct Location;
 class RequestParser {
 private:
     std::string                         _method;
-    std::string                         _path;
+    std::string                         _path;     // According to client
+	std::string							_location; // Where the file is physically located
     std::string                         _query;
     std::string                         _version;
     std::map<std::string, std::string>  _headers;
@@ -55,6 +56,7 @@ public:
     std::map<std::string, std::string>  getHeaders() const;
     std::string                         getMethod() const;
     std::string                         getPath() const;
+    std::string                         getLocation() const;
     std::string                         getQuery() const;
     std::string                         getVersion() const;
     std::string                         getBody() const;

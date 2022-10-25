@@ -49,7 +49,9 @@ std::string createDirectoryListingBody(const std::string &dir_path, const std::s
 	{
 		std::string name(it->d_name);
 		std::string line = "<a href=\"";
-		line += dir_root + "/";
+		line += dir_path;
+		if (dir_path[dir_path.size() -1] != '/')
+			line += '/';
 		line += it->d_name;
 		line += "\">";
 		line += it->d_name;
