@@ -1,5 +1,7 @@
 #compilation files
 /obj
+.cache/
+compile_commands.json
 
 #executable
 webserv
