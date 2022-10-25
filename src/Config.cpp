@@ -39,17 +39,13 @@ bool							Config::isValid() const
 			return false;
 		}
 
-		std::vector<std::string> names = it->getName();
-		if (names.empty())
+		if (inet_addr(it->getAddress().c_str()) == INADDR_NONE)
+		{
+			std::cerr << "Address is not valid: " << it->getAddress() << std::endl;
 			return false;
-		// for (std::vector<std::string>::const_iterator it(names.begin());
-		// it != names.end(); it++)
-		// {
-			// if (!ft::is_url(*it))
-			// 	return false;
-		// }
-		if (it->getRoot().empty())
-			return false;
+		}
+
+		// TODO TYR: Maybe check that names are valid URL ?
 
 		const std::map<std::string, Location> locations = it->getLocations();
 		for(std::map<std::string, Location>::const_iterator it = locations.begin();
@@ -58,11 +54,38 @@ bool							Config::isValid() const
 			const std::string &loc_path = it->first;
 			const Location &loc = it->second;
 
+			if (loc_path.empty())
+			{
+				std::cerr << "Location error: location_path cannot be empty" << std::endl;
+				return false;
+			}
 			if (loc_path == "/" && loc.root_dir.empty())
-				throw std::logic_error("Server error: cannot have an empty root_dir");
-			if (loc.isCGI && !loc.root_dir.empty())
-				throw std::logic_error("Location error: Cannot have a root and a cgi_bin");
-			// TODO TYR: Check if CGI, that cgi_bin is set and executable
+			{
+				std::cerr << "Server error: cannot have an empty root_dir" << std::endl;
+				return false;
+			}
+			if (loc.max_client_body_size < 0)
+			{
+				std::cerr << "Location '" + loc_path + "' error: max_client_body_size must be positive" << std::endl;
+				return false;
+			}
+			if (loc.isCGI)
+			{
+				if (!loc.root_dir.empty())
+				{
+					std::cerr << "Location error: Cannot have a root and a cgi_bin" << std::endl;
+					return false;
+				}
+				// TODO TYR: Check that cgi_bin is set and executable
+			}
+			else
+			{
+				if (loc.root_dir.empty())
+				{
+					std::cerr << "Location error: root_dir cannot be empty if not a CGI proxy" << std::endl;
+					return false;
+				}
+			}
 		}
 	}
 	return true;
@@ -76,6 +99,7 @@ std::ostream &operator<<(std::ostream &out, const Config &rhs)
     out << "Configuration Servers" << std::endl;
     for (int i = 0; i < rhs.getNbServer(); i++) {
         out << YELLOW << "Server number : " << RESET << i
+        << YELLOW << "\nAddress : " << RESET << rhs.getServer()[i].getAddress()
         << YELLOW << "\nPort : " << RESET << rhs.getServer()[i].getPort();
 
 		out << YELLOW << "\nName : " << RESET;
