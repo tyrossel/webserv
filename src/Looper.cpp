@@ -1,4 +1,5 @@
 #include "Looper.hpp"
+#include "DirectoryListing.hpp"
 #include "Utils.hpp"
 #include "webserv.hpp"
 
@@ -81,7 +82,12 @@ int     Looper::checkCode(RequestParser request)
 
 int     Looper::checkPath(long socket)
 {
-    std::ifstream test(_request[socket].getPath().c_str());
+	const std::string path = _request[socket].getPath();
+	if (ft::isDirectory(path))
+	{
+		return HTTP_OK;
+	}
+    std::ifstream test(path.c_str());
     if (!test.good())
     {
         _request[socket].setStatus(404);
@@ -192,18 +198,29 @@ void Looper::addDate(long socket)
 
 void Looper::addBodyToResponse(long socket) // TODO: add file to read from (std::string path)
 {
+    std::string text;
     int i = 0;
     std::stringstream out;
-    std::ifstream fs(_request[socket].getPath().c_str());
-    if (!fs.good())
-    {
-        std::cerr << "Error stream file not found" << std::endl;
-        return ;
-    }
-    std::string text;
-    text.assign(std::istreambuf_iterator<char>(fs),
-                std::istreambuf_iterator<char>());
-    fs.close();
+	std::string path = _request[socket].getPath();
+
+	if (ft::isDirectory(path))
+	{
+		// TODO TYR: we should send the path requested by the client in order
+		// not to expose the physical architecture of our server
+		text = createDirectoryListingBody(path, path);
+	}
+	else
+	{
+		std::ifstream fs(path.c_str());
+		if (!fs.good())
+		{
+			std::cerr << "Error stream file not found" << std::endl;
+			return ;
+		}
+		text.assign(std::istreambuf_iterator<char>(fs),
+					std::istreambuf_iterator<char>());
+		fs.close();
+	}
     _response[socket].append("Content-Length: ");
     i = text.size();
     std::cout << text.size() << std::endl;
@@ -374,8 +391,8 @@ int Looper::readFromClient(long socket)
 
 		if(!request.isValid(loc))
 			return (-1);
+
 		request.updatePathWithLocation(loc);
-		std::cout << MAGENTA << "New Path : " << request.getPath() << RESET << std::endl;
 
         _request.insert(std::make_pair<long, RequestParser>(socket, request));
         buildResponse(socket, loc);
