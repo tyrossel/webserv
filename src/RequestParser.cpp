@@ -402,7 +402,7 @@ int RequestParser::parseRequest(const char *request)
 
 bool matchLocation(const std::string &path, const std::string &loc_path)
 {
-	// TODO: allow other matching, such as those defined in Nginx:
+	// TODO TYR: allow other matching, such as those defined in Nginx:
 	// = (has to be totally equal)
 	// ~ (case-sensitive)
 	// ~* case-insensitive
@@ -421,43 +421,44 @@ const Location & RequestParser::FindLocation(const Server &server) const
 			best_loc_index = it->first;
 	}
 	std::cout << MAGENTA << "Location found: " << best_loc_index << RESET << std::endl;
-	// return loc_map.at("/");
 	return loc_map.at(best_loc_index);
 }
 
-const Server & RequestParser::FindServer(const std::vector<Server> &servers) const
+const Server & RequestParser::FindServer(const std::vector<Server> &servers, in_addr_t req_addr) const
 {
-	std::string hostHeader = _headers.at("Host");
+	(void)req_addr;
+	// TODO TYR: implement
 
-	size_t	colon = hostHeader.find_first_of(':');
+	// // Splitting of Host header into host and port:
+	// std::string hostHeader = _headers.at("Host");
+	//
+	// size_t	colon = hostHeader.find_first_of(':');
+	//
+	// std::string requestHost = hostHeader.substr(0, colon);
+	// std::string requestPortStr = (colon != std::string::npos ? hostHeader.substr(colon + 1) : "80");
+	// int requestPort = 80;
+	// if (colon != std::string::npos && colon != hostHeader.size() - 1)
+	// 	requestPort = ft::stoi(requestPortStr);
+	// std::cout << MAGENTA << "Request host=" << requestHost << ", port=" << requestPort << RESET << std::endl;
 
-	std::string requestHost = hostHeader.substr(0, colon);
-	std::string requestPortStr = (colon != std::string::npos ? hostHeader.substr(colon + 1) : "80");
-	int requestPort = 80;
-	if (colon != hostHeader.size() - 1)
-		requestPort = ft::stoi(requestPortStr);
 
-	std::cout << MAGENTA << "Request host=" << requestHost << ", port=" << requestPort <<
-		RESET << std::endl;
-
-
-	for(std::vector<Server>::const_iterator it_srv = servers.begin(); it_srv !=
-			servers.end(); it_srv++)
-	{
-		if (requestPort != it_srv->getPort())
-			continue;
-
-		const std::vector<std::string> &server_names = it_srv->getName();
-		if (server_names.empty())
-
-		for (std::vector<std::string>::const_iterator it_names = server_names.begin();
-			it_names != server_names.end(); it_names++)
-		{
-			if (*it_names == requestHost && it_srv->getPort() == requestPort)
-				return *it_srv;
-		}
-		// const Server &srv = *it;
-	}
+	// for(std::vector<Server>::const_iterator it_srv = servers.begin(); it_srv !=
+	// 		servers.end(); it_srv++)
+	// {
+	// 	if (requestPort != it_srv->getPort())
+	// 		continue;
+	//
+	// 	const std::vector<std::string> &server_names = it_srv->getName();
+	// 	if (server_names.empty())
+	//
+	// 	for (std::vector<std::string>::const_iterator it_names = server_names.begin();
+	// 		it_names != server_names.end(); it_names++)
+	// 	{
+	// 		if (*it_names == requestHost && it_srv->getPort() == requestPort)
+	// 			return *it_srv;
+	// 	}
+	// 	// const Server &srv = *it;
+	// }
 
 	return servers[0];
 }

@@ -59,7 +59,6 @@ void    Server::setAddress()
 {
     memset((char *)&_addr, 0, sizeof(_addr)); //TODO : import our memset
 
-    //TODO : _host = strToIp(_address);
     _addr.sin_family = AF_INET;
     _addr.sin_addr.s_addr = inet_addr(_address.c_str());
     _addr.sin_port = htons(_port);
@@ -90,7 +89,7 @@ int     Server::send(long socket, std::map<long, std::string> response)
 
 int    Server::setupListen()
 {
-    _fd = socket(PF_INET, SOCK_STREAM, 0);
+    _fd = socket(AF_INET, SOCK_STREAM, 0);
     if (_fd == -1)
     {
         std::cerr << "Could not create server." << std::endl;

@@ -66,9 +66,6 @@
 *                              CUSTOM DEFINES                                      *
 ***********************************************************************************/
 # define URI_MAX_SIZE 10000
-# define GET 1111
-# define POST 2222
-# define DELETE 3333
 
 enum RequestType
 {

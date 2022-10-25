@@ -3,6 +3,9 @@
 
 #include "Config.hpp"
 #include "CommonGatewayInterface.hpp"
+#include "Server.hpp"
+#include "RequestParser.hpp"
+#include "webserv.hpp"
 
 class Looper {
     private:
@@ -40,14 +43,14 @@ class Looper {
         int     checkCode(RequestParser request);
         int     checkPath(long socket);
         int     secFetchImage(long socket);
-        int     requestMethod(long socket);
+        RequestType     requestMethod(long socket);
         // =================================================================
 
         // RESPONSE CRAFTING ===============================================
-        int     buildResponse(long socket);
-        int     buildGetResponse(long socket);
-        int     buildPostResponse(long socket);
-        int     buildDeleteResponse(long socket);
+        int     buildResponse(long socket, const Location &loc);
+        int     buildGetResponse(long socket, const Location &loc);
+        int     buildPostResponse(long socket, const Location &loc);
+        int     buildDeleteResponse(long socket, const Location &loc);
 
         void    addServerHeaderResponse(long socket);
         void    addContentType(long socket);

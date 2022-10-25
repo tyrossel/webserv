@@ -103,17 +103,23 @@ int Looper::secFetchImage(long socket)
     return (1);
 }
 
-int Looper::requestMethod(long socket)
+RequestType Looper::requestMethod(long socket)
 {
     std::string method = _request[socket].getMethod();
     if (method == "GET")
-        return GET;
+        return Get;
     else if (method == "POST")
-        return POST;
+        return Post;
     else if (method == "DELETE")
-        return DELETE;
+        return Delete;
+    else if (method == "PUT")
+        return Put;
+    else if (method == "HEAD")
+        return Head;
+    else if (method == "PATCH")
+        return Patch;
     else
-        return 0;
+        return Unknown;
 }
 
 /**************************************************************************************/
@@ -231,7 +237,7 @@ void Looper::addBodyToResponse(long socket) // TODO: add file to read from (std:
     _response[socket].append(text);
 }
 
-int Looper::buildDeleteResponse(long socket)
+int Looper::buildDeleteResponse(long socket, const Location &loc)
 {
     // TODO : DO THE DELETE
     int             ret = 0;
@@ -262,7 +268,7 @@ void Looper::addContentLengthPOST(long socket)
     _response[socket].append("\r\n");
 }
 
-int Looper::buildPostResponse(long socket)
+int Looper::buildPostResponse(long socket, const Location &loc)
 {
     int ret = 0;
 
@@ -285,7 +291,7 @@ int Looper::buildPostResponse(long socket)
     return (1);
 }
 
-int Looper::buildGetResponse(long socket)
+int Looper::buildGetResponse(long socket, const Location &loc)
 {
     int             ret = 0;
 
@@ -334,18 +340,22 @@ int Looper::buildGetResponse(long socket)
     return (ret);
 }
 
-int Looper::buildResponse(long socket)
+int Looper::buildResponse(long socket, const Location &loc)
 {
-    // TODO : Map with func pointers later ? Or use Tyrossel enum
-    switch (requestMethod(socket)) {
-        case GET:
-            buildGetResponse(socket);
+    // TODO : Map with func pointers later
+	RequestType req_type = requestMethod(socket);
+	if (loc.isRequestAllowed(req_type))
+		return (1);
+
+    switch (req_type) {
+        case Get:
+            buildGetResponse(socket, loc);
             break;
-        case POST:
-            buildPostResponse(socket);
+        case Post:
+            buildPostResponse(socket, loc);
             break;
-        case DELETE:
-            buildDeleteResponse(socket);
+        case Delete:
+            buildDeleteResponse(socket, loc);
             break;
         default:
             std::cout << RED << _request[socket].getMethod() << " is not a method that the server threats." << RESET << std::endl;
@@ -372,15 +382,17 @@ int Looper::readFromClient(long socket)
             std::cout << "==============================================" << std::endl;
         }
 
-        //TODO : body.length() > max_body_size => ERROR after get the right Location
+		struct sockaddr_in req_addr;
+		socklen_t addr_len = sizeof(req_addr);
+		getsockname(socket, (struct sockaddr *)&req_addr, &addr_len);
+		char *addr_str = inet_ntoa(req_addr.sin_addr);
+		std::cout << MAGENTA << "Request adresse: " << RESET << addr_str << std::endl;
+		std::cout << MAGENTA << "Request port: " << RESET << req_addr.sin_port << std::endl;
 
-		const Server &srv = request.FindServer(_servers);
+		const Server &srv = request.FindServer(_servers, req_addr.sin_addr.s_addr);
 		const Location &loc = request.FindLocation(srv);
 
-		// TODO TYR: convert method from string to enum
-		// if(loc.isRequestAllowed(request.getMethod())
-
-        buildResponse(socket);
+        buildResponse(socket, loc);
     }
     return (ret);
 }
