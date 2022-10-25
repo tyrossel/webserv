@@ -43,7 +43,6 @@ class Looper {
         int     checkCode(RequestParser request);
         int     checkPath(long socket);
         int     secFetchImage(long socket);
-        RequestType     requestMethod(long socket);
         // =================================================================
 
         // RESPONSE CRAFTING ===============================================

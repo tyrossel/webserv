@@ -1,4 +1,6 @@
 #include "Looper.hpp"
+#include "Utils.hpp"
+#include "webserv.hpp"
 
 /**************************************************************************************/
 /*                          CONSTRUCTORS / DESTRUCTORS                                */
@@ -101,25 +103,6 @@ int Looper::secFetchImage(long socket)
             return (0);
     }
     return (1);
-}
-
-RequestType Looper::requestMethod(long socket)
-{
-    std::string method = _request[socket].getMethod();
-    if (method == "GET")
-        return Get;
-    else if (method == "POST")
-        return Post;
-    else if (method == "DELETE")
-        return Delete;
-    else if (method == "PUT")
-        return Put;
-    else if (method == "HEAD")
-        return Head;
-    else if (method == "PATCH")
-        return Patch;
-    else
-        return Unknown;
 }
 
 /**************************************************************************************/
@@ -239,7 +222,9 @@ void Looper::addBodyToResponse(long socket) // TODO: add file to read from (std:
 
 int Looper::buildDeleteResponse(long socket, const Location &loc)
 {
-    // TODO : DO THE DELETE
+	(void)loc;
+    // TODO : DO THE DELTE
+
     int             ret = 0;
 
     _response.insert(std::make_pair<long int, std::string>(socket, ""));
@@ -270,7 +255,9 @@ void Looper::addContentLengthPOST(long socket)
 
 int Looper::buildPostResponse(long socket, const Location &loc)
 {
-    int ret = 0;
+	(void)loc;
+    // TODO : DO THE POST
+    int             ret = 0;
 
     _response.insert(std::make_pair<long int, std::string>(socket, ""));
     ret += addHTTPHeader(socket);
@@ -293,6 +280,7 @@ int Looper::buildPostResponse(long socket, const Location &loc)
 
 int Looper::buildGetResponse(long socket, const Location &loc)
 {
+	(void)loc;
     int             ret = 0;
 
     _response.insert(std::make_pair<long int, std::string>(socket, ""));
@@ -343,9 +331,7 @@ int Looper::buildGetResponse(long socket, const Location &loc)
 int Looper::buildResponse(long socket, const Location &loc)
 {
     // TODO : Map with func pointers later
-	RequestType req_type = requestMethod(socket);
-	if (loc.isRequestAllowed(req_type))
-		return (1);
+	RequestType req_type = ft::RequestFromString(_request[socket].getMethod());
 
     switch (req_type) {
         case Get:
@@ -371,6 +357,7 @@ int Looper::readFromClient(long socket)
 
     ft::bzero(&buffer, BUFFER_SIZE);
 
+	// TODO: Create a loop to read the client request
     ret = recv(socket, buffer, BUFFER_SIZE, 0);
     if (ret > 0) {
         request.parseRequest(buffer);
@@ -385,12 +372,15 @@ int Looper::readFromClient(long socket)
 		struct sockaddr_in req_addr;
 		socklen_t addr_len = sizeof(req_addr);
 		getsockname(socket, (struct sockaddr *)&req_addr, &addr_len);
-		char *addr_str = inet_ntoa(req_addr.sin_addr);
-		std::cout << MAGENTA << "Request adresse: " << RESET << addr_str << std::endl;
-		std::cout << MAGENTA << "Request port: " << RESET << req_addr.sin_port << std::endl;
+		// char *addr_str = inet_ntoa(req_addr.sin_addr);
+		// std::cout << MAGENTA << "Request adresse: " << RESET << addr_str << std::endl;
+		// std::cout << MAGENTA << "Request port: " << RESET << req_addr.sin_port << std::endl;
 
 		const Server &srv = request.FindServer(_servers, req_addr.sin_addr.s_addr);
 		const Location &loc = request.FindLocation(srv);
+
+		if(!request.isValid(loc))
+			return (-1);
 
         buildResponse(socket, loc);
     }

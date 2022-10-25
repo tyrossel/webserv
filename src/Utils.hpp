@@ -26,6 +26,8 @@ namespace ft {
     char	    *strdup(const char *str);
     void	    freeArray(char **array);
     char        **mapToArray(std::map<std::string, std::string> map);
+
+    RequestType	RequestFromString(const std::string &str);
 }
 
 #endif //WEBSERV_UTILS_HPP

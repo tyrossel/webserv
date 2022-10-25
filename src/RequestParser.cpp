@@ -1,6 +1,7 @@
 #include "RequestParser.hpp"
 #include "Server.hpp"
 #include "Location.hpp"
+#include "webserv.hpp"
 
 /**************************************************************************************/
 /*                          CONSTRUCTORS / DESTRUCTORS                                */
@@ -461,6 +462,16 @@ const Server & RequestParser::FindServer(const std::vector<Server> &servers, in_
 	// }
 
 	return servers[0];
+}
+
+bool	RequestParser::isValid(const Location &loc) const
+{
+	RequestType req_type = ft::RequestFromString(_method);
+	if (!loc.isRequestAllowed(req_type))
+		return false;
+	if (_body_length > loc.max_client_body_size)
+		return false;
+	return true;
 }
 
 /**************************************************************************************/

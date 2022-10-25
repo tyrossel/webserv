@@ -1,4 +1,5 @@
 # include "Utils.hpp"
+#include "webserv.hpp"
 int RUNNING;
 namespace ft {
 
@@ -228,6 +229,27 @@ namespace ft {
 
         return (array);
     }
+
+    RequestType	RequestFromString(const std::string &str)
+    {
+		std::map<std::string, RequestType> map;
+			map["GET"] = Get;
+			map["POST"] = Post;
+			map["DELETE"] = Delete;
+			map["HEAD"] = Head;
+			map["PATCH"] = Patch;
+			map["PUT"] = Put;
+
+		try
+		{
+			return map.at(str);
+		}
+		catch (const std::exception& e)
+		{
+			return Unknown;
+		}
+
+	}
 }
 
 
