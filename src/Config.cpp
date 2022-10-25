@@ -1,5 +1,6 @@
 #include "Config.hpp"
 #include <vector>
+#include <set>
 
 /** HOW TO TREAT LOCATION PATH
  * The modifier in the location block is optional. Having a modifier in the location block will allow NGINX to treat a URL differently. Few most common modifiers are:
@@ -28,6 +29,8 @@ void							Config::setValid(bool valid) {this->_isValid = valid;}
 
 bool							Config::isValid() const
 {
+	std::set<int> portList;
+
 	if (_server.empty())
 		return false;
 	for (std::vector<Server>::const_iterator it = _server.begin();
@@ -38,6 +41,13 @@ bool							Config::isValid() const
 			std::cerr << "Port is not valid: " << it->getPort() << std::endl;
 			return false;
 		}
+		if (portList.find(it->getPort()) != portList.end())
+		{
+			std::cerr << "Port is already used by a previous server : " <<
+				it->getPort() << std::endl;
+			return false;
+		}
+		portList.insert(it->getPort());
 
 		if (inet_addr(it->getAddress().c_str()) == INADDR_NONE)
 		{
