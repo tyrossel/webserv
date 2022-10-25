@@ -6,7 +6,7 @@
 /*   By: trossel <trossel@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/21 11:11:21 by trossel           #+#    #+#             */
-/*   Updated: 2022/10/21 16:31:52 by trossel          ###   ########.fr       */
+/*   Updated: 2022/10/25 19:40:14 by trossel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,7 @@ Location &Location::operator=(const Location &rhs)
 	max_client_body_size = rhs.max_client_body_size;
 	requests_allowed = rhs.requests_allowed;
 	isCGI = rhs.isCGI;
+	indexes = rhs.indexes;
 	auto_index = rhs.auto_index;
 	directory_listing = rhs.directory_listing;
 	root_dir = rhs.root_dir;

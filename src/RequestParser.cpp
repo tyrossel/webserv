@@ -9,7 +9,10 @@
 
 RequestParser::RequestParser() : _method(""), _path(""), _query(""), _version(""), _headers(), _body(""), _request(""), _body_length(0), _status(0) {}
 
-RequestParser::RequestParser(const RequestParser &other) : _method(other._method), _path(other._path), _version(other._version), _headers(other._headers), _body(other._body), _request(other._request), _body_length(other._body_length), _status(other._status) {}
+RequestParser::RequestParser(const RequestParser &other)
+{
+	*this = other;
+}
 
 RequestParser::~RequestParser() {}
 
@@ -19,7 +22,7 @@ RequestParser &RequestParser::operator=(const RequestParser &other)
     {
         this->_method = other._method;
         this->_path = other._path;
-        this->_path = other._query;
+        this->_query = other._query;
         this->_version = other._version;
         this->_headers = other._headers;
         this->_body = other._body;
