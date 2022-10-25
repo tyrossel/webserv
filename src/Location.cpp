@@ -6,7 +6,7 @@
 /*   By: trossel <trossel@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/21 11:11:21 by trossel           #+#    #+#             */
-/*   Updated: 2022/10/25 19:40:14 by trossel          ###   ########.fr       */
+/*   Updated: 2022/10/25 21:18:32 by trossel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@ Location::Location() :
 		isCGI(false),
 		auto_index(false),
 		directory_listing(false),
+		path(""),
 		root_dir(""),
 		cgi_bin("")
 {
@@ -38,6 +39,7 @@ Location &Location::operator=(const Location &rhs)
 	indexes = rhs.indexes;
 	auto_index = rhs.auto_index;
 	directory_listing = rhs.directory_listing;
+	path = rhs.path;
 	root_dir = rhs.root_dir;
 	cgi_bin = rhs.cgi_bin;
 	return *this;

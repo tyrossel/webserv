@@ -6,7 +6,7 @@
 /*   By: trossel <trossel@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/21 11:08:24 by trossel           #+#    #+#             */
-/*   Updated: 2022/10/21 15:54:34 by trossel          ###   ########.fr       */
+/*   Updated: 2022/10/25 21:19:06 by trossel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,8 @@ struct Location
 	bool						isCGI;
 	bool						auto_index;
 	bool						directory_listing;
-	std::string					root_dir;
+	std::string					path;				// In the client request
+	std::string					root_dir;			// Where to search for file
 	std::string					cgi_bin;
 	std::vector<std::string>	cgi_extensions;
 	std::vector<std::string>	indexes;
