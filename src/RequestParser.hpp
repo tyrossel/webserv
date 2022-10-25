@@ -49,6 +49,7 @@ public:
     const Location &                    FindLocation(const Server &server) const;
     const Server &                      FindServer(const std::vector<Server> &servers, in_addr_t req_addr) const;
 	bool								isValid(const Location &loc) const;
+    void								updatePathWithLocation(const Location &loc);
 
     /* GETTERS */
     std::map<std::string, std::string>  getHeaders() const;

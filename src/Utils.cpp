@@ -1,5 +1,7 @@
 # include "Utils.hpp"
 #include "webserv.hpp"
+#include "sys/stat.h"
+
 int RUNNING;
 namespace ft {
 
@@ -250,6 +252,12 @@ namespace ft {
 		}
 
 	}
+
+	bool isDirectory(const std::string path)
+	{
+		struct stat statbuf;
+		if (stat(path.c_str(), &statbuf) != 0)
+			return 0;
+		return S_ISDIR(statbuf.st_mode);
+	}
 }
-
-

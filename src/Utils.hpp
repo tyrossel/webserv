@@ -28,6 +28,7 @@ namespace ft {
     char        **mapToArray(std::map<std::string, std::string> map);
 
     RequestType	RequestFromString(const std::string &str);
+	bool		isDirectory(const std::string path);
 }
 
 #endif //WEBSERV_UTILS_HPP

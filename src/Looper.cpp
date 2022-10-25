@@ -361,11 +361,10 @@ int Looper::readFromClient(long socket)
     ret = recv(socket, buffer, BUFFER_SIZE, 0);
     if (ret > 0) {
         request.parseRequest(buffer);
-        _request.insert(std::make_pair<long, RequestParser>(socket, request));
 
         if (VERBOSE) {
             std::cout << "================== REQUEST ==================" << std::endl;
-            std::cout << BLUE << _request[socket] << RESET;
+            std::cout << BLUE << request << RESET;
             std::cout << "==============================================" << std::endl;
         }
 
@@ -377,11 +376,15 @@ int Looper::readFromClient(long socket)
 		// std::cout << MAGENTA << "Request port: " << RESET << req_addr.sin_port << std::endl;
 
 		const Server &srv = request.FindServer(_servers, req_addr.sin_addr.s_addr);
+		// TODO TYR: Check if no server corresponds
 		const Location &loc = request.FindLocation(srv);
 
 		if(!request.isValid(loc))
 			return (-1);
+		request.updatePathWithLocation(loc);
+		std::cout << MAGENTA << "New Path : " << request.getPath() << RESET << std::endl;
 
+        _request.insert(std::make_pair<long, RequestParser>(socket, request));
         buildResponse(socket, loc);
     }
     return (ret);

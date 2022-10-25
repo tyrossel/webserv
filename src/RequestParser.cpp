@@ -1,6 +1,7 @@
 #include "RequestParser.hpp"
 #include "Server.hpp"
 #include "Location.hpp"
+#include "Utils.hpp"
 #include "webserv.hpp"
 
 /**************************************************************************************/
@@ -424,7 +425,6 @@ const Location & RequestParser::FindLocation(const Server &server) const
 				&& it->first.size() > best_loc_index.size())
 			best_loc_index = it->first;
 	}
-	std::cout << MAGENTA << "Location found: " << best_loc_index << RESET << std::endl;
 	return loc_map.at(best_loc_index);
 }
 
@@ -472,9 +472,40 @@ bool	RequestParser::isValid(const Location &loc) const
 	RequestType req_type = ft::RequestFromString(_method);
 	if (!loc.isRequestAllowed(req_type))
 		return false;
+
 	if (_body_length > loc.max_client_body_size)
 		return false;
+
 	return true;
+}
+
+void	RequestParser::updatePathWithLocation(const Location &loc)
+{
+	_path = loc.root_dir + _path;
+
+	if (loc.isCGI)
+		return ;
+
+	if (!ft::isDirectory(_path))
+		return ;
+
+
+	if (loc.auto_index)
+	{
+		std::vector<std::string>::const_iterator it = loc.indexes.begin();
+		for (;it != loc.indexes.end(); it++)
+		{
+			std::string new_path = _path + *it;
+			std::ifstream test_stream(new_path.c_str());
+			if (test_stream.is_open())
+			{
+				_path = new_path;
+				return ;
+			}
+			test_stream.close();
+		}
+		// TODO : Handle case if index is not found
+	}
 }
 
 /**************************************************************************************/
