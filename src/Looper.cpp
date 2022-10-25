@@ -81,9 +81,7 @@ int     Looper::checkCode(RequestParser request)
 
 int     Looper::checkPath(long socket)
 {
-    std::string trim_path("src/html"); // TODO: add location path later
-    trim_path.append(_request[socket].getPath().c_str());
-    std::ifstream test(trim_path.c_str());
+    std::ifstream test(_request[socket].getPath().c_str());
     if (!test.good())
     {
         _request[socket].setStatus(404);
@@ -195,13 +193,8 @@ void Looper::addDate(long socket)
 void Looper::addBodyToResponse(long socket) // TODO: add file to read from (std::string path)
 {
     int i = 0;
-    std::stringstream out; // _request[socket].getPath().c_str()
-    std::string trim_path("src/html"); // TODO: add location path later
-    if (_request[socket].getPath() == "/")
-        trim_path.append("/error/error_404.html");
-    else
-        trim_path.append(_request[socket].getPath().c_str());
-    std::ifstream fs(trim_path.c_str());
+    std::stringstream out;
+    std::ifstream fs(_request[socket].getPath().c_str());
     if (!fs.good())
     {
         std::cerr << "Error stream file not found" << std::endl;
