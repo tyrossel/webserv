@@ -506,7 +506,7 @@ void Looper::catchCommunication(fd_set &reading_fd_set, int ret)
                 // if it has a valid socket fd, we enter it into our active_fd_set
                 // and we add it into the _active_servers map with his fd as a key for the sock
                 FD_SET(socket, &_active_fd_set);
-                _active_servers.insert(std::make_pair<long int, Server *>(socket, &(*it)));
+                _active_servers.insert(std::make_pair(socket, &(*it)));
                 // Setting max_fd if the new fd from the socket is greater
                 if (socket > _max_fd)
                     _max_fd = socket;
@@ -522,7 +522,7 @@ void Looper::selectErrorHandle()
     // An issue with select has been caught
     // In this case we will close every opened sockets, clear the active_servers map and the read_fd's
     // FD_ZERO to clear the active_fd_set and re set all the sockets to restart the server
-    std::cout << "Select had an issue !" << std::cout;
+    std::cout << "Select had an issue !" << std::endl;
     for (std::map<long, Server *>::iterator it = _active_servers.begin(); it != _active_servers.end(); it++) {
         it->second->close(it->first);
         _response.erase(it->first);

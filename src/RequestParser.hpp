@@ -4,7 +4,7 @@
 #include "../includes/webserv.hpp"
 
 class Server;
-class Location;
+struct Location;
 
 class RequestParser {
 private:
