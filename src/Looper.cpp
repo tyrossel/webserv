@@ -123,8 +123,6 @@ void Looper::addErrorBodyToResponse(long socket)
     _response[socket].append("\r\n\r\n");
     _response[socket].append(body);
 
-
-
     /*std::string file;
     std::stringstream out;
     int i = 0;
