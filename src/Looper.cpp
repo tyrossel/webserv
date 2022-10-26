@@ -189,6 +189,7 @@ void Looper::addBodyToResponse(long socket) // TODO: add file to read from (std:
 	std::string loc = _request[socket].getLocation();
 	std::string path = _request[socket].getPath();
 
+    ft::trimLeft(loc, "/");
 	if (ft::isDirectory(loc))
 	{
 		// TODO TYR: we should send the path requested by the client in order
@@ -197,7 +198,7 @@ void Looper::addBodyToResponse(long socket) // TODO: add file to read from (std:
 	}
 	else
 	{
-		std::ifstream fs(loc.c_str());
+        std::ifstream fs(loc.c_str());
 		if (!fs.good())
 		{
 			std::cerr << "Error stream file not found" << std::endl;
@@ -284,14 +285,17 @@ int Looper::buildGetResponse(long socket, const Location &loc)
     addServerHeaderResponse(socket);
     addDate(socket);
 
-    if (0) // CGI or not ?
+    if (1) // CGI or not ?
     {
+
         CGI cgi(_request[socket].getHeaders(), _request[socket].getBody());
         ret = cgi.executeCgi(&_request[socket], _active_servers[socket]);
+
         // Here we remove HTTP EOF because the CGI we use cannot accept HTML in it.
         // If we send HTML inside the CGI he will TOUPPER the html which is.. shitty ?
         cgi.removeEOFHTTP();
         _response[socket].append(cgi.getRetBody());
+
         if (ret != HTTP_OK)
             addErrorBodyToResponse(socket);
         else
@@ -327,7 +331,7 @@ int Looper::buildGetResponse(long socket, const Location &loc)
 int Looper::buildResponse(long socket, const Location &loc)
 {
     // TODO : Map with func pointers later
-	RequestType req_type = ft::RequestFromString(_request[socket].getMethod());
+    RequestType req_type = ft::RequestFromString(_request[socket].getMethod());
 
     switch (req_type) {
         case Get:
@@ -379,8 +383,8 @@ int Looper::readFromClient(long socket)
 			return (-1);
 
 		request.updatePathWithLocation(loc);
-
         _request.insert(std::make_pair<long, RequestParser>(socket, request));
+
         buildResponse(socket, loc);
     }
     return (ret);
