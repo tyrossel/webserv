@@ -6,7 +6,7 @@
 /*   By: trossel <trossel@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/21 11:08:24 by trossel           #+#    #+#             */
-/*   Updated: 2022/10/25 21:19:06 by trossel          ###   ########.fr       */
+/*   Updated: 2022/10/26 09:14:07 by trossel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,7 @@ struct Location
 	std::string					cgi_bin;
 	std::vector<std::string>	cgi_extensions;
 	std::vector<std::string>	indexes;
+	std::map<int, std::string>	error_pages;
 };
 
 std::ostream &operator<<(std::ostream &os, const Location &loc);

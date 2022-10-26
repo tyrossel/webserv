@@ -6,7 +6,7 @@
 /*   By: trossel <trossel@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/21 11:11:21 by trossel           #+#    #+#             */
-/*   Updated: 2022/10/25 21:18:32 by trossel          ###   ########.fr       */
+/*   Updated: 2022/10/27 10:08:44 by trossel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,7 @@ Location &Location::operator=(const Location &rhs)
 	path = rhs.path;
 	root_dir = rhs.root_dir;
 	cgi_bin = rhs.cgi_bin;
+	error_pages = rhs.error_pages;
 	return *this;
 }
 
@@ -79,6 +80,14 @@ std::ostream &operator<<(std::ostream &os, const Location &loc)
 		os << YELLOW << "\n\tindexes: " << RESET;
 		for (size_t j = 0; j < loc.indexes.size(); j++)
 			os << loc.indexes[j] << " ";
+	}
+
+	if (!loc.error_pages.empty())
+	{
+		os << YELLOW << "\n\terror pages: " << RESET << std::endl;
+		for (std::map<int, std::string>::const_iterator it = loc.error_pages.begin();
+				it != loc.error_pages.end(); it++)
+			os << "\t\t" <<  it->first << ": " << it->second << std::endl;
 	}
 
 	os << YELLOW << "\n\tcgi_bin: " << RESET << loc.cgi_bin;

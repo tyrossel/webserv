@@ -6,7 +6,7 @@
 /*   By: trossel <trossel@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 16:47:18 by trossel           #+#    #+#             */
-/*   Updated: 2022/10/25 22:41:06 by trossel          ###   ########.fr       */
+/*   Updated: 2022/10/27 10:13:07 by trossel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,6 +72,22 @@ Location ConfigParsor::parseLocation(const JsonObject &locObject, const Location
 		std::string index = *it;
 		ft::trim(index);
 		loc.indexes.push_back(index);
+	}
+
+	//error pages
+	JsonObject errorsObj = locObject.getObjectOrEmpty("error_pages");
+	std::map<std::string, JsonArray> err_map = errorsObj.getAllArrays();
+	if (err_map.empty())
+		loc.error_pages = defaultLoc.error_pages;
+	else
+	{
+		for(std::map<std::string, JsonArray>::const_iterator it = err_map.begin();
+				it != err_map.end(); it++)
+		{
+			std::vector<int> error_codes = it->second.intValues();
+			for (size_t i(0); i < error_codes.size(); i++)
+				loc.error_pages[error_codes[i]] = it->first;
+		}
 	}
 
 	std::vector<std::string> disabled_requests = locObject.getArrayOrEmpty("disabled_methods").stringValues();

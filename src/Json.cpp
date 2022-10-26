@@ -269,7 +269,6 @@ void JsonArray::parseJsonValue(std::string &s, const std::string &key)
 // ------------------------------------------------------------------------------
 JsonObject::JsonObject()
 {
-
 }
 
 JsonObject::JsonObject(const std::string &text)
@@ -470,6 +469,17 @@ JsonObject	JsonObject::getObject(const std::string &name) const
 	throw std::logic_error("JSON error: no object named " + name);
 }
 
+JsonObject	JsonObject::getObjectOrEmpty(const std::string &name) const
+{
+	std::map<std::string, JsonObject>::const_iterator it;
+	for (it = this->objects.begin(); it != this->objects.end(); it++)
+	{
+		if (name == it->first)
+			return it->second;
+	}
+	return JsonObject();
+}
+
 std::string	JsonObject::getString(const std::string &name) const
 {
 	if (this->strings.find(name) == this->strings.end())
@@ -496,6 +506,11 @@ int	JsonObject::getIntOrDefault(const std::string &name, int val) const
 	if (this->ints.find(name) == this->ints.end())
 		return val;
 	return this->ints.at(name);
+}
+
+std::map<std::string, JsonArray>	JsonObject::getAllArrays() const
+{
+	return this->arrays;
 }
 
 bool	JsonObject::getBool(const std::string &name) const

@@ -31,11 +31,11 @@ class JsonArray
 		{
 			throw std::logic_error("Json array error: cannot contain this type");
 		}
-		std::vector<int> intValues() { return this->ints;}
-		std::vector<std::string> stringValues() { return this->strings;}
-		std::vector<bool> boolValues() { return this->bools;}
-		std::vector<JsonObject> ObjectValues() {return this->objects;}
-		std::vector<JsonArray> arrayValues() {return this->arrays;}
+		std::vector<int> intValues() const { return this->ints;}
+		std::vector<std::string> stringValues() const { return this->strings;}
+		std::vector<bool> boolValues() const { return this->bools;}
+		std::vector<JsonObject> ObjectValues() const {return this->objects;}
+		std::vector<JsonArray> arrayValues() const {return this->arrays;}
 
 		void parseFromString(std::string &s);
 
@@ -99,12 +99,14 @@ class JsonObject
 		JsonArray					getArray(const std::string &name) const;
 		JsonArray					getArrayOrEmpty(const std::string &name) const;
 		JsonObject					getObject(const std::string &name) const;
+		JsonObject					getObjectOrEmpty(const std::string &name) const;
 		std::string				 	getString(const std::string &name) const;
 		std::string					getStringOrDefault(const std::string &name, const std::string &val) const;
 		bool					 	getBool(const std::string &name) const;
 		bool					 	getBoolOrDefault(const std::string &name, bool val) const;
 		int						 	getInt(const std::string &name) const;
 		int							getIntOrDefault(const std::string &name, int val) const;
+		std::map<std::string, JsonArray>	getAllArrays() const;
 };
 
 std::ostream & operator<<(std::ostream &os, const JsonObject &json);

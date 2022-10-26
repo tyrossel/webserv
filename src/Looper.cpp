@@ -371,7 +371,7 @@ int Looper::readFromClient(long socket)
 		// std::cout << MAGENTA << "Request adresse: " << RESET << addr_str << std::endl;
 		// std::cout << MAGENTA << "Request port: " << RESET << req_addr.sin_port << std::endl;
 
-		const Server &srv = request.FindServer(_servers, req_addr.sin_addr.s_addr);
+		const Server &srv = request.FindServer(_servers);
 		// TODO TYR: Check if no server corresponds
 		const Location &loc = request.FindLocation(srv);
 
