@@ -82,7 +82,9 @@ int     Looper::checkCode(RequestParser request)
 
 int     Looper::checkPath(long socket)
 {
-	const std::string path = _request[socket].getLocation();
+	std::string path = _request[socket].getLocation();
+
+    ft::trimLeft(path, "/");
 	if (ft::isDirectory(path))
 	{
 		return HTTP_OK;
@@ -195,7 +197,6 @@ void Looper::addDate(long socket)
 void Looper::addBodyToResponse(long socket) // TODO: add file to read from (std::string path)
 {
     std::string text;
-    int i = 0;
     std::stringstream out;
 	std::string loc = _request[socket].getLocation();
 	std::string path = _request[socket].getPath();
@@ -215,11 +216,9 @@ void Looper::addBodyToResponse(long socket) // TODO: add file to read from (std:
 			std::cerr << e.what() << std::endl;;
 		}
 	}
-    _response[socket].append("Content-Length: ");
-    i = text.size();
-    std::cout << text.size() << std::endl;
-    out << i;
-    _response[socket].append(out.str());
+    out << text.size();
+    std::string content_len = "Content-Length: " + out.str();
+    _response[socket].append(content_len);
     _response[socket].append("\r\n\r\n");
     _response[socket].append(text);
 }
@@ -292,7 +291,7 @@ int Looper::buildGetResponse(long socket, const Location &loc)
     addServerHeaderResponse(socket);
     addDate(socket);
 
-    if (1) // CGI or not ?
+    if (0) // CGI or not ?
     {
         CGI cgi(_request[socket].getHeaders(), _request[socket].getBody());
         ret = cgi.executeCgi(&_request[socket], _active_servers[socket]);
