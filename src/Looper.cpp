@@ -114,7 +114,18 @@ int Looper::secFetchImage(long socket)
 /**************************************************************************************/
 void Looper::addErrorBodyToResponse(long socket)
 {
-    std::string file;
+    std::string body;
+    std::stringstream out;
+
+    body.append(ft::craftErrorHTML(_request[socket].getStatus()));
+    _response[socket].append("Content-Length: ");
+    _response[socket].append(ft::itoa(body.size()));
+    _response[socket].append("\r\n\r\n");
+    _response[socket].append(body);
+
+
+
+    /*std::string file;
     std::stringstream out;
     int i = 0;
 
@@ -136,7 +147,7 @@ void Looper::addErrorBodyToResponse(long socket)
     out << i;
     _response[socket].append(out.str());
     _response[socket].append("\r\n\r\n");
-    _response[socket].append(text);
+    _response[socket].append(text);*/
 }
 
 int Looper::writeResponseHeader(long socket)

@@ -260,4 +260,79 @@ namespace ft {
 			return false;
 		return S_ISDIR(statbuf.st_mode);
 	}
+
+    std::string itoa(int i)
+    {
+        std::stringstream out;
+
+        out << i;
+        return (out.str());
+    }
+
+    std::string errorMessage(int error)
+    {
+        if (error == BAD_REQUEST)
+            return (" Bad Request");
+        else if (error == UNAUTHORIZED)
+            return (" Unauthorized");
+        else if (error == FORBIDDEN)
+            return (" Forbidden");
+        else if (error == NOT_FOUND)
+            return (" Not Found");
+        else if (error == METHOD_NOT_ALLOWED)
+            return (" Method Not Allowed");
+        else if (error == PROXY_AUTHENTICATION)
+            return (" Proxy Authentication");
+        else if (error == REQUEST_TIMEOUT)
+            return (" Request Timeout");
+        else if (error == CONFLICT)
+            return (" Conflict");
+        else if (error == LENGTH_REQUIRED)
+            return (" Length Required");
+        else if (error == PRECONDITION_FAILED)
+            return (" Precondition Failed");
+        else if (error == URI_TOO_LONG)
+            return (" URI Too Long");
+        else if (error == MEDIA_UNSUPPORTED)
+            return (" Media Unsupported");
+        else if (error == RANGE_NOT_SATISFIABLE)
+            return (" Range Not Satisfiable");
+        else if (error == EXPECTATION_FAILED)
+            return (" Expectation Failed");
+        else if (error == TEAPOT)
+            return (" I'm a teapot");
+        else if (error == TOO_MANY_REQUESTS)
+            return (" Too Many Requests");
+        else if (error == UNAVAILABLE_LEGAL_REASON)
+            return (" Unvailable Legal Reason");
+        else if (error == INTERNAL_SERVER_ERROR)
+            return (" Internal Server Error");
+        else if (error == NOT_IMPLEMENTED)
+            return (" Not Implemented");
+        else if (error == BAD_GATEWAY)
+            return (" Bad Gateway");
+        else if (error == SERVICE_UNAVAILABLE)
+            return (" Service Unavailable");
+        else if (error == GATEWAY_TIMEOUT)
+            return (" Gateway Timeout");
+        else if (error == HTTP_VERSION_UNSUPPORTED)
+            return (" HTTP Version Unsupported");
+        else if (error == NOT_EXTENDED)
+            return (" Not Extended");
+        else if (error == NETWORK_AUTHENTICATION_REQUIRED)
+            return (" Network Authentication Required");
+        else
+            return (" Error");
+    }
+
+    std::string craftErrorHTML(int error)
+    {
+        std::string ret;
+
+        ret.append("<!DOCTYPE html>\n<html lang=\"en\">\n<body>\n<meta charset=\"UTF-8\">\n<h1 style=\"text-align: center\">");
+        ret.append(itoa(error));
+        ret.append(errorMessage(error));
+        ret.append("</h1>\n<hr>\n<body>\n<h2 style=\"text-align: center\">WetServ</h2>\n</body>\n</html>\n");
+        return (ret);
+    }
 }

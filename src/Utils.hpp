@@ -29,6 +29,10 @@ namespace ft {
 
     RequestType	RequestFromString(const std::string &str);
 	bool		isDirectory(const std::string path);
+
+    std::string itoa(int i);
+    std::string errorMessage(int error);
+    std::string craftErrorHTML(int error);
 }
 
 #endif //WEBSERV_UTILS_HPP
