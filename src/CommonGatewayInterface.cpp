@@ -6,7 +6,7 @@
 
 CGI::CGI(std::map<std::string, std::string> headers, std::string req_body) : _env(), _headers(headers), _req_body(req_body), _cwd(""), _cgi_path(""), _file_path(""), _ret_body(""), _fd_file(0), _cgi_env() {}
 
-CGI::CGI(const CGI &rhs) : _env(rhs._env), _headers(rhs._headers), _req_body(rhs._req_body), _cwd(""), _cgi_path(""), _file_path(""), _ret_body(""), _fd_file(0), _cgi_env() {}
+CGI::CGI(const CGI &rhs) : _env(rhs._env), _headers(rhs._headers), _req_body(rhs._req_body), _cwd(rhs._cwd), _cgi_path(rhs._cgi_path), _file_path(rhs._file_path), _ret_body(rhs._ret_body), _fd_file(rhs._fd_file), _cgi_env(rhs._cgi_env) {}
 
 CGI::~CGI()
 {
@@ -54,7 +54,7 @@ std::string CGI::readContent()
 
 int CGI::executeCgi(const RequestParser *request, const Server *server)
 {
-    if (setCGIEnvironment(request, server))
+    if (setCGIEnvironment(request, server) == -1)
         return INTERNAL_SERVER_ERROR;
 
     std::string _path = _cwd + _file_path;
@@ -81,6 +81,7 @@ int CGI::executeCgi(const RequestParser *request, const Server *server)
 
         if (chdir(_path.substr(0, _path.find_last_of('/')).c_str()) == -1)
             exit(42);
+
         close(pip[1]);
         if (dup2(pip[0], 0) == -1)
             exit(42);
@@ -131,7 +132,7 @@ int CGI::setCGIEnvironment(const RequestParser *request, const Server *server)
     char *tmp = getcwd(NULL, 0);
 
     if (!tmp)
-        return 1;
+        return -1;
     _cwd = tmp;
     free(tmp);
 
@@ -151,7 +152,6 @@ int CGI::setCGIEnvironment(const RequestParser *request, const Server *server)
     _env["REQUEST_URI"] = _cwd + _file_path;
     _env["PATH_TRANSLATED"] = _cwd + _file_path;
     _env["QUERY_STRING"] = request->getQuery();
-//    _env["REMOTE_ADDR"] = server->getAddress();
     _env["REMOTE_HOST"] = "";
     _env["REQUEST_METHOD"] = request->getMethod();
     _env["SCRIPT_NAME"] = _cgi_path;
@@ -171,7 +171,7 @@ int CGI::setCGIEnvironment(const RequestParser *request, const Server *server)
     }
 
     if (!(_cgi_env = ft::mapToArray(_env)))
-        return 1;
+        return -1;
     return 0;
 }
 
