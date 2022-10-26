@@ -117,13 +117,12 @@ int CGI::executeCgi(const RequestParser *request, const Server *server)
     return (HTTP_OK);
 }
 
-void CGI::removeEOFHTTP()
-{
-    std::string str = this->getRetBody();
-    for (int i = 0; i < 2; i++)
-    {
-        std::string::iterator it = str.end();
-        str.erase(--it);
+void CGI::removeEOFHTTP() {
+    if (!_ret_body.empty()) {
+        for (int i = 0; i < 2; i++) {
+            std::string::iterator it = _ret_body.end();
+            _ret_body.erase(--it);
+        }
     }
 }
 
@@ -136,7 +135,7 @@ int CGI::setCGIEnvironment(const RequestParser *request, const Server *server)
     _cwd = tmp;
     free(tmp);
 
-    _cgi_path = _cwd + "/cgi-bin/ubuntu_cgi_tester";
+    _cgi_path = _cwd + "/cgi-bin/cgi_tester";
     _file_path = server->getRoot() + request->getPath();
     _cgi_env = NULL;
 
