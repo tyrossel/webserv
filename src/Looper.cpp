@@ -122,30 +122,6 @@ void Looper::addErrorBodyToResponse(long socket)
     _response[socket].append(ft::itoa(body.size()));
     _response[socket].append("\r\n\r\n");
     _response[socket].append(body);
-
-    /*std::string file;
-    std::stringstream out;
-    int i = 0;
-
-    file.append("src/html/error/error_");
-    i = _request[socket].getStatus();
-    out << i;
-    file.append(out.str());
-    out.str("");
-    file.append(".html");
-    std::ifstream fs(file.c_str());
-    if (!fs.good())
-        fs.open("src/html/error/error_404.html");
-    std::string text;
-    text.assign(std::istreambuf_iterator<char>(fs),
-                std::istreambuf_iterator<char>());
-    fs.close();
-    _response[socket].append("Content-Length: ");
-    i = text.size();
-    out << i;
-    _response[socket].append(out.str());
-    _response[socket].append("\r\n\r\n");
-    _response[socket].append(text);*/
 }
 
 int Looper::writeResponseHeader(long socket)
