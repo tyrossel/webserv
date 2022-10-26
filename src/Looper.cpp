@@ -292,7 +292,7 @@ int Looper::buildGetResponse(long socket, const Location &loc)
     addServerHeaderResponse(socket);
     addDate(socket);
 
-    if (0) // CGI or not ?
+    if (1) // CGI or not ?
     {
         CGI cgi(_request[socket].getHeaders(), _request[socket].getBody());
         ret = cgi.executeCgi(&_request[socket], _active_servers[socket]);
@@ -335,7 +335,7 @@ int Looper::buildGetResponse(long socket, const Location &loc)
 int Looper::buildResponse(long socket, const Location &loc)
 {
     // TODO : Map with func pointers later
-	RequestType req_type = ft::RequestFromString(_request[socket].getMethod());
+    RequestType req_type = ft::RequestFromString(_request[socket].getMethod());
 
     switch (req_type) {
         case Get:
