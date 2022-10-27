@@ -46,10 +46,10 @@ class Looper {
         // =================================================================
 
         // RESPONSE CRAFTING ===============================================
-        int     buildResponse(long socket, const Location &loc);
-        int     buildGetResponse(long socket, const Location &loc);
-        int     buildPostResponse(long socket, const Location &loc);
-        int     buildDeleteResponse(long socket, const Location &loc);
+        int     buildResponse(long socket, const Location *loc);
+        int     buildGetResponse(long socket, const Location *loc);
+        int     buildPostResponse(long socket, const Location *loc);
+        int     buildDeleteResponse(long socket, const Location *loc);
 
         void    addServerHeaderResponse(long socket);
         void    addContentType(long socket);
@@ -59,7 +59,7 @@ class Looper {
         void    addContentLengthPOST(long socket);
 
         int     writeResponseHeader(long socket);
-        void    addErrorBodyToResponse(long socket, const Location &loc);
+        void    addErrorBodyToResponse(long socket, const Location *loc);
         // =================================================================
 };
 

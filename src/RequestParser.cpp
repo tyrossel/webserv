@@ -415,7 +415,7 @@ bool matchLocation(const std::string &path, const std::string &loc_path)
 	return !path.compare(0, loc_path.size(), loc_path);
 }
 
-const Location & RequestParser::FindLocation(const Server &server) const
+const Location * RequestParser::FindLocation(const Server &server) const
 {
 	const std::map<std::string, Location> & loc_map = server.getLocations();
 	std::string best_loc_index = "/";
@@ -426,13 +426,11 @@ const Location & RequestParser::FindLocation(const Server &server) const
 				&& it->first.size() > best_loc_index.size())
 			best_loc_index = it->first;
 	}
-	return loc_map.at(best_loc_index);
+	return &loc_map.at(best_loc_index);
 }
 
-const Server & RequestParser::FindServer(const std::vector<Server> &servers) const
+const Server * RequestParser::FindServer(const std::vector<Server> &servers) const
 {
-	// TODO TYR: implement
-
 	// Splitting of Host header into host and port:
 	std::string hostHeader = _headers.at("Host");
 
@@ -445,66 +443,66 @@ const Server & RequestParser::FindServer(const std::vector<Server> &servers) con
 		requestPort = ft::stoi(requestPortStr);
 	std::cout << MAGENTA << "Request host=" << requestHost << ", port=" << requestPort << RESET << std::endl;
 
-
 	for(std::vector<Server>::const_iterator it_srv = servers.begin(); it_srv !=
 			servers.end(); it_srv++)
 	{
+		// TODO: Check request adress
 		if (requestPort != it_srv->getPort())
 			continue;
 
 		const std::vector<std::string> &server_names = it_srv->getName();
 		if (server_names.empty())
+			return &(*it_srv);
 
 		for (std::vector<std::string>::const_iterator it_names = server_names.begin();
 			it_names != server_names.end(); it_names++)
 		{
-			if (*it_names == requestHost && it_srv->getPort() == requestPort)
-				return *it_srv;
+			// TODO: Handle wildcards
+			if (*it_names == requestHost)
+				return &(*it_srv);
 		}
-		// const Server &srv = *it;
 	}
-
-	return servers[0];
+	return NULL;
 }
 
-bool	RequestParser::isValid(const Location &loc) const
+bool	RequestParser::isValid(const Location *loc) const
 {
-	if (_headers.find("Host") == _headers.end())
-	{
-		std::cerr << RED << "Request has no Host header" << RESET << std::endl;
+	if (!loc)
 		return false;
-	}
 
 	RequestType req_type = ft::RequestFromString(_method);
-	if (!loc.isRequestAllowed(req_type))
+	if (!loc->isRequestAllowed(req_type))
 	{
-		std::cerr << RED << "Method " << _method << " not allowed in location " << loc.path << RESET << std::endl;
+		std::cerr << RED << "Method " << _method << " not allowed in location " << loc->path << RESET << std::endl;
 		return false;
 	}
 
-	if (loc.max_client_body_size != 0 && _body_length > loc.max_client_body_size)
+	if (loc->max_client_body_size != 0 && _body_length > loc->max_client_body_size)
 	{
-		std::cerr << RED << "Client body size too big for location " << loc.path << RESET << std::endl;
+		std::cerr << RED << "Client body size too big for location " << loc->path << RESET << std::endl;
 		return false;
 	}
 
 	return true;
 }
 
-void	RequestParser::updatePathWithLocation(const Location &loc)
+void	RequestParser::updatePathWithLocation(const Location *loc)
 {
-	_location = loc.root_dir + "/" + _path.substr(loc.path.length());
+	if (!loc)
+		return ;
 
-	if (loc.isCGI)
+	_location = loc->root_dir + "/" + _path.substr(loc->path.length());
+
+	if (loc->isCGI)
 		return ;
 
 	if (!ft::isDirectory(_location))
 		return ;
 
-	if (loc.auto_index)
+	if (loc->auto_index)
 	{
-		std::vector<std::string>::const_iterator it = loc.indexes.begin();
-		for (;it != loc.indexes.end(); it++)
+		std::vector<std::string>::const_iterator it = loc->indexes.begin();
+		for (;it != loc->indexes.end(); it++)
 		{
 			std::string new_location = _location + *it;
 			std::ifstream test_stream(new_location.c_str());

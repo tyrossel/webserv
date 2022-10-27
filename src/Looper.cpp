@@ -114,21 +114,27 @@ int Looper::secFetchImage(long socket)
 /**************************************************************************************/
 /*                                  RESPONSE CRAFTING                                 */
 /**************************************************************************************/
-void Looper::addErrorBodyToResponse(long socket, const Location &loc)
+void Looper::addErrorBodyToResponse(long socket, const Location *loc)
 {
     std::string body;
     std::stringstream out;
 	int status = _request[socket].getStatus();
 
 	std::cerr << RED << "Status = " << status << RESET << std::endl;
-	try
+	if (!loc)
 	{
-		body.append(ft::readFile(loc.error_pages.at(status)));
-	}
-	catch (const std::exception& e)
-	{
-		// std::cerr << RED << "Custom error file not found" << loc.error_pages.at(status) << RESET << std::endl;
 		body.append(ft::craftErrorHTML(_request[socket].getStatus()));
+	}
+	else
+	{
+		try
+		{
+			body.append(ft::readFile(loc->error_pages.at(status)));
+		}
+		catch (const std::exception& e)
+		{
+			body.append(ft::craftErrorHTML(_request[socket].getStatus()));
+		}
 	}
 
     _response[socket].append("Content-Length: ");
@@ -226,7 +232,7 @@ void Looper::addBodyToResponse(long socket) // TODO: add file to read from (std:
     _response[socket].append(text);
 }
 
-int Looper::buildDeleteResponse(long socket, const Location &loc)
+int Looper::buildDeleteResponse(long socket, const Location *loc)
 {
     int             ret = 0;
 
@@ -273,7 +279,6 @@ void Looper::addContentLengthPOST(long socket)
 
 int Looper::buildPostResponse(long socket, const Location &loc)
 {
-	(void)loc;
     int             ret = 0;
 
     _response.insert(std::make_pair<long int, std::string>(socket, ""));
@@ -295,9 +300,8 @@ int Looper::buildPostResponse(long socket, const Location &loc)
     return (1);
 }
 
-int Looper::buildGetResponse(long socket, const Location &loc)
+int Looper::buildGetResponse(long socket, const Location *loc)
 {
-	(void)loc;
     int             ret = 0;
 
     _response.insert(std::make_pair<long int, std::string>(socket, ""));
@@ -346,10 +350,10 @@ int Looper::buildGetResponse(long socket, const Location &loc)
     return (ret);
 }
 
-int Looper::buildResponse(long socket, const Location &loc)
+int Looper::buildResponse(long socket, const Location *loc)
 {
     // TODO : Map with func pointers later
-    RequestType req_type = ft::RequestFromString(_request[socket].getMethod());
+	RequestType req_type = ft::RequestFromString(_request[socket].getMethod());
 
     switch (req_type) {
         case Get:
@@ -386,16 +390,17 @@ int Looper::readFromClient(long socket)
             std::cout << "==============================================" << std::endl;
         }
 
-		struct sockaddr_in req_addr;
-		socklen_t addr_len = sizeof(req_addr);
-		getsockname(socket, (struct sockaddr *)&req_addr, &addr_len);
-		// char *addr_str = inet_ntoa(req_addr.sin_addr);
-		// std::cout << MAGENTA << "Request adresse: " << RESET << addr_str << std::endl;
-		// std::cout << MAGENTA << "Request port: " << RESET << req_addr.sin_port << std::endl;
+		const Server *srv = request.FindServer(_servers);
+		if (!srv)
+		{
+			std::cerr << RED << "No corresponding server was found" << RESET << std::endl;
+			return -1;
+		}
 
-		const Server &srv = request.FindServer(_servers);
 		// TODO TYR: Check if no server corresponds
-		const Location &loc = request.FindLocation(srv);
+		const Location *loc = NULL;
+		if (request.getStatus() == 0)
+			loc = request.FindLocation(*srv);
 
 		if(!request.isValid(loc))
 			return (-1);

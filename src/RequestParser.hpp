@@ -47,10 +47,10 @@ public:
     int                                 parseBody(size_t &index);
     int                                 parseRequest(const char *request);
 
-    const Location &                    FindLocation(const Server &server) const;
-    const Server &                      FindServer(const std::vector<Server> &servers) const;
-	bool								isValid(const Location &loc) const;
-    void								updatePathWithLocation(const Location &loc);
+    const Location *                    FindLocation(const Server &server) const;
+    const Server *						FindServer(const std::vector<Server> &servers) const;
+	bool								isValid(const Location *loc) const;
+    void								updatePathWithLocation(const Location *loc);
 
     /* GETTERS */
     std::map<std::string, std::string>  getHeaders() const;
