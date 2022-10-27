@@ -215,6 +215,7 @@ void Looper::addBodyToResponse(long socket) // TODO: add file to read from (std:
 		}
 		catch (const std::exception& e)
 		{
+            _response[socket].append("\r\n\r\n");
 			std::cerr << e.what() << std::endl;;
 		}
 	}
@@ -232,9 +233,12 @@ int Looper::buildDeleteResponse(long socket, const Location &loc)
     int             ret = 0;
 
     _response.insert(std::make_pair<long int, std::string>(socket, ""));
-    if (!ft::isDirectory(_request[socket].getPath()))
+    std::string path = _request[socket].getLocation();
+    if (path[0] == '/')
+        ft::trimLeft(path, "/");
+    if (ft::isFile(path))
     {
-        if (remove(_request[socket].getPath().c_str()) == 0)
+        if (remove(path.c_str()) == 0)
             _request[socket].setStatus(204);
         else
             _request[socket].setStatus(403);
@@ -245,10 +249,10 @@ int Looper::buildDeleteResponse(long socket, const Location &loc)
     addServerHeaderResponse(socket);
     addContentType(socket);
     addDate(socket);
-    if (ret != HTTP_OK)
-        addErrorBodyToResponse(socket, loc);
-    else
+    if (ft::isOkHTTP(ret))
         addBodyToResponse(socket);
+    else
+        addErrorBodyToResponse(socket);
     std::cout << "================== RESPONSE ==================" << std::endl;
     if (secFetchImage(socket))
         std::cout << GREEN << _response[socket] << RESET << std::endl;
@@ -269,7 +273,6 @@ void Looper::addContentLengthPOST(long socket)
 int Looper::buildPostResponse(long socket, const Location &loc)
 {
 	(void)loc;
-    // TODO : DO THE POST
     int             ret = 0;
 
     _response.insert(std::make_pair<long int, std::string>(socket, ""));
@@ -309,10 +312,10 @@ int Looper::buildGetResponse(long socket, const Location &loc)
         // If we send HTML inside the CGI he will TOUPPER the html which is.. shitty ?
         cgi.removeEOFHTTP();
         _response[socket].append(cgi.getRetBody());
-        if (ret != HTTP_OK)
-            addErrorBodyToResponse(socket, loc);
-        else
+        if (ft::isOkHTTP(ret))
             addBodyToResponse(socket);
+        else
+            addErrorBodyToResponse(socket);
         if (VERBOSE) {
             std::cout << "================== CGI ==================" << std::endl;
             if (secFetchImage(socket))
@@ -325,10 +328,10 @@ int Looper::buildGetResponse(long socket, const Location &loc)
     else
     {
         //addContentType(socket); // TODO: Mime if no CGI
-        if (ret != HTTP_OK)
-            addErrorBodyToResponse(socket, loc);
-        else
+        if (ft::isOkHTTP(ret))
             addBodyToResponse(socket);
+        else
+            addErrorBodyToResponse(socket);
         if (VERBOSE) {
             std::cout << "================== RESPONSE ==================" << std::endl;
             if (secFetchImage(socket))
