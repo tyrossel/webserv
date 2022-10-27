@@ -119,7 +119,7 @@ enum RequestType
  ***********************************************************************************/
 extern int RUNNING;
 
-#define VERBOSE 0
+#define VERBOSE 1
 
 #include "../src/Utils.hpp"
 
