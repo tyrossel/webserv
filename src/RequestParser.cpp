@@ -360,19 +360,19 @@ int RequestParser::parseBody(size_t &index)
     return (0);
 }
 
-int RequestParser::parseRequest(const char *request)
+int RequestParser::parseRequest(std::string &request)
 {
-    if (!request)
-    {
-        std::cerr << "Wrong buffer sent by recv" << std::endl;
-        return (-1);
-    }
+//    if (!request)
+//    {
+//        std::cerr << "Wrong buffer sent by recv" << std::endl;
+//        return (-1);
+//    }
 
     size_t      index = 0;
     std::string line;
 
-    std::string req_str(request);
-    _string_request = req_str;
+//    std::string req_str(request);
+    _string_request = request;
 
     line = getNextLine(_string_request, index);
     if (parseFirstLine(line) == -1)

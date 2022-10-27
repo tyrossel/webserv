@@ -381,16 +381,21 @@ int Looper::readFromClient(long socket)
 {
     char	        buffer[BUFFER_SIZE];
     int		        ret;
-    RequestParser   parserRequest;
+    std::string     string_buffer;
+    RequestParser   parser;
     Request         request;
 
     ft::bzero(&buffer, BUFFER_SIZE);
 
-	// TODO: Create a loop to read the client request
-    ret = recv(socket, buffer, BUFFER_SIZE, 0);
-    if (ret > 0) {
-        parserRequest.parseRequest(buffer);
-        request = parserRequest.getRequest();
+    while ((ret = recv(socket, buffer, BUFFER_SIZE-1, 0)) > 0)
+    {
+        string_buffer += buffer;
+        ft::bzero(&buffer, BUFFER_SIZE);
+    }
+
+    if (!string_buffer.empty()) {
+        parser.parseRequest(string_buffer);
+        request = parser.getRequest();
 
         if (VERBOSE) {
             std::cout << "================== REQUEST ==================" << std::endl;
@@ -420,7 +425,7 @@ int Looper::readFromClient(long socket)
         _request.insert(std::make_pair<long, Request>(socket, request));
         buildResponse(socket, loc);
     }
-    return (ret);
+    return (string_buffer.size());
 }
 
 /**************************************************************************************/

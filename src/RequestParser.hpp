@@ -34,7 +34,7 @@ class RequestParser {
 
         RequestParser &operator=(const RequestParser &other);
 
-        int                 parseRequest(const char *request);
+        int                 parseRequest(std::string &request);
         Request             getRequest();
 
 };
