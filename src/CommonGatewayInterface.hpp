@@ -18,7 +18,7 @@ class CGI {
         char**                              _cgi_env;
 
     public:
-        CGI(std::map<std::string, std::string> headers, std::string body);
+        CGI(const RequestParser &request);
         ~CGI();
         CGI(const CGI &rhs);
         CGI &operator=(const CGI &rhs);
@@ -33,7 +33,10 @@ class CGI {
         std::string                         getRetBody();
         int                                 getFdFile();
 
-        std::string readContent();
+        int returnFail(int ret, std::string error, bool close_pipe=false, int pip_to_cgi=-1, int pip_from_cgi=-1);
+        void exitFail(std::string error, int exit_value);
+
+        std::string readContent(int fd);
         int setCGIEnvironment(const RequestParser *request, const Server *server);
         int executeCgi(const RequestParser *request, const Server *server);
 
