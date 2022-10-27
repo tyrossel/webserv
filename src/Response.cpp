@@ -172,7 +172,7 @@ void Response::buildGetResponse(Request req)
     addServerHeaderResponse();
     addDate();
 
-    if (0) // CGI or not ?
+    if (1) // CGI or not ?
     {
         std::string path = _request.getLocation();
         if (path[0] == '/')
