@@ -312,15 +312,21 @@ int Looper::buildGetResponse(long socket, const Location *loc)
 
     if (1) // CGI or not ?
     {
-
-        CGI cgi(_request[socket]);
-        ret = cgi.executeCgi(&_request[socket], _active_servers[socket]);
-        // Here we remove HTTP EOF because the CGI we use cannot accept HTML in it.
-        // If we send HTML inside the CGI he will TOUPPER the html which is.. shitty ?
-        cgi.removeEOFHTTP();
-        _response[socket].append(cgi.getRetBody());
-        if (ft::isOkHTTP(ret))
-            addBodyToResponse(socket);
+        std::string path = _request[socket].getLocation();
+        if (path[0] == '/')
+            ft::trimLeft(path, "/");
+        if (ft::isFile(path)) {
+            CGI cgi(_request[socket]);
+            ret = cgi.executeCgi(&_request[socket], _active_servers[socket]);
+            // Here we remove HTTP EOF because the CGI we use cannot accept HTML in it.
+            // If we send HTML inside the CGI he will TOUPPER the html which is.. shitty ?
+            cgi.removeEOFHTTP();
+            _response[socket].append(cgi.getRetBody());
+            if (ft::isOkHTTP(ret))
+                addBodyToResponse(socket);
+            else
+                addErrorBodyToResponse(socket, loc);
+        }
         else
             addErrorBodyToResponse(socket, loc);
         if (VERBOSE) {
