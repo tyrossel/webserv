@@ -72,7 +72,7 @@ int Looper::setupLoop()
 /**************************************************************************************/
 /*                                      CHECKERS                                      */
 /**************************************************************************************/
-int     Looper::checkCode(RequestParser request)
+int     Looper::checkCode(Request request)
 {
     if (request.getStatus() == 0)
         return HTTP_OK;
@@ -360,9 +360,8 @@ int Looper::buildGetResponse(long socket, const Location *loc)
 int Looper::buildResponse(long socket, const Location *loc)
 {
     // TODO : Map with func pointers later
-	RequestType req_type = ft::RequestFromString(_request[socket].getMethod());
 
-    switch (req_type) {
+    switch (_request[socket].getMethod()) {
         case Get:
             buildGetResponse(socket, loc);
             break;
@@ -382,14 +381,16 @@ int Looper::readFromClient(long socket)
 {
     char	        buffer[BUFFER_SIZE];
     int		        ret;
-    RequestParser   request;
+    RequestParser   parserRequest;
+    Request         request;
 
     ft::bzero(&buffer, BUFFER_SIZE);
 
 	// TODO: Create a loop to read the client request
     ret = recv(socket, buffer, BUFFER_SIZE, 0);
     if (ret > 0) {
-        request.parseRequest(buffer);
+        parserRequest.parseRequest(buffer);
+        request = parserRequest.getRequest();
 
         if (VERBOSE) {
             std::cout << "================== REQUEST ==================" << std::endl;
@@ -397,7 +398,9 @@ int Looper::readFromClient(long socket)
             std::cout << "==============================================" << std::endl;
         }
 
-		const Server *srv = request.FindServer(_servers);
+		const Server *srv = NULL;
+        if (request.getStatus() == 0)
+            srv = request.FindServer(_servers);
 		if (!srv)
 		{
 			std::cerr << RED << "No corresponding server was found" << RESET << std::endl;
@@ -414,7 +417,7 @@ int Looper::readFromClient(long socket)
 
 		request.updatePathWithLocation(loc);
 
-        _request.insert(std::make_pair<long, RequestParser>(socket, request));
+        _request.insert(std::make_pair<long, Request>(socket, request));
         buildResponse(socket, loc);
     }
     return (ret);

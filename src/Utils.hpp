@@ -28,6 +28,7 @@ namespace ft {
     char        **mapToArray(std::map<std::string, std::string> map);
 
     RequestType	RequestFromString(const std::string &str);
+    std::string RequestToString(RequestType type);
 	bool		isDirectory(const std::string path);
 	std::string	readFile(const std::string &filename);
 

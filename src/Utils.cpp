@@ -239,9 +239,6 @@ namespace ft {
 		map["GET"] = Get;
 		map["POST"] = Post;
 		map["DELETE"] = Delete;
-		map["HEAD"] = Head;
-		map["PATCH"] = Patch;
-		map["PUT"] = Put;
 
 		try
 		{
@@ -251,8 +248,25 @@ namespace ft {
 		{
 			return Unknown;
 		}
-
 	}
+
+    std::string    RequestToString(RequestType type)
+    {
+        std::map<RequestType, std::string> map;
+        map[Unknown] = "UNKNOWN";
+        map[Get] = "GET";
+        map[Post] = "POST";
+        map[Delete] = "DELETE";
+
+        try
+        {
+            return map.at(type);
+        }
+        catch (const std::exception& e)
+        {
+            return map[Unknown];
+        }
+    }
 
 	bool isDirectory(const std::string path)
 	{

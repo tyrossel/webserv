@@ -1,14 +1,10 @@
 #include "RequestParser.hpp"
-#include "Server.hpp"
-#include "Location.hpp"
-#include "Utils.hpp"
-#include "webserv.hpp"
 
 /**************************************************************************************/
 /*                          CONSTRUCTORS / DESTRUCTORS                                */
 /**************************************************************************************/
 
-RequestParser::RequestParser() : _method(""), _path(""), _query(""), _version(""), _headers(), _body(""), _request(""), _body_length(0), _status(0) {}
+RequestParser::RequestParser() : _request(), _string_request("") {}
 
 RequestParser::RequestParser(const RequestParser &other)
 {
@@ -21,16 +17,8 @@ RequestParser &RequestParser::operator=(const RequestParser &other)
 {
     if (this != &other)
     {
-        this->_method = other._method;
-        this->_path = other._path;
-		this->_location = other._location;
-        this->_query = other._query;
-        this->_version = other._version;
-        this->_headers = other._headers;
-        this->_body = other._body;
         this->_request = other._request;
-        this->_body_length = other._body_length;
-        this->_status = other._status;
+        this->_string_request = other._string_request;
     }
     return (*this);
 }
@@ -54,15 +42,9 @@ std::string RequestParser::getNextLine(std::string &str, size_t &start)
     return line;
 }
 
-void RequestParser::trimWhitespaces(std::string &str)
-{
-    ft::trimLeft(str, " ");
-    ft::trimRight(str, " ");
-}
-
 int RequestParser::exitStatus(int exit_status)
 {
-    this->_status = exit_status;
+    _request._status = exit_status;
     return (-1);
 }
 
@@ -77,10 +59,9 @@ int RequestParser::isValidEncoding(std::string &to_check)
 /*                                      CHECKERS                                      */
 /**************************************************************************************/
 
-int RequestParser::checkMethod(std::string &method)
+int RequestParser::checkMethod(RequestType method)
 {
-    if (method == "GET" || method == "POST"
-        || method == "DELETE")
+    if (method != Unknown)
         return 0;
     return (exitStatus(NOT_IMPLEMENTED));
 }
@@ -108,30 +89,30 @@ int RequestParser::checkWhitespaceBeforeColon(std::string &line, size_t &trunc)
 int RequestParser::checkHeaders()
 {
     /* Check if there is whitespaces before comma */
-    for (std::map<std::string, std::string>::iterator it = _headers.begin(); it != _headers.end(); it++) {
+    for (std::map<std::string, std::string>::iterator it = _request._headers.begin(); it != _request._headers.end(); it++) {
         if (checkWhitespaceBeforeComma(it->second) == -1)
             return (-1);
     }
 
     /* Check value of Content-Length if existing */
-    if (_headers.find("Content-Length") != _headers.end())
+    if (_request._headers.find("Content-Length") != _request._headers.end())
     {
-        std::map<std::string, std::string>::iterator it = this->_headers.find("Content-Length");
-        this->_body_length = ft::stoi(it->second);
-        if (this->_body_length < 0)
+        std::map<std::string, std::string>::iterator it = _request._headers.find("Content-Length");
+        _request._body_length = ft::stoi(it->second);
+        if (_request._body_length < 0)
             return (exitStatus(BAD_REQUEST));
     }
 
-    if (_headers.find("Host") == _headers.end())
+    if (_request._headers.find("Host") == _request._headers.end())
         return (exitStatus(BAD_REQUEST));
 
     /* Check value of Transfer-Encoding if existing */
     size_t      comma = 0, start = 0;
     std::string to_check;
 
-    if (_headers.find("Transfer-Encoding") != _headers.end())
+    if (_request._headers.find("Transfer-Encoding") != _request._headers.end())
     {
-        std::string encoding = _headers.find("Transfer-Encoding")->second;
+        std::string encoding = _request._headers.find("Transfer-Encoding")->second;
         if (encoding.find_first_of(',') != std::string::npos)
         {
             while ((comma = encoding.find_first_of(',', start)) != std::string::npos)
@@ -163,7 +144,7 @@ int RequestParser::appendHeaderValue(std::string &key, std::string &value)
     if (key == "Content-Length")
         return (exitStatus(BAD_REQUEST));
 
-    std::map<std::string, std::string>::iterator it = this->_headers.find(key);
+    std::map<std::string, std::string>::iterator it = _request._headers.find(key);
     it->second.append(", ");
     it->second.append(value);
 
@@ -189,9 +170,9 @@ int RequestParser::parseVersion(std::string &first_line, size_t &start, size_t &
     }
 
     /* Extract version */
-    this->_version = first_line.substr(start + 5, 3);
+    _request._version = first_line.substr(start + 5, 3);
 
-    if (this->_version != "1.1")
+    if (_request._version != "1.1")
     {
         std::cout << "Wrong HTTP version" << std::endl;
         return (exitStatus(HTTP_VERSION_UNSUPPORTED));
@@ -211,18 +192,18 @@ int RequestParser::parsePath(std::string &first_line, size_t &start, size_t &end
     }
     end = first_line.find_first_of(' ', start);
 
-    this->_path = first_line.substr(start, end - start);
-    if (this->_path.size() > URI_MAX_SIZE)
+    _request._path = first_line.substr(start, end - start);
+    if (_request._path.size() > URI_MAX_SIZE)
         return (exitStatus(URI_TOO_LONG));
 
     /* Substr and Erase with a pos : will copy/erase at pos, until the end */
-    if (_path.find('?') != std::string::npos)
+    if (_request._path.find('?') != std::string::npos)
     {
-        _query = _path.substr(_path.find('?') + 1);
-        _path.erase(_path.find('?'));
+        _request._query = _request._path.substr(_request._path.find('?') + 1);
+        _request._path.erase(_request._path.find('?'));
     }
 
-    if (_path[0] != '/')
+    if (_request._path[0] != '/')
         return (exitStatus(BAD_REQUEST));
 
     return (parseVersion(first_line, start, end));
@@ -240,11 +221,11 @@ int RequestParser::parseFirstLine(std::string &first_line)
     if (end == std::string::npos)
     {
         std::cout << "Error Not Found : There is no spaces after method" << std::endl;
-        this->_status = BAD_REQUEST; //  server cannot or will not process the request due to something that is perceived to be a client error
+        _request._status = BAD_REQUEST; //  server cannot or will not process the request due to something that is perceived to be a client error
         return (-1);
     }
-    this->_method = first_line.substr(start, end);
-    if (checkMethod(this->_method) == -1)
+    _request._method = ft::RequestFromString(first_line.substr(start, end));
+    if (checkMethod(_request._method) == -1)
         return -1;
 
     return parsePath(first_line, start, end);
@@ -255,7 +236,7 @@ int RequestParser::parseHeaders(size_t &index)
     std::string line, key, value;
     size_t      trunc = 0;
 
-    line = getNextLine(_request, index);
+    line = getNextLine(_string_request, index);
     if (line == "" || line == "\r" || line == "\r\n")
         return (exitStatus(BAD_REQUEST));
 
@@ -267,7 +248,7 @@ int RequestParser::parseHeaders(size_t &index)
             return (exitStatus(BAD_REQUEST));
 
         /* Check if whitespace before colon */
-        if (this->checkWhitespaceBeforeColon(line, trunc) == -1)
+        if (checkWhitespaceBeforeColon(line, trunc) == -1)
             return (-1);
 
         /* Get the key */
@@ -276,16 +257,16 @@ int RequestParser::parseHeaders(size_t &index)
 
         /* Insert key and value : append to value if key is already in map */
         value = line.substr(trunc, line.size() - trunc);
-        trimWhitespaces(value);
+        ft::trim(value, " ");
 
-        if (this->_headers.find(key) != _headers.end()) {
+        if (_request._headers.find(key) != _request._headers.end()) {
             if (appendHeaderValue(key, value) == -1)
                 return (-1);
         }
         else
-            this->_headers[key] = value;
+            _request._headers[key] = value;
 
-        line = getNextLine(_request, index);
+        line = getNextLine(_string_request, index);
     }
 
     return (checkHeaders());
@@ -293,32 +274,32 @@ int RequestParser::parseHeaders(size_t &index)
 
 int RequestParser::parseTrailer(size_t &index)
 {
-    _request.erase(0, index);
+    _string_request.erase(0, index);
 
-    if (_request.substr(0, 5).compare("0\r\n\r\n") == 0)
+    if (_string_request.substr(0, 5).compare("0\r\n\r\n") == 0)
         return 0;
-    else if (_request.substr(0, 3).compare("0\r\n") == 0)
-        _request.erase(0, 3);
+    else if (_string_request.substr(0, 3).compare("0\r\n") == 0)
+        _string_request.erase(0, 3);
     else
         return (exitStatus(BAD_REQUEST));
 
     size_t colon, end_line;
-    while ((end_line = _request.find("\r\n")) != std::string::npos)
+    while ((end_line = _string_request.find("\r\n")) != std::string::npos)
     {
-        if ((colon = _request.find(':', 0)) != std::string::npos)
+        if ((colon = _string_request.find(':', 0)) != std::string::npos)
         {
-            std::string key = _request.substr(0, colon);
-            std::string value = _request.substr(colon + 1, end_line - colon);
+            std::string key = _string_request.substr(0, colon);
+            std::string value = _string_request.substr(colon + 1, end_line - colon);
             ft::trim(key);
             ft::trim(value);
 
-            _headers[key] = value;
+            _request._headers[key] = value;
         }
         else
             return (exitStatus(BAD_REQUEST));
 
-        _request.erase(0, end_line + 2);
-        if (_request.empty())
+        _string_request.erase(0, end_line + 2);
+        if (_string_request.empty())
             return 0;
     }
     return (exitStatus(BAD_REQUEST));
@@ -327,11 +308,11 @@ int RequestParser::parseTrailer(size_t &index)
 int RequestParser::parseChunkedBody(size_t &index)
 {
     size_t end_line;
-    index = _request.find_first_not_of("\r\n", index);
+    index = _string_request.find_first_not_of("\r\n", index);
 
-    while ((end_line = _request.find("\r\n", index)) != std::string::npos)
+    while ((end_line = _string_request.find("\r\n", index)) != std::string::npos)
     {
-        std::string chunk_size = _request.substr(index, end_line - index);
+        std::string chunk_size = _string_request.substr(index, end_line - index);
         size_t size = ft::hexToInt(chunk_size);
         if (size == 0)
         {
@@ -340,15 +321,15 @@ int RequestParser::parseChunkedBody(size_t &index)
             return 0;
         }
 
-        index = _request.find_first_not_of("\r\n", end_line);
-        end_line = _request.find("\r\n", index);
+        index = _string_request.find_first_not_of("\r\n", end_line);
+        end_line = _string_request.find("\r\n", index);
         if (size != end_line - index)
             return (exitStatus(BAD_REQUEST));
         else
-            _body += _request.substr(index, size);
+            _request._body += _string_request.substr(index, size);
 
         index += size;
-        index = _request.find_first_not_of("\r\n", end_line);
+        index = _string_request.find_first_not_of("\r\n", end_line);
     }
 
     return -1;
@@ -356,9 +337,9 @@ int RequestParser::parseChunkedBody(size_t &index)
 
 int RequestParser::parseBody(size_t &index)
 {
-    if (index != _request.size())
+    if (index != _string_request.size())
     {
-        if (_headers.find("Transfer-Encoding") != _headers.end() && _headers["Transfer-Encoding"] == "chunked")
+        if (_request._headers.find("Transfer-Encoding") != _request._headers.end() && _request._headers["Transfer-Encoding"] == "chunked")
         {
             if (parseChunkedBody(index) == -1)
                 return -1;
@@ -366,12 +347,12 @@ int RequestParser::parseBody(size_t &index)
         else
         {
             /* A server MAY reject a _request that contains a message body but not a Content-Length */
-            if (_headers.find("Content-Length") == _headers.end())
+            if (_request._headers.find("Content-Length") == _request._headers.end())
                 return (exitStatus(LENGTH_REQUIRED));
 
-            this->_body = _request.substr(index, _request.size() - index);
+            _request._body = _string_request.substr(index, _string_request.size() - index);
 
-            if (_body_length > 0 && _body_length != (int)_body.size())
+            if (_request._body_length > 0 && _request._body_length != (int)_request._body.size())
                 return (exitStatus(BAD_REQUEST));
         }
     }
@@ -391,165 +372,19 @@ int RequestParser::parseRequest(const char *request)
     std::string line;
 
     std::string req_str(request);
-    _request = req_str;
+    _string_request = req_str;
 
-    line = getNextLine(_request, index);
-    if (this->parseFirstLine(line) == -1)
+    line = getNextLine(_string_request, index);
+    if (parseFirstLine(line) == -1)
         return (-1);
 
-    if (this->parseHeaders(index) == -1)
+    if (parseHeaders(index) == -1)
         return (-1);
 
-    if (this->parseBody(index) == -1)
+    if (parseBody(index) == -1)
         return (-1);
 
     return (0);
 }
 
-bool matchLocation(const std::string &path, const std::string &loc_path)
-{
-	// TODO TYR: allow other matching, such as those defined in Nginx:
-	// = (has to be totally equal)
-	// ~ (case-sensitive)
-	// ~* case-insensitive
-	return !path.compare(0, loc_path.size(), loc_path);
-}
-
-const Location * RequestParser::FindLocation(const Server &server) const
-{
-	const std::map<std::string, Location> & loc_map = server.getLocations();
-	std::string best_loc_index = "/";
-	for (std::map<std::string, Location>::const_iterator it = loc_map.begin();
-			it != loc_map.end(); it++)
-	{
-		if (matchLocation(_path, it->first)
-				&& it->first.size() > best_loc_index.size())
-			best_loc_index = it->first;
-	}
-	return &loc_map.at(best_loc_index);
-}
-
-const Server * RequestParser::FindServer(const std::vector<Server> &servers) const
-{
-	// Splitting of Host header into host and port:
-	std::string hostHeader = _headers.at("Host");
-
-	size_t	colon = hostHeader.find_first_of(':');
-
-	std::string requestHost = hostHeader.substr(0, colon);
-	std::string requestPortStr = (colon != std::string::npos ? hostHeader.substr(colon + 1) : "80");
-	int requestPort = 80;
-	if (colon != std::string::npos && colon != hostHeader.size() - 1)
-		requestPort = ft::stoi(requestPortStr);
-	std::cout << MAGENTA << "Request host=" << requestHost << ", port=" << requestPort << RESET << std::endl;
-
-	for(std::vector<Server>::const_iterator it_srv = servers.begin(); it_srv !=
-			servers.end(); it_srv++)
-	{
-		// TODO: Check request adress
-		if (requestPort != it_srv->getPort())
-			continue;
-
-		const std::vector<std::string> &server_names = it_srv->getName();
-		if (server_names.empty())
-			return &(*it_srv);
-
-		for (std::vector<std::string>::const_iterator it_names = server_names.begin();
-			it_names != server_names.end(); it_names++)
-		{
-			// TODO: Handle wildcards
-			if (*it_names == requestHost)
-				return &(*it_srv);
-		}
-	}
-	return NULL;
-}
-
-bool	RequestParser::isValid(const Location *loc) const
-{
-	if (!loc)
-		return false;
-
-	RequestType req_type = ft::RequestFromString(_method);
-	if (!loc->isRequestAllowed(req_type))
-	{
-		std::cerr << RED << "Method " << _method << " not allowed in location " << loc->path << RESET << std::endl;
-		return false;
-	}
-
-	if (loc->max_client_body_size != 0 && _body_length > loc->max_client_body_size)
-	{
-		std::cerr << RED << "Client body size too big for location " << loc->path << RESET << std::endl;
-		return false;
-	}
-
-	return true;
-}
-
-void	RequestParser::updatePathWithLocation(const Location *loc)
-{
-	if (!loc)
-		return ;
-
-	_location = loc->root_dir + "/" + _path.substr(loc->path.length());
-
-	if (loc->isCGI)
-		return ;
-
-	if (!ft::isDirectory(_location))
-		return ;
-
-	if (loc->auto_index)
-	{
-		std::vector<std::string>::const_iterator it = loc->indexes.begin();
-		for (;it != loc->indexes.end(); it++)
-		{
-			std::string new_location = _location + *it;
-			std::ifstream test_stream(new_location.c_str());
-			if (test_stream.is_open())
-			{
-				_location = new_location;
-				return ;
-			}
-			test_stream.close();
-		}
-		// TODO : Handle case if index is not found
-	}
-}
-
-/**************************************************************************************/
-/*                                      GETTERS                                       */
-/**************************************************************************************/
-
-std::map<std::string, std::string>  RequestParser::getHeaders() const { return (this->_headers); }
-std::string                         RequestParser::getMethod() const { return (this->_method); }
-std::string                         RequestParser::getPath() const { return (this->_path); }
-std::string                         RequestParser::getLocation() const { return (this->_location); }
-std::string                         RequestParser::getQuery() const { return (this->_query); }
-std::string                         RequestParser::getVersion() const { return (this->_version); }
-std::string                         RequestParser::getBody() const { return (this->_body); }
-int                                 RequestParser::getBodyLength() const { return (this->_body_length); }
-int                                 RequestParser::getStatus() const { return (this->_status); }
-
-/**************************************************************************************/
-/*                                      NON MEMBERS                                   */
-/**************************************************************************************/
-
-std::ostream &operator<<(std::ostream &out, const RequestParser &rhs)
-{
-    out << "HTTP CLIENT REQUEST : \n"
-        << rhs.getMethod() << ' ' << rhs.getPath() << ' ' << rhs.getVersion() << "\r\n";
-
-    std::map<std::string, std::string> headers = rhs.getHeaders();
-    for (std::map<std::string, std::string>::iterator it = headers.begin(); it != headers.end(); it++)
-        out << it->first << ": " << it->second << "\r\n";
-
-    out << "\r\n" << rhs.getBody() << std::endl;
-
-    return out;
-}
-/**************************************************************************************/
-/*                                      SETTERS                                       */
-/**************************************************************************************/
-
-void RequestParser::setStatus(int new_status) { this->_status = new_status; }
+Request RequestParser::getRequest() { return (this->_request); }
