@@ -228,8 +228,6 @@ void Looper::addBodyToResponse(long socket) // TODO: add file to read from (std:
 
 int Looper::buildDeleteResponse(long socket, const Location &loc)
 {
-	(void)loc;
-
     int             ret = 0;
 
     _response.insert(std::make_pair<long int, std::string>(socket, ""));
@@ -252,7 +250,7 @@ int Looper::buildDeleteResponse(long socket, const Location &loc)
     if (ft::isOkHTTP(ret))
         addBodyToResponse(socket);
     else
-        addErrorBodyToResponse(socket);
+        addErrorBodyToResponse(socket, loc);
 
     if (VERBOSE) {
         std::cout << "================== RESPONSE ==================" << std::endl;
@@ -319,7 +317,7 @@ int Looper::buildGetResponse(long socket, const Location &loc)
         if (ft::isOkHTTP(ret))
             addBodyToResponse(socket);
         else
-            addErrorBodyToResponse(socket);
+            addErrorBodyToResponse(socket, loc);
         if (VERBOSE) {
             std::cout << "================== CGI ==================" << std::endl;
             if (secFetchImage(socket))
@@ -335,7 +333,7 @@ int Looper::buildGetResponse(long socket, const Location &loc)
         if (ft::isOkHTTP(ret))
             addBodyToResponse(socket);
         else
-            addErrorBodyToResponse(socket);
+            addErrorBodyToResponse(socket, loc);
         if (VERBOSE) {
             std::cout << "================== RESPONSE ==================" << std::endl;
             if (secFetchImage(socket))
