@@ -350,4 +350,24 @@ namespace ft {
 		fs.close();
 		return content;
 	}
+
+    bool isOkHTTP(int status)
+    {
+        switch (status) {
+            case HTTP_OK:
+                return true;
+            case HTTP_CREATED:
+                return true;
+            case HTTP_ACCEPTED:
+                return true;
+            case HTTP_NO_CONTENT:
+                return true;
+            case HTTP_RESET_CONTENT:
+                return true;
+            case HTTP_PARTIAL_CONTENT:
+                return true;
+            default:
+                return false;
+        }
+    }
 }
