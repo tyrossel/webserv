@@ -5,6 +5,7 @@
 #include "CommonGatewayInterface.hpp"
 #include "Server.hpp"
 #include "RequestParser.hpp"
+#include "Response.hpp"
 #include "webserv.hpp"
 
 class Looper {
@@ -14,7 +15,7 @@ class Looper {
         std::vector<Server>                 _servers;
         std::map<long int, Server *>        _active_servers;
         std::vector<int>                    _ready_fd;
-        std::map<long int, std::string>     _response;
+        std::map<long int, Response>        _response;
         std::map<long int, Request>         _request;
 
         fd_set                              _active_fd_set;
@@ -39,27 +40,8 @@ class Looper {
         void    selectErrorHandle();
         // =================================================================
 
-        // CHECKERS ========================================================
-        int     checkCode(Request request);
-        int     checkPath(long socket);
-        int     secFetchImage(long socket);
-        // =================================================================
-
         // RESPONSE CRAFTING ===============================================
         int     buildResponse(long socket, const Location *loc);
-        int     buildGetResponse(long socket, const Location *loc);
-        int     buildPostResponse(long socket, const Location *loc);
-        int     buildDeleteResponse(long socket, const Location *loc);
-
-        void    addServerHeaderResponse(long socket);
-        void    addContentType(long socket);
-        void    addDate(long socket);
-        void    addBodyToResponse(long socket);
-        int     addHTTPHeader(long socket);
-        void    addContentLengthPOST(long socket);
-
-        int     writeResponseHeader(long socket);
-        void    addErrorBodyToResponse(long socket, const Location *loc);
         // =================================================================
 };
 

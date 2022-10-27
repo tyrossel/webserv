@@ -104,7 +104,6 @@ enum RequestType
 #include <cstring>
 #include <fcntl.h>
 
-#include <errno.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -113,13 +112,14 @@ enum RequestType
 #include <netdb.h>
 #include <arpa/inet.h>
 #include <ctime>
+#include <utility>
 
 /***********************************************************************************
  *                             GLOBAL VARIABLE                                     *
  ***********************************************************************************/
 extern int RUNNING;
 
-#define VERBOSE 1
+#define VERBOSE 0
 
 #include "../src/Utils.hpp"
 

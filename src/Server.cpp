@@ -1,4 +1,5 @@
 #include "Server.hpp"
+#include "Response.hpp"
 #include <stdexcept>
 
 /**************************************************************************************/
@@ -64,15 +65,15 @@ void    Server::setAddress()
     _addr.sin_port = htons(_port);
 }
 
-int     Server::send(long socket, std::map<long, std::string> response)
+int     Server::send(const Response &resp)
 {
     int bytes_sent_total = 0;
     int bytes_sent_now = 0;
 
-    while (bytes_sent_total < (int)response[socket].size())
+    while (bytes_sent_total < (int)resp.respSize())
     {
-        bytes_sent_now = ::send(socket, response[socket].c_str() + bytes_sent_total, response[socket].size() - bytes_sent_total, 0);
-        std::cout << YELLOW << "SENDING " << bytes_sent_now << " BYTES TO SOCKET " << socket << RESET << std::endl;
+        bytes_sent_now = ::send(resp.getSocket(), resp.getResponse().c_str() + bytes_sent_total, resp.respSize() - bytes_sent_total, 0);
+        //std::cout << YELLOW << "SENDING " << bytes_sent_now << " BYTES TO SOCKET " << socket << RESET << std::endl;
         if (bytes_sent_now == -1)
         {
             std::cout << "Error on sockets 🔥. Send failed" << std::endl;
@@ -147,4 +148,3 @@ void	Server::addAddress(const std::string &address) { _address = address; }
 void    Server::addName(const std::string &name) { _name.push_back(name); }
 void    Server::addLocation(const std::string &key, const Location &location) { _location[key] = location; }
 void    Server::addHost(const unsigned int &host) { _host = host; }
-
