@@ -128,21 +128,23 @@ void Looper::addErrorBodyToResponse(long socket)
 
 int Looper::writeResponseHeader(long socket)
 {
-    std::stringstream out;
-    int i = 0;
+    if (_request[socket].getStatus() == 0)
+        _request[socket].setStatus(200);
 
-    i = _request[socket].getStatus();
-    out << i;
+    int status = _request[socket].getStatus();
+    std::stringstream out;
+
+    out << status;
     _response[socket].append("HTTP/1.1 ");
-    if (i == 0) {
-        _response[socket].append("200 OK\r\n");
-        return (HTTP_OK);
+    if (ft::isOkHTTP(status)) {
+        _response[socket].append(out.str());
+        _response[socket].append(" OK\r\n");
     }
     else {
         _response[socket].append(out.str());
         _response[socket].append(" KO\r\n");
     }
-    return (i);
+    return (status);
 }
 
 int Looper::addHTTPHeader(long socket)
@@ -219,11 +221,19 @@ void Looper::addBodyToResponse(long socket) // TODO: add file to read from (std:
 int Looper::buildDeleteResponse(long socket, const Location &loc)
 {
 	(void)loc;
-    // TODO : DO THE DELTE
 
     int             ret = 0;
 
     _response.insert(std::make_pair<long int, std::string>(socket, ""));
+    if (!ft::isDirectory(_request[socket].getPath()))
+    {
+        if (remove(_request[socket].getPath().c_str()) == 0)
+            _request[socket].setStatus(204);
+        else
+            _request[socket].setStatus(403);
+    }
+    else
+        _request[socket].setStatus(404);
     ret = addHTTPHeader(socket);
     addServerHeaderResponse(socket);
     addContentType(socket);
@@ -286,7 +296,6 @@ int Looper::buildGetResponse(long socket, const Location &loc)
 
     if (0) // CGI or not ?
     {
-
         CGI cgi(_request[socket].getHeaders(), _request[socket].getBody());
         ret = cgi.executeCgi(&_request[socket], _active_servers[socket]);
 
