@@ -132,24 +132,24 @@ void Response::addErrorBodyToResponse()
 /*                                  CHECKERS                                          */
 /**************************************************************************************/
 
-void     Response::checkCode()
+void    Response::checkCode()
 {
     if (_request.getStatus() == 0)
         _request.setStatus(HTTP_OK);
 }
 
-void     Response::checkPath()
+void    Response::checkPath()
 {
     std::string path = _request.getLocation();
 
     ft::trimLeft(path, "/");
-    if (!ft::isDirectory(path) || !ft::isFile(path))
-        _request.setStatus(NOT_FOUND);
-    else
+    if (ft::isDirectory(path) || ft::isFile(path))
         _request.setStatus(HTTP_OK);
+    else
+        _request.setStatus(NOT_FOUND);
 }
 
-bool Response::secFetchImage()
+bool    Response::secFetchImage()
 {
     // This function just checks if the _request is for an image
     std::map<std::string, std::string> tmp = _request.getHeaders();
@@ -172,7 +172,7 @@ void Response::buildGetResponse(Request req)
     addServerHeaderResponse();
     addDate();
 
-    if (1) // CGI or not ?
+    if (0) // CGI or not ?
     {
         std::string path = _request.getLocation();
         if (path[0] == '/')
