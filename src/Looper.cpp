@@ -1,7 +1,6 @@
 #include "Looper.hpp"
-#include "DirectoryListing.hpp"
-#include "Utils.hpp"
 #include "webserv.hpp"
+#include "Utils.hpp"
 
 /**************************************************************************************/
 /*                          CONSTRUCTORS / DESTRUCTORS                                */
@@ -69,311 +68,31 @@ int Looper::setupLoop()
     else
         return (0);
 }
-/**************************************************************************************/
-/*                                      CHECKERS                                      */
-/**************************************************************************************/
-int     Looper::checkCode(Request request)
-{
-    if (request.getStatus() == 0)
-        return HTTP_OK;
-    else
-        return (request.getStatus());
-}
-
-int     Looper::checkPath(long socket)
-{
-	std::string path = _request[socket].getLocation();
-
-    ft::trimLeft(path, "/");
-	if (ft::isDirectory(path))
-	{
-		return HTTP_OK;
-	}
-    std::ifstream test(path.c_str());
-    if (!test.good())
-    {
-        _request[socket].setStatus(404);
-        return NOT_FOUND;
-    }
-    else
-        return HTTP_OK;
-}
-
-int Looper::secFetchImage(long socket)
-{
-    // This function just checks if the request is for an image
-    std::map<std::string, std::string> tmp = _request[socket].getHeaders();
-    if (tmp.find("Sec-Fetch-Dest") != tmp.end())
-    {
-        if (tmp.find("Sec-Fetch-Dest")->second == "image")
-            return (0);
-    }
-    return (1);
-}
 
 /**************************************************************************************/
 /*                                  RESPONSE CRAFTING                                 */
 /**************************************************************************************/
-void Looper::addErrorBodyToResponse(long socket, const Location *loc)
-{
-    std::string body;
-    std::stringstream out;
-	int status = _request[socket].getStatus();
-
-	std::cerr << RED << "Status = " << status << RESET << std::endl;
-	if (!loc)
-	{
-		body.append(ft::craftErrorHTML(_request[socket].getStatus()));
-	}
-	else
-	{
-		try
-		{
-			body.append(ft::readFile(loc->error_pages.at(status)));
-		}
-		catch (const std::exception& e)
-		{
-			body.append(ft::craftErrorHTML(_request[socket].getStatus()));
-		}
-	}
-
-    _response[socket].append("Content-Length: ");
-    _response[socket].append(ft::itoa(body.size()));
-    _response[socket].append("\r\n\r\n");
-    _response[socket].append(body);
-}
-
-int Looper::writeResponseHeader(long socket)
-{
-    if (_request[socket].getStatus() == 0)
-        _request[socket].setStatus(200);
-
-    int status = _request[socket].getStatus();
-    std::stringstream out;
-
-    out << status;
-    _response[socket].append("HTTP/1.1 ");
-    if (ft::isOkHTTP(status)) {
-        _response[socket].append(out.str());
-        _response[socket].append(" OK\r\n");
-    }
-    else {
-        _response[socket].append(out.str());
-        _response[socket].append(" KO\r\n");
-    }
-    return (status);
-}
-
-int Looper::addHTTPHeader(long socket)
-{
-    if (checkCode(_request[socket]) != HTTP_OK) // checking if an error code has been parsed in request
-        return writeResponseHeader(socket); // make this return return ret so we can pass it to body
-    else if (checkPath(socket) != HTTP_OK) // functions will return the code catched
-        return writeResponseHeader(socket);
-    return writeResponseHeader(socket);
-}
-
-void Looper::addServerHeaderResponse(long socket)
-{
-    _response[socket].append("Server: WetServ/1.0.0\r\n");
-}
-
-void Looper::addContentType(long socket)
-{
-    _response[socket].append("Content-Type: ");
-    std::map<std::string, std::string> tmp = _request[socket].getHeaders();
-    if (tmp.find("Sec-Fetch-Dest") != tmp.end())
-        _response[socket].append(tmp.find("Sec-Fetch-Dest")->second);
-    else
-        _response[socket].append("NONE");
-    _response[socket].append("\r\n");
-}
-
-void Looper::addDate(long socket)
-{
-    // current date/time based on current system
-    time_t now = time(0);
-    // convert now to string form
-    char* dt = ctime(&now);
-    // convert now to tm struct for UTC
-    tm *gmtm = gmtime(&now);
-    dt = asctime(gmtm);
-    _response[socket].append("Date: ");
-    _response[socket].append(dt);
-}
-
-void Looper::addBodyToResponse(long socket) // TODO: add file to read from (std::string path)
-{
-    std::string text;
-    std::stringstream out;
-	std::string loc = _request[socket].getLocation();
-	std::string path = _request[socket].getPath();
-
-	if (ft::isDirectory(loc))
-	{
-		text = createDirectoryListingBody(path, loc);
-	}
-	else
-	{
-		try
-		{
-			text = ft::readFile(loc);
-		}
-		catch (const std::exception& e)
-		{
-            _response[socket].append("\r\n\r\n");
-			std::cerr << e.what() << std::endl;;
-		}
-	}
-    out << text.size();
-    std::string content_len = "Content-Length: " + out.str();
-    _response[socket].append(content_len);
-    _response[socket].append("\r\n\r\n");
-    _response[socket].append(text);
-}
-
-int Looper::buildDeleteResponse(long socket, const Location *loc)
-{
-    int             ret = 0;
-
-    _response.insert(std::make_pair<long int, std::string>(socket, ""));
-    std::string path = _request[socket].getLocation();
-    if (path[0] == '/')
-        ft::trimLeft(path, "/");
-    if (ft::isFile(path))
-    {
-        if (remove(path.c_str()) == 0)
-            _request[socket].setStatus(204);
-        else
-            _request[socket].setStatus(403);
-    }
-    else
-        _request[socket].setStatus(404);
-    ret = addHTTPHeader(socket);
-    addServerHeaderResponse(socket);
-    addContentType(socket);
-    addDate(socket);
-    if (ft::isOkHTTP(ret))
-        addBodyToResponse(socket);
-    else
-        addErrorBodyToResponse(socket, loc);
-
-    if (VERBOSE) {
-        std::cout << "================== RESPONSE ==================" << std::endl;
-        if (secFetchImage(socket))
-            std::cout << GREEN << _response[socket] << RESET << std::endl;
-        else
-            std::cout << GREEN << "We sent an image" << RESET << std::endl;
-        std::cout << "==============================================" << std::endl << std::endl;
-    }
-
-    return (1);
-}
-
-void Looper::addContentLengthPOST(long socket)
-{
-    _response[socket].append("Content-Length: ");
-    _response[socket].append(_request[socket].getHeaders().find("Content-Length")->second);
-    _response[socket].append("\r\n");
-}
-
-int Looper::buildPostResponse(long socket, const Location *loc)
-{
-	(void)loc;
-    int             ret = 0;
-
-    _response.insert(std::make_pair<long int, std::string>(socket, ""));
-    ret += addHTTPHeader(socket);
-    addServerHeaderResponse(socket);
-    addDate(socket);
-    addContentLengthPOST(socket);
-    CGI cgi(_request[socket]);
-    ret = cgi.executeCgi(&_request[socket], _active_servers[socket]);
-    _response[socket].append(cgi.getRetBody());
-    if (VERBOSE) {
-        std::cout << "================== CGI ==================" << std::endl;
-        if (secFetchImage(socket))
-            std::cout << _response[socket] << std::endl;
-        else
-            std::cout << GREEN << "We sent an image" << RESET << std::endl;
-        std::cout << "==============================================" << std::endl << std::endl;
-    }
-    return (ret);
-}
-
-int Looper::buildGetResponse(long socket, const Location *loc)
-{
-    int             ret = 0;
-
-    _response.insert(std::make_pair<long int, std::string>(socket, ""));
-    ret = addHTTPHeader(socket);
-    addServerHeaderResponse(socket);
-    addDate(socket);
-
-    if (1) // CGI or not ?
-    {
-        std::string path = _request[socket].getLocation();
-        if (path[0] == '/')
-            ft::trimLeft(path, "/");
-        if (ft::isFile(path)) {
-            CGI cgi(_request[socket]);
-            ret = cgi.executeCgi(&_request[socket], _active_servers[socket]);
-            // Here we remove HTTP EOF because the CGI we use cannot accept HTML in it.
-            // If we send HTML inside the CGI he will TOUPPER the html which is.. shitty ?
-            cgi.removeEOFHTTP();
-            _response[socket].append(cgi.getRetBody());
-            if (ft::isOkHTTP(ret))
-                addBodyToResponse(socket);
-            else
-                addErrorBodyToResponse(socket, loc);
-        }
-        else
-            addErrorBodyToResponse(socket, loc);
-        if (VERBOSE) {
-            std::cout << "================== CGI ==================" << std::endl;
-            if (secFetchImage(socket))
-                std::cout << _response[socket] << std::endl;
-            else
-                std::cout << GREEN << "We sent an image" << RESET << std::endl;
-            std::cout << "==============================================" << std::endl << std::endl;
-        }
-    }
-    else
-    {
-        //addContentType(socket); // TODO: Mime if no CGI
-        if (ft::isOkHTTP(ret))
-            addBodyToResponse(socket);
-        else
-            addErrorBodyToResponse(socket, loc);
-        if (VERBOSE) {
-            std::cout << "================== RESPONSE ==================" << std::endl;
-            if (secFetchImage(socket))
-                std::cout << GREEN << _response[socket] << RESET << std::endl;
-            else
-                std::cout << GREEN << "We sent an image" << RESET << std::endl;
-            std::cout << "==============================================" << std::endl << std::endl;
-        }
-    }
-    return (ret);
-}
 
 int Looper::buildResponse(long socket, const Location *loc)
 {
-    // TODO : Map with func pointers later
-
+    Response ret(socket, loc, _active_servers[socket]);
     switch (_request[socket].getMethod()) {
         case Get:
-            buildGetResponse(socket, loc);
+            ret.buildGetResponse(_request[socket]);
+            _response.insert(std::pair<long int, Response>(socket, ret));
             break;
         case Post:
-            buildPostResponse(socket, loc);
+            ret.buildPostResponse(_request[socket]);
+            _response.insert(std::pair<long int, Response>(socket, ret));
             break;
         case Delete:
-            buildDeleteResponse(socket, loc);
+            ret.buildDeleteResponse(_request[socket]);
+            _response.insert(std::pair<long int, Response>(socket, ret));
             break;
         default:
             std::cout << RED << _request[socket].getMethod() << " is not a method that the server threats." << RESET << std::endl;
     }
+    (void)ret;
     return (1);
 }
 
@@ -479,7 +198,7 @@ void Looper::sendResponse(fd_set &reading_fd_set, fd_set &writing_fd_set, fd_set
     {
         if (FD_ISSET(*it, &writing_fd_set))
         {
-            long ret_val = _active_servers[*it]->send(*it, _response);
+            long ret_val = _active_servers[*it]->send(_response[*it]);
             if (ret_val >= 0)
             {
                 _response.erase(*it); // erase the response from map when comm is over

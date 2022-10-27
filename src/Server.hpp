@@ -5,6 +5,8 @@
 #include "Location.hpp"
 #include <stdexcept>
 
+class Response;
+
 class Server {
     private:
         int                                 _port; // where the server is listening
@@ -27,7 +29,7 @@ class Server {
         int     setupListen(); // Bind and listen socket
         int     buildServer();
         void    close(int socket);
-        int     send(long socket, std::map<long, std::string> response);
+        int     send(const Response &Resp);
 
         // GETTERS
         long                                        getFd() const;
@@ -42,7 +44,7 @@ class Server {
         unsigned int                                getHost() const;
 
 
-    // ADDERS
+        // ADDERS
         void                                        addPort(int port);
 		void										addAddress(const std::string &address);
         void                                        addLocation(const std::string &key, const Location &location);

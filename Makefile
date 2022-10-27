@@ -19,14 +19,15 @@ OBJS_DIR	= obj
 OBJS = 		$(patsubst %.cpp, $(OBJS_DIR)/%.o, $(SRCS))
 SRCS		= main.cpp \
 			  Config.cpp \
+			  Response.cpp \
 			  Looper.cpp \
 			  Server.cpp \
 			  Location.cpp \
 			  DirectoryListing.cpp \
-			  RequestParser.cpp \
 			  Utils.cpp \
 			  ConfigParser.cpp \
 			  Json.cpp \
+			  RequestParser.cpp \
 			  CommonGatewayInterface.cpp \
 			  Request.cpp
 
