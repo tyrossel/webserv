@@ -59,7 +59,7 @@ class Looper {
         void    addContentLengthPOST(long socket);
 
         int     writeResponseHeader(long socket);
-        void    addErrorBodyToResponse(long socket);
+        void    addErrorBodyToResponse(long socket, const Location &loc);
         // =================================================================
 };
 

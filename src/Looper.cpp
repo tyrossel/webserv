@@ -112,12 +112,23 @@ int Looper::secFetchImage(long socket)
 /**************************************************************************************/
 /*                                  RESPONSE CRAFTING                                 */
 /**************************************************************************************/
-void Looper::addErrorBodyToResponse(long socket)
+void Looper::addErrorBodyToResponse(long socket, const Location &loc)
 {
     std::string body;
     std::stringstream out;
+	int status = _request[socket].getStatus();
 
-    body.append(ft::craftErrorHTML(_request[socket].getStatus()));
+	std::cerr << RED << "Status = " << status << RESET << std::endl;
+	try
+	{
+		body.append(ft::readFile(loc.error_pages.at(status)));
+	}
+	catch (const std::exception& e)
+	{
+		// std::cerr << RED << "Custom error file not found" << loc.error_pages.at(status) << RESET << std::endl;
+		body.append(ft::craftErrorHTML(_request[socket].getStatus()));
+	}
+
     _response[socket].append("Content-Length: ");
     _response[socket].append(ft::itoa(body.size()));
     _response[socket].append("\r\n\r\n");
@@ -226,7 +237,7 @@ int Looper::buildDeleteResponse(long socket, const Location &loc)
     addContentType(socket);
     addDate(socket);
     if (ret != HTTP_OK)
-        addErrorBodyToResponse(socket);
+        addErrorBodyToResponse(socket, loc);
     else
         addBodyToResponse(socket);
     std::cout << "================== RESPONSE ==================" << std::endl;
@@ -290,7 +301,7 @@ int Looper::buildGetResponse(long socket, const Location &loc)
         cgi.removeEOFHTTP();
         _response[socket].append(cgi.getRetBody());
         if (ret != HTTP_OK)
-            addErrorBodyToResponse(socket);
+            addErrorBodyToResponse(socket, loc);
         else
             addBodyToResponse(socket);
         if (VERBOSE) {
@@ -306,7 +317,7 @@ int Looper::buildGetResponse(long socket, const Location &loc)
     {
         //addContentType(socket); // TODO: Mime if no CGI
         if (ret != HTTP_OK)
-            addErrorBodyToResponse(socket);
+            addErrorBodyToResponse(socket, loc);
         else
             addBodyToResponse(socket);
         if (VERBOSE) {
