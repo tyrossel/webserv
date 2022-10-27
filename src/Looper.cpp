@@ -280,7 +280,7 @@ int Looper::buildPostResponse(long socket, const Location &loc)
     addServerHeaderResponse(socket);
     addDate(socket);
     addContentLengthPOST(socket);
-    CGI cgi(_request[socket].getHeaders(), _request[socket].getBody());
+    CGI cgi(_request[socket]);
     ret = cgi.executeCgi(&_request[socket], _active_servers[socket]);
     _response[socket].append(cgi.getRetBody());
     if (VERBOSE) {
@@ -304,9 +304,10 @@ int Looper::buildGetResponse(long socket, const Location &loc)
     addServerHeaderResponse(socket);
     addDate(socket);
 
-    if (0) // CGI or not ?
+    if (1) // CGI or not ?
     {
-        CGI cgi(_request[socket].getHeaders(), _request[socket].getBody());
+
+        CGI cgi(_request[socket]);
         ret = cgi.executeCgi(&_request[socket], _active_servers[socket]);
         // Here we remove HTTP EOF because the CGI we use cannot accept HTML in it.
         // If we send HTML inside the CGI he will TOUPPER the html which is.. shitty ?
