@@ -1,4 +1,5 @@
 #include "Config.hpp"
+#include <unistd.h>
 #include <vector>
 #include <set>
 
@@ -79,16 +80,25 @@ bool							Config::isValid() const
 				std::cerr << "Location '" + loc_path + "' error: max_client_body_size must be positive" << std::endl;
 				return false;
 			}
-			if (loc.isCGI)
+			if (loc.isCGI || (loc.path == "/" && !loc.cgi_bin.empty()))
 			{
-				if (!loc.root_dir.empty())
+				if (access(loc.cgi_bin.c_str(), F_OK))
 				{
-					std::cerr << "Location error: Cannot have a root and a cgi_bin" << std::endl;
+					std::cerr << "CGI error: '" << loc.cgi_bin << "' cannot be found" << std::endl;
 					return false;
 				}
-				// TODO TYR: Check that cgi_bin is set and executable
+				if (access(loc.cgi_bin.c_str(), X_OK))
+				{
+					std::cerr << "CGI error: " << loc.cgi_bin << " cannot be executed" << std::endl;
+					return false;
+				}
 			}
-			else
+			if (loc.isCGI && !loc.root_dir.empty())
+			{
+				std::cerr << "Location " + loc.path + " error: Cannot have a root and a cgi_bin" << std::endl;
+				return false;
+			}
+			if (!loc.isCGI)
 			{
 				if (loc.root_dir.empty())
 				{
