@@ -34,6 +34,7 @@ namespace ft {
     std::string itoa(int i);
     std::string errorMessage(int error);
     std::string craftErrorHTML(int error);
+    bool        isOkHTTP(int status);
 }
 
 #endif //WEBSERV_UTILS_HPP
