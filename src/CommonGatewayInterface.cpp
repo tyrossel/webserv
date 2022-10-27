@@ -4,7 +4,7 @@
 /*                          CONSTRUCTORS / DESTRUCTORS                                */
 /**************************************************************************************/
 
-CGI::CGI(const RequestParser &request) : _env(), _headers(request.getHeaders()), _req_body(request.getBody()), _cwd(""), _cgi_path(""), _file_path(""), _ret_body(""), _fd_file(0), _cgi_env(NULL) {}
+CGI::CGI(const Request &request) : _env(), _headers(request.getHeaders()), _req_body(request.getBody()), _cwd(""), _cgi_path(""), _file_path(""), _ret_body(""), _fd_file(0), _cgi_env(NULL) {}
 
 CGI::CGI(const CGI &rhs)
 {
@@ -74,7 +74,7 @@ std::string CGI::readContent(int fd)
     return ret;
 }
 
-int CGI::executeCgi(const RequestParser *request, const Server *server)
+int CGI::executeCgi(const Request *request, const Server *server)
 {
     if (setCGIEnvironment(request, server) == -1)
         return INTERNAL_SERVER_ERROR;
@@ -155,7 +155,7 @@ void CGI::removeEOFHTTP()
     }
 }
 
-int CGI::setCGIEnvironment(const RequestParser *request, const Server *server)
+int CGI::setCGIEnvironment(const Request *request, const Server *server)
 {
     char *tmp = getcwd(NULL, 0);
 

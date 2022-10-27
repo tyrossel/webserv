@@ -18,7 +18,7 @@ class CGI {
         char**                              _cgi_env;
 
     public:
-        CGI(const RequestParser &request);
+        CGI(const Request &request);
         ~CGI();
         CGI(const CGI &rhs);
         CGI &operator=(const CGI &rhs);
@@ -37,8 +37,8 @@ class CGI {
         void exitFail(std::string error, int exit_value);
 
         std::string readContent(int fd);
-        int setCGIEnvironment(const RequestParser *request, const Server *server);
-        int executeCgi(const RequestParser *request, const Server *server);
+        int setCGIEnvironment(const Request *request, const Server *server);
+        int executeCgi(const Request *request, const Server *server);
 
         void removeEOFHTTP();
 };

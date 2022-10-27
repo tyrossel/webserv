@@ -15,7 +15,7 @@ class Looper {
         std::map<long int, Server *>        _active_servers;
         std::vector<int>                    _ready_fd;
         std::map<long int, std::string>     _response;
-        std::map<long int, RequestParser>   _request;
+        std::map<long int, Request>         _request;
 
         fd_set                              _active_fd_set;
 
@@ -40,7 +40,7 @@ class Looper {
         // =================================================================
 
         // CHECKERS ========================================================
-        int     checkCode(RequestParser request);
+        int     checkCode(Request request);
         int     checkPath(long socket);
         int     secFetchImage(long socket);
         // =================================================================
