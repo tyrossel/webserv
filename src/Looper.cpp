@@ -253,12 +253,15 @@ int Looper::buildDeleteResponse(long socket, const Location &loc)
         addBodyToResponse(socket);
     else
         addErrorBodyToResponse(socket);
-    std::cout << "================== RESPONSE ==================" << std::endl;
-    if (secFetchImage(socket))
-        std::cout << GREEN << _response[socket] << RESET << std::endl;
-    else
-        std::cout << GREEN << "We sent an image" << RESET << std::endl;
-    std::cout << "==============================================" << std::endl << std::endl;
+
+    if (VERBOSE) {
+        std::cout << "================== RESPONSE ==================" << std::endl;
+        if (secFetchImage(socket))
+            std::cout << GREEN << _response[socket] << RESET << std::endl;
+        else
+            std::cout << GREEN << "We sent an image" << RESET << std::endl;
+        std::cout << "==============================================" << std::endl << std::endl;
+    }
 
     return (1);
 }
