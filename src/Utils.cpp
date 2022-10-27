@@ -1,6 +1,7 @@
 # include "Utils.hpp"
 #include "webserv.hpp"
 #include "sys/stat.h"
+#include <stdexcept>
 
 int RUNNING;
 namespace ft {
@@ -235,12 +236,12 @@ namespace ft {
     RequestType	RequestFromString(const std::string &str)
     {
 		std::map<std::string, RequestType> map;
-			map["GET"] = Get;
-			map["POST"] = Post;
-			map["DELETE"] = Delete;
-			map["HEAD"] = Head;
-			map["PATCH"] = Patch;
-			map["PUT"] = Put;
+		map["GET"] = Get;
+		map["POST"] = Post;
+		map["DELETE"] = Delete;
+		map["HEAD"] = Head;
+		map["PATCH"] = Patch;
+		map["PUT"] = Put;
 
 		try
 		{
@@ -335,4 +336,18 @@ namespace ft {
         ret.append("</h1>\n<hr>\n<body>\n<h2 style=\"text-align: center\">WetServ</h2>\n</body>\n</html>\n");
         return (ret);
     }
+
+	std::string readFile(const std::string &filename)
+	{
+		std::string content;
+		std::ifstream fs(filename.c_str());
+		if (!fs.good())
+		{
+			throw std::runtime_error("cannot open file: " + filename);
+		}
+		content.assign(std::istreambuf_iterator<char>(fs),
+					std::istreambuf_iterator<char>());
+		fs.close();
+		return content;
+	}
 }

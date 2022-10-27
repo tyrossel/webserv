@@ -379,15 +379,7 @@ void JsonObject::parseJsonValue(std::string &s, const std::string &key)
 
 void	JsonObject::parseFromFile(const std::string &file)
 {
-	std::ifstream fs(file.c_str());
-
-	if (!fs.good())
-		throw std::logic_error("JSON error: file '" + file + "' cannot be opened");
-
-	std::string text;
-	text.assign(std::istreambuf_iterator<char>(fs),
-			std::istreambuf_iterator<char>());
-	fs.close();
+	std::string text = ft::readFile(file);
 
 	this->parseFromString(text);
 }

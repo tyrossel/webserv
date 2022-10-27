@@ -29,6 +29,7 @@ namespace ft {
 
     RequestType	RequestFromString(const std::string &str);
 	bool		isDirectory(const std::string path);
+	std::string	readFile(const std::string &filename);
 
     std::string itoa(int i);
     std::string errorMessage(int error);

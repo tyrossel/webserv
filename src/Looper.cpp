@@ -191,21 +191,18 @@ void Looper::addBodyToResponse(long socket) // TODO: add file to read from (std:
 
 	if (ft::isDirectory(loc))
 	{
-		// TODO TYR: we should send the path requested by the client in order
-		// not to expose the physical architecture of our server
 		text = createDirectoryListingBody(path, loc);
 	}
 	else
 	{
-		std::ifstream fs(loc.c_str());
-		if (!fs.good())
+		try
 		{
-			std::cerr << "Error stream file not found" << std::endl;
-			return ;
+			text = ft::readFile(loc);
 		}
-		text.assign(std::istreambuf_iterator<char>(fs),
-					std::istreambuf_iterator<char>());
-		fs.close();
+		catch (const std::exception& e)
+		{
+			std::cerr << e.what() << std::endl;;
+		}
 	}
     _response[socket].append("Content-Length: ");
     i = text.size();
