@@ -277,8 +277,9 @@ void Looper::addContentLengthPOST(long socket)
     _response[socket].append("\r\n");
 }
 
-int Looper::buildPostResponse(long socket, const Location &loc)
+int Looper::buildPostResponse(long socket, const Location *loc)
 {
+	(void)loc;
     int             ret = 0;
 
     _response.insert(std::make_pair<long int, std::string>(socket, ""));
@@ -297,7 +298,7 @@ int Looper::buildPostResponse(long socket, const Location &loc)
             std::cout << GREEN << "We sent an image" << RESET << std::endl;
         std::cout << "==============================================" << std::endl << std::endl;
     }
-    return (1);
+    return (ret);
 }
 
 int Looper::buildGetResponse(long socket, const Location *loc)
