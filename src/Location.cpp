@@ -6,7 +6,7 @@
 /*   By: trossel <trossel@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/21 11:11:21 by trossel           #+#    #+#             */
-/*   Updated: 2022/10/27 10:08:44 by trossel          ###   ########.fr       */
+/*   Updated: 2022/10/28 11:46:12 by trossel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,7 @@ Location &Location::operator=(const Location &rhs)
 	path = rhs.path;
 	root_dir = rhs.root_dir;
 	cgi_bin = rhs.cgi_bin;
+	cgi_extensions = rhs.cgi_extensions;
 	error_pages = rhs.error_pages;
 	return *this;
 }
@@ -115,6 +116,6 @@ std::ostream &operator<<(std::ostream &os, const Location &loc)
 	}
 	else
 		os << "none";
-	os << std::endl;
+	os << std::endl << std::endl;
 	return os;
 }
