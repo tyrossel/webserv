@@ -131,7 +131,7 @@ void Response::writeResponseHeader()
     }
     else {
         _response.append(out.str());
-        _response.append(" KO\r\n");
+        _response.append(" Found\r\n");
     }
 }
 
@@ -240,7 +240,10 @@ void	Response::buildRedirectionResponse(const Redirection &redir)
 	{
 		std::cout << RED "Redir to FILE" RESET << std::endl;
 		_response.append("Location: " + redir.new_url + "\r\n");
-		_response.append("Connection: close\r\n\r\n");
+		_response.append("Connection: keep-alive\r\n");
+		// _response.append("Connection: close\r\n\r\n");
+		// _response.append("Connection: close\r\n");
+		_response.append("Content-Length: 0\r\n\r\n");
 	}
 	else
 	{
