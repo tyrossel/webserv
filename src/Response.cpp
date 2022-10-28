@@ -266,12 +266,12 @@ void Response::buildDeleteResponse(Request req)
     if (ft::isFile(path))
     {
         if (remove(path.c_str()) == 0)
-            setStatus(204);
+            setStatus(HTTP_NO_CONTENT);
         else
-            setStatus(403);
+            setStatus(FORBIDDEN);
     }
     else
-        setStatus(404);
+        setStatus(NOT_FOUND);
     addHTTPHeader();
     addContentType();
 
