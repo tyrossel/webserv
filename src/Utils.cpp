@@ -369,15 +369,10 @@ namespace ft {
     {
         switch (status) {
             case HTTP_OK:
-                return true;
             case HTTP_CREATED:
-                return true;
             case HTTP_ACCEPTED:
-                return true;
             case HTTP_NO_CONTENT:
-                return true;
             case HTTP_RESET_CONTENT:
-                return true;
             case HTTP_PARTIAL_CONTENT:
                 return true;
             default:
