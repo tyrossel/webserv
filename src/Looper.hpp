@@ -30,7 +30,7 @@ class Looper {
         int     readFromClient(long socket);
         void    setMaxFd();
         void    addServer(Server &server);
-        void    printLog(const Request &request);
+        void    printLog(const Request &request, int socket);
 
         // LOOP RELATED ====================================================
         void    loop();

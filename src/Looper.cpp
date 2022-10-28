@@ -29,8 +29,13 @@ Looper::~Looper()
 /**************************************************************************************/
 /*                                  MEMBER FUNCTIONS                                  */
 /**************************************************************************************/
-void Looper::printLog(const Request &request)
+void Looper::printLog(const Request &request, int socket)
 {
+    struct sockaddr_in req_addr;
+    socklen_t	req_len = sizeof(req_addr);
+    getsockname(socket, (struct sockaddr *)&req_addr, &req_len);
+    char *addr_str = inet_ntoa(req_addr.sin_addr);
+
     if (VERBOSE) {
         std::cout << "================== REQUEST ==================" << std::endl;
         std::cout << BLUE << request << RESET;
@@ -125,11 +130,6 @@ int Looper::readFromClient(long socket)
         parser.parseRequest(string_buffer);
         request = parser.getRequest();
 
-        struct sockaddr_in req_addr;
-		socklen_t	req_len = sizeof(req_addr);
-		getsockname(socket, (struct sockaddr *)&req_addr, &req_len);
-		char *addr_str = inet_ntoa(req_addr.sin_addr);
-
 		const Server *srv = NULL;
         if (request.getStatus() == 0)
             srv = request.FindServer(_servers);
@@ -147,7 +147,7 @@ int Looper::readFromClient(long socket)
 		if(!request.isValid(loc))
 			return (-1);
 
-        printLog(request);
+        printLog(request, socket);
 
 		request.updatePathWithLocation(loc);
 
