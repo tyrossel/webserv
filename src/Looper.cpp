@@ -89,22 +89,31 @@ int Looper::setupLoop()
 
 int Looper::buildResponse(long socket, const Location *loc)
 {
+	Request &req = _request[socket];
     Response ret(socket, loc, _active_servers[socket]);
-    switch (_request[socket].getMethod()) {
+	const Redirection *redir = loc->findRedirection(req.getPath());
+	if (redir)
+	{
+		ret.buildRedirectionResponse(*redir);
+		_response.insert(std::pair<long int, Response>(socket, ret));
+		return 1;
+	}
+    switch (req.getMethod()) {
         case Get:
-            ret.buildGetResponse(_request[socket], loc);
+			// TODO: Remove loc as param
+            ret.buildGetResponse(req, loc);
             _response.insert(std::pair<long int, Response>(socket, ret));
             break;
         case Post:
-            ret.buildPostResponse(_request[socket], loc);
+            ret.buildPostResponse(req, loc);
             _response.insert(std::pair<long int, Response>(socket, ret));
             break;
         case Delete:
-            ret.buildDeleteResponse(_request[socket]);
+            ret.buildDeleteResponse(req);
             _response.insert(std::pair<long int, Response>(socket, ret));
             break;
         default:
-            std::cout << RED << _request[socket].getMethod() << " is not a method that the server threats." << RESET << std::endl;
+            std::cout << RED << req.getMethod() << " is not a method that the server threats." << RESET << std::endl;
     }
     (void)ret;
     return (1);
@@ -132,7 +141,7 @@ int Looper::readFromClient(long socket)
 
 		const Server *srv = NULL;
         if (request.getStatus() == 0)
-            srv = request.FindServer(_servers);
+            srv = request.FindServer(_servers, req_addr);
 		if (!srv)
 		{
 			std::cerr << RED << "No corresponding server was found" << RESET << std::endl;

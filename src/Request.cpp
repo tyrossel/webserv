@@ -57,18 +57,14 @@ const Location * Request::FindLocation(const Server &server) const
     return &loc_map.at(best_loc_index);
 }
 
-const Server * Request::FindServer(const std::vector<Server> &servers) const
+const Server * Request::FindServer(const std::vector<Server> &servers, struct sockaddr_in req_addr) const
 {
     // Splitting of Host header into host and port:
     std::string hostHeader = _headers.at("Host");
 
     size_t	colon = hostHeader.find_first_of(':');
-
     std::string requestHost = hostHeader.substr(0, colon);
-    std::string requestPortStr = (colon != std::string::npos ? hostHeader.substr(colon + 1) : "80");
-    int requestPort = 80;
-    if (colon != std::string::npos && colon != hostHeader.size() - 1)
-        requestPort = ft::stoi(requestPortStr);
+    int requestPort = ntohs(req_addr.sin_port);
 
     for(std::vector<Server>::const_iterator it_srv = servers.begin(); it_srv !=
                                                                       servers.end(); it_srv++)
@@ -76,6 +72,8 @@ const Server * Request::FindServer(const std::vector<Server> &servers) const
         // TODO: Check request adress
         if (requestPort != it_srv->getPort())
             continue;
+		if (it_srv->getAddress() != "0.0.0.0" && inet_addr(it_srv->getAddress().c_str()) != req_addr.sin_addr.s_addr)
+			continue;
 
         const std::vector<std::string> &server_names = it_srv->getName();
         if (server_names.empty())

@@ -6,12 +6,13 @@
 /*   By: trossel <trossel@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 16:47:18 by trossel           #+#    #+#             */
-/*   Updated: 2022/10/28 16:36:16 by trossel          ###   ########.fr       */
+/*   Updated: 2022/10/28 19:58:41 by trossel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ConfigParser.hpp"
 #include "Config.hpp"
+#include "Location.hpp"
 #include "Utils.hpp"
 #include <fstream>
 #include <stdexcept>
@@ -107,14 +108,16 @@ Location ConfigParsor::parseLocation(const JsonObject &locObject, const Location
 				it != redirObj.end(); it++)
 		{
 			std::string old_url = it->getString("old_url");
-			std::string new_url = it->getString("new_url");
+			Redirection redir;
+			redir.status = it->getIntOrDefault("status", 302);
+			redir.new_url = it->getStringOrDefault("new_url", "");
 			ft::trim(old_url);
-			ft::trim(new_url);
+			ft::trim(redir.new_url);
 			if (old_url[0] != '/')
 				old_url = loc.path + '/' + old_url;
-			if (new_url[0] != '/')
-				new_url = loc.path + '/' + new_url;
-			loc.redirections[old_url] = new_url;
+			if (!redir.new_url.empty() && redir.new_url[0] != '/')
+				redir.new_url = loc.path + '/' + redir.new_url;
+			loc.redirections[old_url] = redir;
 		}
 	}
 
