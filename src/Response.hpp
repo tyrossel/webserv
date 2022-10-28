@@ -32,6 +32,7 @@ class Response {
         // =================================================================
 
         // TOOLS ========================================================
+        void        printLog(bool print_cgi);
         void        addContentLengthPOST();
         void        addBodyToResponse();
         void        addDate();

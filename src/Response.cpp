@@ -12,6 +12,36 @@ Response::~Response() {}
 /**************************************************************************************/
 /*                                  TOOLS                                             */
 /**************************************************************************************/
+void Response::printLog(bool print_cgi)
+{
+    if (print_cgi)
+    {
+        if (VERBOSE) {
+            std::cout << "==================== CGI ====================" << std::endl;
+            if (secFetchImage())
+                std::cout << _response << std::endl;
+            else
+                std::cout << GREEN << "We sent an image" << RESET << std::endl;
+        }
+        else {
+            std::cout << BLUE << "Response code [" << getStatus() << "]" << std::endl;
+        }
+    }
+    else
+    {
+        if (VERBOSE) {
+            std::cout << "================== RESPONSE ==================" << std::endl;
+            if (secFetchImage())
+                std::cout << GREEN << _response << RESET << std::endl << std::endl;
+            else
+                std::cout << GREEN << "We sent an image" << RESET << std::endl;
+        }
+        else {
+            std::cout << BLUE << "Response code [" << getStatus() << "]" << std::endl;
+        }
+    }
+}
+
 void Response::addContentLengthPOST()
 {
     _response.append("Content-Length: ");
@@ -211,16 +241,7 @@ void Response::buildGetResponse(Request req, const Location *loc)
         }
         else
             addErrorBodyToResponse();
-        if (VERBOSE) {
-            std::cout << "==================== CGI ====================" << std::endl;
-            if (secFetchImage())
-                std::cout << _response << std::endl;
-            else
-                std::cout << GREEN << "We sent an image" << RESET << std::endl;
-        }
-        else {
-            std::cout << BLUE << "Response code [" << getStatus() << "]" << std::endl;
-        }
+        printLog(true);
     }
     else
     {
@@ -230,16 +251,7 @@ void Response::buildGetResponse(Request req, const Location *loc)
             addBodyToResponse();
         else
             addErrorBodyToResponse();
-        if (VERBOSE) {
-            std::cout << "================== RESPONSE ==================" << std::endl;
-            if (secFetchImage())
-                std::cout << GREEN << _response << RESET << std::endl << std::endl;
-            else
-                std::cout << GREEN << "We sent an image" << RESET << std::endl;
-        }
-        else {
-            std::cout << BLUE << "Response code [" << getStatus() << "]" << std::endl;
-        }
+        printLog(false);
     }
 }
 
@@ -252,16 +264,7 @@ void Response::buildPostResponse(Request req, const Location *loc)
     addHTTPHeader();
     addContentLengthPOST();
     _response.append(cgi.getRetBody());
-    if (VERBOSE) {
-        std::cout << "==================== CGI ====================" << std::endl;
-        if (secFetchImage())
-            std::cout << _response << std::endl;
-        else
-            std::cout << GREEN << "We sent an image" << RESET << std::endl;
-    }
-    else {
-        std::cout << BLUE << "Response code [" << getStatus() << "]" << std::endl;
-    }
+    printLog(true);
 }
 
 void Response::buildDeleteResponse(Request req)
@@ -285,17 +288,7 @@ void Response::buildDeleteResponse(Request req)
         addBodyToResponse();
     else
         addErrorBodyToResponse();
-
-    if (VERBOSE) {
-        std::cout << "================== RESPONSE ==================" << std::endl;
-        if (secFetchImage())
-            std::cout << GREEN << _response << RESET << std::endl << std::endl;
-        else
-            std::cout << GREEN << "We sent an image" << RESET << std::endl;
-    }
-    else {
-        std::cout << BLUE << "Response code [" << getStatus() << "]" << std::endl;
-    }
+    printLog(false);
 }
 
 /**************************************************************************************/
