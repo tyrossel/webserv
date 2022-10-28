@@ -161,6 +161,30 @@ bool    Response::secFetchImage()
     return (true);
 }
 
+bool Response::useCGI()
+{
+	if (_loc->isCGI)
+		return true;
+	std::string path = _request.getPath();
+	size_t slash = path.find_last_of('/');
+	if (slash == path.npos)
+		slash = 0;
+	size_t dot = path.find_last_of('.');
+	if (dot == path.npos || dot == path.size() - 1)
+		dot = slash;
+	std::string path_extension = path.substr(dot + 1);
+	std::cout << RED << "File extension is: " << path_extension << RESET << std::endl;
+	for(std::vector<std::string>::const_iterator it = _loc->cgi_extensions.begin();
+			it != _loc->cgi_extensions.end(); it++)
+	{
+		if (path_extension == *it)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
 /**************************************************************************************/
 /*                                  BUILDERS                                          */
 /**************************************************************************************/
@@ -172,8 +196,9 @@ void Response::buildGetResponse(Request req)
     addServerHeaderResponse();
     addDate();
 
-    if (1) // CGI or not ?
+    if (useCGI()) // CGI or not ?
     {
+		std::cout << RED << "CGI IS USED" << RESET << std::endl;
         std::string path = _request.getLocation();
         if (path[0] == '/')
             ft::trimLeft(path, "/");

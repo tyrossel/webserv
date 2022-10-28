@@ -27,6 +27,7 @@ class Response {
         void     checkCode();
         void     checkPath();
         bool     secFetchImage();
+		bool	 useCGI();
         // =================================================================
 
         // TOOLS ========================================================
