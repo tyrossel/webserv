@@ -131,7 +131,7 @@ void Response::writeResponseHeader()
     }
     else {
         _response.append(out.str());
-        _response.append(" Found\r\n");
+        _response.append(" KO\r\n");
     }
 }
 
