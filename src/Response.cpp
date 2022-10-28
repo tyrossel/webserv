@@ -198,7 +198,7 @@ void Response::buildGetResponse(Request req, const Location *loc)
     {
         if (ft::isFile(_request.getLocation())) {
             CGI cgi(_request);
-            setStatus(cgi.executeCgi(&_request, _server, loc)));
+            setStatus(cgi.executeCgi(&_request, _server, loc));
             addHTTPHeader();
             // Here we remove HTTP EOF because the CGI we use cannot accept HTML in it.
             // If we send HTML inside the CGI he will TOUPPER the html which is.. shitty ?
