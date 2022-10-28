@@ -239,7 +239,8 @@ void	Response::buildRedirectionResponse(const Redirection &redir)
 	else if (_status / 100 == 3)
 	{
 		std::cout << RED "Redir to FILE" RESET << std::endl;
-		_response.append("Location: " + redir.new_url + "\r\n\r\n");
+		_response.append("Location: " + redir.new_url + "\r\n");
+		_response.append("Connection: close\r\n\r\n");
 	}
 	else
 	{
