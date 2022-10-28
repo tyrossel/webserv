@@ -6,7 +6,7 @@
 /*   By: trossel <trossel@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/21 11:11:21 by trossel           #+#    #+#             */
-/*   Updated: 2022/10/28 11:46:12 by trossel          ###   ########.fr       */
+/*   Updated: 2022/10/27 10:08:44 by trossel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,7 @@ Location &Location::operator=(const Location &rhs)
 	cgi_bin = rhs.cgi_bin;
 	cgi_extensions = rhs.cgi_extensions;
 	error_pages = rhs.error_pages;
+	redirections = rhs.redirections;
 	return *this;
 }
 
@@ -91,7 +92,15 @@ std::ostream &operator<<(std::ostream &os, const Location &loc)
 			os << "\t\t" <<  it->first << ": " << it->second << std::endl;
 	}
 
-	os << YELLOW << "\n\tcgi_bin: " << RESET << loc.cgi_bin;
+	if (!loc.redirections.empty())
+	{
+		os << YELLOW << "\tredirections: " << RESET << std::endl;
+		for (std::map<std::string, std::string>::const_iterator it = loc.redirections.begin();
+				it != loc.redirections.end(); it++)
+			os << "\t\t" <<  it->first << " --> " << it->second << std::endl;
+	}
+
+	os << YELLOW << "\tcgi_bin: " << RESET << loc.cgi_bin;
 	os << YELLOW << "\n\tcgi_extensions: " << RESET;
 	if (!loc.cgi_extensions.empty())
 	{

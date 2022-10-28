@@ -118,7 +118,7 @@ std::ostream &operator<<(std::ostream &out, const Config &rhs)
 {
     out << "Configuration Servers" << std::endl;
     for (int i = 0; i < rhs.getNbServer(); i++) {
-        out << YELLOW << "Server number : " << RESET << i
+        out << CYAN << "Server number : " << RESET << i
         << YELLOW << "\nAddress : " << RESET << rhs.getServer()[i].getAddress()
         << YELLOW << "\nPort : " << RESET << rhs.getServer()[i].getPort();
 

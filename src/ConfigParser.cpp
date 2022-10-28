@@ -6,7 +6,7 @@
 /*   By: trossel <trossel@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 16:47:18 by trossel           #+#    #+#             */
-/*   Updated: 2022/10/27 18:50:54 by trossel          ###   ########.fr       */
+/*   Updated: 2022/10/28 10:12:43 by trossel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,13 @@ const std::string &ConfigParsor::getFilename() const { return this->_filename;}
 Location ConfigParsor::parseLocation(const JsonObject &locObject, const Location &defaultLoc) const
 {
 	Location loc;
+
+	// Location path
+	std::string location_path = locObject.getStringOrDefault("location_path", "");
+	ft::trim(location_path);
+	if (location_path.empty() && !defaultLoc.path.empty())
+		throw std::logic_error("Location error: location_path cannot be empty");
+	loc.path = location_path;
 
 	loc.root_dir = locObject.getStringOrDefault("root", "");
 
@@ -90,6 +97,27 @@ Location ConfigParsor::parseLocation(const JsonObject &locObject, const Location
 		}
 	}
 
+	//redirections
+	std::vector<JsonObject> redirObj = locObject.getArrayOrEmpty("redirections").ObjectValues();
+	if (redirObj.empty())
+		loc.redirections = defaultLoc.redirections;
+	else
+	{
+		for(std::vector<JsonObject>::const_iterator it = redirObj.begin();
+				it != redirObj.end(); it++)
+		{
+			std::string old_url = it->getString("old_url");
+			std::string new_url = it->getString("new_url");
+			ft::trim(old_url);
+			ft::trim(new_url);
+			if (old_url[0] != '/')
+				old_url = loc.path + '/' + old_url;
+			if (new_url[0] != '/')
+				new_url = loc.path + '/' + new_url;
+			loc.redirections[old_url] = new_url;
+		}
+	}
+
 	std::vector<std::string> disabled_requests = locObject.getArrayOrEmpty("disabled_methods").stringValues();
 	for (size_t i(0); i < disabled_requests.size(); i++)
 	{
@@ -133,13 +161,8 @@ Server ConfigParsor::parseServer(const JsonObject &serverObject) const
 	for(std::vector<JsonObject>::iterator it = locations.begin();
 		it != locations.end(); it++)
 	{
-		std::string location_path = it->getString("location_path");
-		ft::trim(location_path);
-		if (location_path.empty())
-			throw std::logic_error("Location error: location_path cannot be empty");
 		Location loc = parseLocation(*it, defaultLocation);
-		loc.path = location_path;
-		serverCfg.addLocation(location_path, loc);
+		serverCfg.addLocation(loc.path, loc);
 	}
 	return serverCfg;
 }
