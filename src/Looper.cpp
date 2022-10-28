@@ -139,6 +139,9 @@ int Looper::readFromClient(long socket)
         parser.parseRequest(string_buffer);
         request = parser.getRequest();
 
+		struct sockaddr_in req_addr;
+		socklen_t addr_len = sizeof(req_addr);
+		getsockname(socket, (struct sockaddr *)&req_addr, &addr_len);
 		const Server *srv = NULL;
         if (request.getStatus() == 0)
             srv = request.FindServer(_servers, req_addr);
@@ -261,7 +264,7 @@ void Looper::requestProcess(fd_set &reading_fd_set)
                 FD_CLR(socket, &_active_fd_set);
                 FD_CLR(socket, &reading_fd_set);
                 _active_servers.erase(socket);
-                close(socket);
+                // close(socket);
                 it = _active_servers.begin();
             }
             ret_val = 0;
