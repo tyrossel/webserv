@@ -212,12 +212,11 @@ void Response::buildGetResponse(Request req, const Location *loc)
         else
             addErrorBodyToResponse();
         if (VERBOSE) {
-            std::cout << "================== CGI ==================" << std::endl;
+            std::cout << "==================== CGI ====================" << std::endl;
             if (secFetchImage())
                 std::cout << _response << std::endl;
             else
                 std::cout << GREEN << "We sent an image" << RESET << std::endl;
-            std::cout << "==============================================" << std::endl << std::endl;
         }
     }
     else
@@ -231,10 +230,12 @@ void Response::buildGetResponse(Request req, const Location *loc)
         if (VERBOSE) {
             std::cout << "================== RESPONSE ==================" << std::endl;
             if (secFetchImage())
-                std::cout << GREEN << _response << RESET << std::endl;
+                std::cout << GREEN << _response << RESET << std::endl << std::endl;
             else
                 std::cout << GREEN << "We sent an image" << RESET << std::endl;
-            std::cout << "==============================================" << std::endl << std::endl;
+        }
+        else {
+            std::cout << BLUE << "Response code [" << getStatus() << "]" << std::endl;
         }
     }
 }
@@ -249,12 +250,14 @@ void Response::buildPostResponse(Request req, const Location *loc)
     addContentLengthPOST();
     _response.append(cgi.getRetBody());
     if (VERBOSE) {
-        std::cout << "================== CGI ==================" << std::endl;
+        std::cout << "==================== CGI ====================" << std::endl;
         if (secFetchImage())
             std::cout << _response << std::endl;
         else
             std::cout << GREEN << "We sent an image" << RESET << std::endl;
-        std::cout << "==============================================" << std::endl << std::endl;
+    }
+    else {
+        std::cout << BLUE << "Response code [" << getStatus() << "]" << std::endl;
     }
 }
 
@@ -283,10 +286,12 @@ void Response::buildDeleteResponse(Request req)
     if (VERBOSE) {
         std::cout << "================== RESPONSE ==================" << std::endl;
         if (secFetchImage())
-            std::cout << GREEN << _response << RESET << std::endl;
+            std::cout << GREEN << _response << RESET << std::endl << std::endl;
         else
             std::cout << GREEN << "We sent an image" << RESET << std::endl;
-        std::cout << "==============================================" << std::endl << std::endl;
+    }
+    else {
+        std::cout << BLUE << "Response code [" << getStatus() << "]" << std::endl;
     }
 }
 

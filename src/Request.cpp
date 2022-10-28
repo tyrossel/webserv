@@ -69,7 +69,6 @@ const Server * Request::FindServer(const std::vector<Server> &servers) const
     int requestPort = 80;
     if (colon != std::string::npos && colon != hostHeader.size() - 1)
         requestPort = ft::stoi(requestPortStr);
-    std::cout << MAGENTA << "Request host=" << requestHost << ", port=" << requestPort << RESET << std::endl;
 
     for(std::vector<Server>::const_iterator it_srv = servers.begin(); it_srv !=
                                                                       servers.end(); it_srv++)
@@ -178,14 +177,14 @@ void Request::setStatus(int new_status) { this->_status = new_status; }
 
 std::ostream &operator<<(std::ostream &out, const Request &rhs)
 {
-    out << "HTTP CLIENT REQUEST : \n"
-        << ft::RequestToString(rhs.getMethod()) << ' ' << rhs.getPath() << ' ' << rhs.getVersion() << "\r\n";
+    out << ft::RequestToString(rhs.getMethod()) << ' ' << rhs.getPath() << ' ' << rhs.getVersion() << "\r\n";
 
     std::map<std::string, std::string> headers = rhs.getHeaders();
     for (std::map<std::string, std::string>::iterator it = headers.begin(); it != headers.end(); it++)
         out << it->first << ": " << it->second << "\r\n";
 
-    out << "\r\n" << rhs.getBody() << std::endl;
+    if (!(rhs.getBody().empty()))
+        out << "\r\n" << rhs.getBody() << std::endl;
 
     return out;
 }

@@ -16,122 +16,119 @@
 /*                          CONSTRUCTORS / DESTRUCTORS                                */
 /**************************************************************************************/
 Config::Config() : _server() {}
+
 Config::Config(const Config &other) : _server(other._server) {}
+
 Config::~Config() {}
 
 /**************************************************************************************/
 /*                                  MEMBER FUNCTIONS                                  */
 /**************************************************************************************/
 
-const std::vector<Server>       Config::getServer() const { return (this->_server); }
-void                            Config::addServer(const Server &newServ) { this->_server.push_back(newServ); }
-int                             Config::getNbServer() const { return (this->_server.size()); }
-void							Config::setValid(bool valid) {this->_isValid = valid;}
+const std::vector <Server> Config::getServer() const { return (this->_server); }
 
-bool							Config::isValid() const
-{
-	std::set<int> portList;
+void Config::addServer(const Server &newServ) { this->_server.push_back(newServ); }
 
-	if (_server.empty())
-		return false;
-	for (std::vector<Server>::const_iterator it = _server.begin();
-			it != _server.end(); it++)
-	{
-		if (it->getPort() < 1 || it->getPort() > 65535)
-		{
-			std::cerr << "Port is not valid: " << it->getPort() << std::endl;
-			return false;
-		}
-		if (portList.find(it->getPort()) != portList.end())
-		{
-			std::cerr << "Port is already used by a previous server : " <<
-				it->getPort() << std::endl;
-			return false;
-		}
-		portList.insert(it->getPort());
+int Config::getNbServer() const { return (this->_server.size()); }
 
-		if (inet_addr(it->getAddress().c_str()) == INADDR_NONE)
-		{
-			std::cerr << "Address is not valid: " << it->getAddress() << std::endl;
-			return false;
-		}
+void Config::setValid(bool valid) { this->_isValid = valid; }
 
-		// TODO TYR: Maybe check that names are valid URL ?
+bool Config::isValid() const {
+    std::set<int> portList;
 
-		const std::map<std::string, Location> locations = it->getLocations();
-		for(std::map<std::string, Location>::const_iterator it = locations.begin();
-				it != locations.end(); it++)
-		{
-			const std::string &loc_path = it->first;
-			const Location &loc = it->second;
+    if (_server.empty())
+        return false;
+    for (std::vector<Server>::const_iterator it = _server.begin();
+         it != _server.end(); it++) {
+        if (it->getPort() < 1 || it->getPort() > 65535) {
+            std::cerr << "Port is not valid: " << it->getPort() << std::endl;
+            return false;
+        }
+        if (portList.find(it->getPort()) != portList.end()) {
+            std::cerr << "Port is already used by a previous server : " <<
+                      it->getPort() << std::endl;
+            return false;
+        }
+        portList.insert(it->getPort());
 
-			if (loc_path.empty())
-			{
-				std::cerr << "Location error: location_path cannot be empty" << std::endl;
-				return false;
-			}
-			if (loc_path == "/" && loc.root_dir.empty())
-			{
-				std::cerr << "Server error: cannot have an empty root_dir" << std::endl;
-				return false;
-			}
-			if (loc.max_client_body_size < 0)
-			{
-				std::cerr << "Location '" + loc_path + "' error: max_client_body_size must be positive" << std::endl;
-				return false;
-			}
-			if (loc.isCGI || (loc.path == "/" && !loc.cgi_bin.empty()))
-			{
-				if (access(loc.cgi_bin.c_str(), F_OK))
-				{
-					std::cerr << "CGI error: '" << loc.cgi_bin << "' cannot be found" << std::endl;
-					return false;
-				}
-				if (access(loc.cgi_bin.c_str(), X_OK))
-				{
-					std::cerr << "CGI error: " << loc.cgi_bin << " cannot be executed" << std::endl;
-					return false;
-				}
-			}
-			if (loc.isCGI && !loc.root_dir.empty())
-			{
-				std::cerr << "Location " + loc.path + " error: Cannot have a root and a cgi_bin" << std::endl;
-				return false;
-			}
-			if (!loc.isCGI)
-			{
-				if (loc.root_dir.empty())
-				{
-					std::cerr << "Location error: root_dir cannot be empty if not a CGI proxy" << std::endl;
-					return false;
-				}
-			}
-		}
-	}
-	return true;
+        if (inet_addr(it->getAddress().c_str()) == INADDR_NONE) {
+            std::cerr << "Address is not valid: " << it->getAddress() << std::endl;
+            return false;
+        }
+
+        // TODO TYR: Maybe check that names are valid URL ?
+
+        const std::map <std::string, Location> locations = it->getLocations();
+        for (std::map<std::string, Location>::const_iterator it = locations.begin();
+             it != locations.end(); it++) {
+            const std::string &loc_path = it->first;
+            const Location &loc = it->second;
+
+            if (loc_path.empty()) {
+                std::cerr << "Location error: location_path cannot be empty" << std::endl;
+                return false;
+            }
+            if (loc_path == "/" && loc.root_dir.empty()) {
+                std::cerr << "Server error: cannot have an empty root_dir" << std::endl;
+                return false;
+            }
+            if (loc.max_client_body_size < 0) {
+                std::cerr << "Location '" + loc_path + "' error: max_client_body_size must be positive" << std::endl;
+                return false;
+            }
+            if (loc.isCGI || (loc.path == "/" && !loc.cgi_bin.empty())) {
+                if (access(loc.cgi_bin.c_str(), F_OK)) {
+                    std::cerr << "CGI error: '" << loc.cgi_bin << "' cannot be found" << std::endl;
+                    return false;
+                }
+                if (access(loc.cgi_bin.c_str(), X_OK)) {
+                    std::cerr << "CGI error: " << loc.cgi_bin << " cannot be executed" << std::endl;
+                    return false;
+                }
+            }
+            if (loc.isCGI && !loc.root_dir.empty()) {
+                std::cerr << "Location " + loc.path + " error: Cannot have a root and a cgi_bin" << std::endl;
+                return false;
+            }
+            if (!loc.isCGI) {
+                if (loc.root_dir.empty()) {
+                    std::cerr << "Location error: root_dir cannot be empty if not a CGI proxy" << std::endl;
+                    return false;
+                }
+            }
+        }
+    }
+    return true;
 }
 /**************************************************************************************/
 /*                                NON MEMBER FUNCTIONS                                */
 /**************************************************************************************/
 
-std::ostream &operator<<(std::ostream &out, const Config &rhs)
-{
-    out << "Configuration Servers" << std::endl;
-    for (int i = 0; i < rhs.getNbServer(); i++) {
-        out << CYAN << "Server number : " << RESET << i
-        << YELLOW << "\nAddress : " << RESET << rhs.getServer()[i].getAddress()
-        << YELLOW << "\nPort : " << RESET << rhs.getServer()[i].getPort();
+std::ostream &operator<<(std::ostream &out, const Config &rhs) {
+    if (VERBOSE) {
+        out << "[Configuration Servers]" << std::endl;
+        for (int i = 0; i < rhs.getNbServer(); i++) {
+            out << CYAN << "Server number : " << RESET << i
+                << YELLOW << "\nAddress : " << RESET << rhs.getServer()[i].getAddress()
+                << YELLOW << "\nPort : " << RESET << rhs.getServer()[i].getPort();
 
-		out << YELLOW << "\nName : " << RESET;
-        for (size_t j = 0; j < rhs.getServer()[i].getName().size(); j++)
-            out << rhs.getServer()[i].getName()[j] << " ";
+            out << YELLOW << "\nName : " << RESET;
+            for (size_t j = 0; j < rhs.getServer()[i].getName().size(); j++)
+                out << rhs.getServer()[i].getName()[j] << " ";
 
-        std::map<std::string, Location> location = rhs.getServer()[i].getLocations();
-        for (std::map<std::string, Location>::iterator it = location.begin();
-                it != location.end(); it++)
-		{
-			out << YELLOW << "\nLocation: " << RESET << it->first << std::endl << it->second;
-		}
+            std::map <std::string, Location> location = rhs.getServer()[i].getLocations();
+            for (std::map<std::string, Location>::iterator it = location.begin();
+                 it != location.end(); it++) {
+                out << YELLOW << "\nLocation: " << RESET << it->first << std::endl << it->second;
+            }
+        }
     }
+    else
+    {
+        for (int i = 0; i < rhs.getNbServer(); i++) {
+            out << YELLOW << "Listening on [" << rhs.getServer()[i].getAddress() << ":" << rhs.getServer()[i].getPort() << "]\n" << RESET;
+        }
+    }
+
     return (out);
 }

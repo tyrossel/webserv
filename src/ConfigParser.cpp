@@ -197,6 +197,6 @@ Config ConfigParsor::parse() const
 	{
 		std::cerr << e.what() << std::endl;
 	}
-	std::cout << "Config = " << cfg << std::endl;
+    std::cout << cfg << std::endl;
 	return cfg;
 }

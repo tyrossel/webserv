@@ -111,18 +111,10 @@ int Looper::readFromClient(long socket)
         parser.parseRequest(string_buffer);
         request = parser.getRequest();
 
-        if (VERBOSE) {
-            std::cout << "================== REQUEST ==================" << std::endl;
-            std::cout << BLUE << request << RESET;
-            std::cout << "==============================================" << std::endl;
-        }
-
         struct sockaddr_in req_addr;
 		socklen_t	req_len = sizeof(req_addr);
 		getsockname(socket, (struct sockaddr *)&req_addr, &req_len);
 		char *addr_str = inet_ntoa(req_addr.sin_addr);
-		std::cout << MAGENTA << "Request host: " << RESET << addr_str << ":" <<
-			ntohs(req_addr.sin_port) << std::endl;
 
 		const Server *srv = NULL;
         if (request.getStatus() == 0)
@@ -140,6 +132,19 @@ int Looper::readFromClient(long socket)
 
 		if(!request.isValid(loc))
 			return (-1);
+
+        if (VERBOSE) {
+            std::cout << "================== REQUEST ==================" << std::endl;
+            std::cout << BLUE << request << RESET;
+        }
+        else {
+            std::cout << GREEN << "===================================================\n"
+                << "Connection receive from client on ["
+                <<  addr_str << ":" << ntohs(req_addr.sin_port) << "]\n"
+                << BLUE << "Request [" << ft::RequestToString(request.getMethod())
+                << " " << request.getPath() << " HTTP " << request.getVersion() << "]"
+                << RESET << std::endl;
+        }
 
 		request.updatePathWithLocation(loc);
 
