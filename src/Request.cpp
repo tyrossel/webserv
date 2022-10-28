@@ -118,7 +118,14 @@ void	Request::updatePathWithLocation(const Location *loc)
     if (!loc)
         return ;
 
+
+    char *tmp = getcwd(NULL, 0);
+    if (!tmp)
+        return ;
+    std::string cwd = tmp;
     _location = loc->root_dir + "/" + _path.substr(loc->path.length());
+    _location = (_location[0] == '/') ? _location : (cwd + '/' + _location);
+    free(tmp);
 
     if (loc->isCGI)
         return ;

@@ -42,8 +42,8 @@ class Response {
         // =================================================================
 
         // BUILDERS ========================================================
-        void        buildGetResponse(Request req);
-        void        buildPostResponse(Request req);
+        void        buildGetResponse(Request req, const Location *loc);
+        void        buildPostResponse(Request req, const Location *loc);
         void        buildDeleteResponse(Request req);
         // =================================================================
 

@@ -10,7 +10,6 @@ class CGI {
         std::map<std::string, std::string>  _env;
         std::map<std::string, std::string>  _headers;
         std::string                         _req_body;
-        std::string                         _cwd;
         std::string                         _cgi_path;
         std::string                         _file_path;
         std::string                         _ret_body;
@@ -37,8 +36,8 @@ class CGI {
         void exitFail(std::string error, int exit_value);
 
         std::string readContent(int fd);
-        int setCGIEnvironment(const Request *request, const Server *server);
-        int executeCgi(const Request *request, const Server *server);
+        int setCGIEnvironment(const Request *request, const Server *server, const Location *loc);
+        int executeCgi(const Request *request, const Server *server, const Location *loc);
 
         void removeEOFHTTP();
 };

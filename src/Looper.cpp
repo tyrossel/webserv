@@ -1,6 +1,7 @@
 #include "Looper.hpp"
 #include "webserv.hpp"
 #include "Utils.hpp"
+#include <unistd.h>
 
 /**************************************************************************************/
 /*                          CONSTRUCTORS / DESTRUCTORS                                */
@@ -60,13 +61,7 @@ int Looper::setupLoop()
                 _max_fd = fd;
         }
     }
-    if (_max_fd == 0)
-    {
-        std::cerr << "Could not setup looper !" << std::endl;
-        return (-1);
-    }
-    else
-        return (0);
+    return _max_fd == 0 ? -1 : 0;
 }
 
 /**************************************************************************************/
@@ -78,11 +73,11 @@ int Looper::buildResponse(long socket, const Location *loc)
     Response ret(socket, loc, _active_servers[socket]);
     switch (_request[socket].getMethod()) {
         case Get:
-            ret.buildGetResponse(_request[socket]);
+            ret.buildGetResponse(_request[socket], loc);
             _response.insert(std::pair<long int, Response>(socket, ret));
             break;
         case Post:
-            ret.buildPostResponse(_request[socket]);
+            ret.buildPostResponse(_request[socket], loc);
             _response.insert(std::pair<long int, Response>(socket, ret));
             break;
         case Delete:
@@ -121,6 +116,13 @@ int Looper::readFromClient(long socket)
             std::cout << BLUE << request << RESET;
             std::cout << "==============================================" << std::endl;
         }
+
+        struct sockaddr_in req_addr;
+		socklen_t	req_len = sizeof(req_addr);
+		getsockname(socket, (struct sockaddr *)&req_addr, &req_len);
+		char *addr_str = inet_ntoa(req_addr.sin_addr);
+		std::cout << MAGENTA << "Request host: " << RESET << addr_str << ":" <<
+			ntohs(req_addr.sin_port) << std::endl;
 
 		const Server *srv = NULL;
         if (request.getStatus() == 0)

@@ -4,7 +4,7 @@
 /*                          CONSTRUCTORS / DESTRUCTORS                                */
 /**************************************************************************************/
 
-CGI::CGI(const Request &request) : _env(), _headers(request.getHeaders()), _req_body(request.getBody()), _cwd(""), _cgi_path(""), _file_path(""), _ret_body(""), _fd_file(0), _cgi_env(NULL) {}
+CGI::CGI(const Request &request) : _env(), _headers(request.getHeaders()), _req_body(request.getBody()), _cgi_path(""), _file_path(""), _ret_body(""), _fd_file(0), _cgi_env(NULL) {}
 
 CGI::CGI(const CGI &rhs)
 {
@@ -24,7 +24,6 @@ CGI &CGI::operator=(const CGI &rhs)
         this->_env = rhs._env;
         this->_headers = rhs._headers;
         this->_req_body = rhs._req_body;
-        this->_cwd = rhs._cwd;
         this->_cgi_path = rhs._cgi_path;
         this->_file_path = rhs._file_path;
         this->_ret_body = rhs._ret_body;
@@ -74,12 +73,11 @@ std::string CGI::readContent(int fd)
     return ret;
 }
 
-int CGI::executeCgi(const Request *request, const Server *server)
+int CGI::executeCgi(const Request *request, const Server *server, const Location *loc)
 {
-    if (setCGIEnvironment(request, server) == -1)
+    if (setCGIEnvironment(request, server, loc) == -1)
         return INTERNAL_SERVER_ERROR;
 
-    std::string _path = (_file_path[0] == '/') ? _file_path : (_cwd + '/' + _file_path);
 
     int pip_to_cgi[2];
     int pip_from_cgi[2];
@@ -100,11 +98,12 @@ int CGI::executeCgi(const Request *request, const Server *server)
 
             if (!(argv[0] = ft::strdup(_cgi_path.c_str())))
                 exitFail("Can't duplicate _cgi_path", 42);
-            if (!(argv[1] = ft::strdup(_path.c_str())))
+            if (!(argv[1] = ft::strdup(_file_path.c_str())))
                 exitFail("Can't duplicate _path", 42);
             argv[2] = NULL;
 
-            if (chdir(_path.substr(0, _path.find_last_of('/')).c_str()) == -1)
+			// TODO: Remove ?
+            if (chdir(_file_path.substr(0, _file_path.find_last_of('/')).c_str()) == -1)
                 exitFail("Can't change directory", 42);
             if (dup2(pip_to_cgi[0], STDIN_FILENO) == -1)
                 exitFail("Can't duplicate pip_to_cgi to STDIN_FILENO", 42);
@@ -155,17 +154,12 @@ void CGI::removeEOFHTTP()
     }
 }
 
-int CGI::setCGIEnvironment(const Request *request, const Server *server)
+// TODO: Use Location instead of server ?
+int CGI::setCGIEnvironment(const Request *request, const Server *server, const Location *loc)
 {
-    char *tmp = getcwd(NULL, 0);
 
-    if (!tmp)
-        return -1;
-    _cwd = tmp;
-    free(tmp);
-
-    _cgi_path = _cwd + "/cgi-bin/ubuntu_cgi_tester";
-    _file_path = server->getRoot() + request->getPath();
+    _file_path = request->getLocation();
+	_cgi_path = loc->cgi_bin;
 
     if (_headers.find("Auth-Scheme") != _headers.end())
         _env["AUTH_TYPE"] = _headers["Authorization"];
@@ -175,13 +169,13 @@ int CGI::setCGIEnvironment(const Request *request, const Server *server)
 
     _env["CONTENT_TYPE"] = _headers["Content-Type"];
     _env["GATEWAY_INTERFACE"] = "CGI/1.1";
-    _env["PATH_INFO"] = _cwd + _file_path;
-    _env["REQUEST_URI"] = _cwd + _file_path;
-    _env["PATH_TRANSLATED"] = _cwd + _file_path;
+    _env["PATH_INFO"] = _file_path;
+    _env["REQUEST_URI"] = _file_path;
+    _env["PATH_TRANSLATED"] = _file_path;
     _env["QUERY_STRING"] = request->getQuery();
     _env["REMOTE_HOST"] = "";
     _env["REQUEST_METHOD"] = request->getMethod();
-    _env["SCRIPT_NAME"] = _cgi_path;
+    _env["SCRIPT_NAME"] = loc->cgi_bin;
     _env["SERVER_NAME"] = server->getAddress();
     _env["SERVER_PORT"] = ft::to_string(server->getPort());
     _env["SERVER_PROTOCOL"] = "HTTP/" + request->getVersion();
@@ -209,7 +203,6 @@ int CGI::setCGIEnvironment(const Request *request, const Server *server)
 std::map<std::string, std::string>  CGI::getEnv() { return (this->_env); }
 std::map<std::string, std::string>  CGI::getHeaders() { return (this->_headers); }
 std::string                         CGI::getReqBody() { return (this->_req_body); }
-std::string                         CGI::getCwd() { return (this->_cwd); }
 std::string                         CGI::getCGIPath() { return (this->_cgi_path); }
 std::string                         CGI::getFilePath() { return (this->_file_path); }
 std::string                         CGI::getRetBody() { return (this->_ret_body); }

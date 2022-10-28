@@ -6,7 +6,7 @@
 /*   By: trossel <trossel@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/21 11:11:21 by trossel           #+#    #+#             */
-/*   Updated: 2022/10/27 10:08:44 by trossel          ###   ########.fr       */
+/*   Updated: 2022/10/28 16:28:17 by trossel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,8 +42,8 @@ Location &Location::operator=(const Location &rhs)
 	path = rhs.path;
 	root_dir = rhs.root_dir;
 	cgi_bin = rhs.cgi_bin;
-	cgi_extensions = rhs.cgi_extensions;
 	error_pages = rhs.error_pages;
+	cgi_extensions = rhs.cgi_extensions;
 	redirections = rhs.redirections;
 	return *this;
 }

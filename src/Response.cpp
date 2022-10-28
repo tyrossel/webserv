@@ -142,7 +142,6 @@ void    Response::checkPath()
 {
     std::string path = _request.getLocation();
 
-    ft::trimLeft(path, "/");
     if (ft::isDirectory(path) || ft::isFile(path))
         _request.setStatus(HTTP_OK);
     else
@@ -173,7 +172,6 @@ bool Response::useCGI()
 	if (dot == path.npos || dot == path.size() - 1)
 		dot = slash;
 	std::string path_extension = path.substr(dot + 1);
-	std::cout << RED << "File extension is: " << path_extension << RESET << std::endl;
 	for(std::vector<std::string>::const_iterator it = _loc->cgi_extensions.begin();
 			it != _loc->cgi_extensions.end(); it++)
 	{
@@ -189,7 +187,7 @@ bool Response::useCGI()
 /*                                  BUILDERS                                          */
 /**************************************************************************************/
 
-void Response::buildGetResponse(Request req)
+void Response::buildGetResponse(Request req, const Location *loc)
 {
     this->_request = req;
     addHTTPHeader();
@@ -198,13 +196,9 @@ void Response::buildGetResponse(Request req)
 
     if (useCGI()) // CGI or not ?
     {
-		std::cout << RED << "CGI IS USED" << RESET << std::endl;
-        std::string path = _request.getLocation();
-        if (path[0] == '/')
-            ft::trimLeft(path, "/");
-        if (ft::isFile(path)) {
+        if (ft::isFile(_request.getLocation())) {
             CGI cgi(_request);
-            cgi.executeCgi(&_request, _server); //TODO: do smthing with the return !
+            cgi.executeCgi(&_request, _server, loc); //TODO: do smthing with the return !
             // Here we remove HTTP EOF because the CGI we use cannot accept HTML in it.
             // If we send HTML inside the CGI he will TOUPPER the html which is.. shitty ?
             cgi.removeEOFHTTP();
@@ -243,7 +237,7 @@ void Response::buildGetResponse(Request req)
     }
 }
 
-void Response::buildPostResponse(Request req)
+void Response::buildPostResponse(Request req, const Location *loc)
 {
     this->_request = req;
     addHTTPHeader();
@@ -251,7 +245,7 @@ void Response::buildPostResponse(Request req)
     addDate();
     addContentLengthPOST();
     CGI cgi(_request);
-    cgi.executeCgi(&_request, _server); //TODO & ? and do smthing with execute return !
+    cgi.executeCgi(&_request, _server, loc); //TODO & ? and do smthing with execute return !
     _response.append(cgi.getRetBody());
     if (VERBOSE) {
         std::cout << "================== CGI ==================" << std::endl;
@@ -268,8 +262,6 @@ void Response::buildDeleteResponse(Request req)
     this->_request = req;
 
     std::string path = _request.getLocation();
-    if (path[0] == '/')
-        ft::trimLeft(path, "/");
     if (ft::isFile(path))
     {
         if (remove(path.c_str()) == 0)

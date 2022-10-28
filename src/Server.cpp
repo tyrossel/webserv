@@ -105,7 +105,8 @@ int    Server::setupListen()
     this->setAddress();
     if (bind(_fd, (struct sockaddr *)&_addr, sizeof(_addr)) == -1)
     {
-        std::cerr << RED << "(╯‵□′)╯︵┻━┻ Could not bind port ┻━┻ ︵ ＼( °□° ＼)" << RESET << std::endl;
+        std::cerr << RED << "(╯‵□′)╯︵┻━┻ Could not bind host " <<
+			_address << ":" << _port << " ┻━┻ ︵ ＼( °□° ＼)" << RESET << std::endl;
         return (-1);
     }
     if (listen(_fd, 1000) == -1)
@@ -133,12 +134,6 @@ std::vector<std::string>            Server::getName() const { return (this->_nam
 long                                Server::getFd() const { return (this->_fd); }
 unsigned int                        Server::getHost() const { return (this->_host); }
 const std::map<std::string, Location> &Server::getLocations() const { return (this->_location); }
-
-// TODO TYR: Remove
-std::string				            Server::getRoot() const { return (this->_location.at("/").root_dir); }
-std::vector<std::string>            Server::getIndex() const { return (this->_location.at("/").indexes); }
-std::string							Server::getCGIBin() const { return (this->_location.at("/").cgi_bin); }
-std::vector<std::string>            Server::getCGIExtensions() const { return (this->_location.at("/").cgi_extensions); }
 
 /**************************************************************************************/
 /*                                  ADDERS                                            */

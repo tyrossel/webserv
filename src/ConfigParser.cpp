@@ -6,7 +6,7 @@
 /*   By: trossel <trossel@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 16:47:18 by trossel           #+#    #+#             */
-/*   Updated: 2022/10/28 10:12:43 by trossel          ###   ########.fr       */
+/*   Updated: 2022/10/28 16:36:16 by trossel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -130,6 +130,13 @@ Location ConfigParsor::parseLocation(const JsonObject &locObject, const Location
 		loc.isCGI = true;
 	else
 		loc.cgi_bin = defaultLoc.cgi_bin;
+    char *tmp = getcwd(NULL, 0);
+    if (tmp)
+	{
+		std::string cwd = tmp;
+		free(tmp);
+		loc.cgi_bin = (loc.cgi_bin[0] == '/') ? loc.cgi_bin : (cwd + '/' + loc.cgi_bin);
+	}
 
 	return loc;
 }
