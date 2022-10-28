@@ -218,6 +218,9 @@ void Response::buildGetResponse(Request req, const Location *loc)
             else
                 std::cout << GREEN << "We sent an image" << RESET << std::endl;
         }
+        else {
+            std::cout << BLUE << "Response code [" << getStatus() << "]" << std::endl;
+        }
     }
     else
     {

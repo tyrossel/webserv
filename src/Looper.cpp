@@ -29,7 +29,21 @@ Looper::~Looper()
 /**************************************************************************************/
 /*                                  MEMBER FUNCTIONS                                  */
 /**************************************************************************************/
-void Looper::log(std::string message) { std::cout << message << std::endl; }
+void Looper::printLog(const Request &request)
+{
+    if (VERBOSE) {
+        std::cout << "================== REQUEST ==================" << std::endl;
+        std::cout << BLUE << request << RESET;
+    }
+    else {
+        std::cout << GREEN << "===================================================\n"
+                  << "Connection receive from client on ["
+                  <<  addr_str << ":" << ntohs(req_addr.sin_port) << "]\n"
+                  << BLUE << "Request [" << ft::RequestToString(request.getMethod())
+                  << " " << request.getPath() << " HTTP " << request.getVersion() << "]"
+                  << RESET << std::endl;
+    }
+}
 
 void Looper::addServer(Server &server) { this->_servers.push_back(server); }
 
@@ -133,18 +147,7 @@ int Looper::readFromClient(long socket)
 		if(!request.isValid(loc))
 			return (-1);
 
-        if (VERBOSE) {
-            std::cout << "================== REQUEST ==================" << std::endl;
-            std::cout << BLUE << request << RESET;
-        }
-        else {
-            std::cout << GREEN << "===================================================\n"
-                << "Connection receive from client on ["
-                <<  addr_str << ":" << ntohs(req_addr.sin_port) << "]\n"
-                << BLUE << "Request [" << ft::RequestToString(request.getMethod())
-                << " " << request.getPath() << " HTTP " << request.getVersion() << "]"
-                << RESET << std::endl;
-        }
+        printLog(request);
 
 		request.updatePathWithLocation(loc);
 
