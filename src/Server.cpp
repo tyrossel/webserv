@@ -119,8 +119,10 @@ int    Server::setupListen()
 
 void Server::close(int socket)
 {
-    if (socket > 0)
-        ::close(socket);
+    if (socket <= 0)
+		return;
+	::close(socket);
+    std::cout << "Client closed connection on socket " << socket << std::endl;
 }
 
 int Server::buildServer() { return (this->setupListen()); }

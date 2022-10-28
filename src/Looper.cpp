@@ -221,6 +221,13 @@ void Looper::sendResponse(fd_set &reading_fd_set, fd_set &writing_fd_set, fd_set
         if (FD_ISSET(*it, &writing_fd_set))
         {
             long ret_val = _active_servers[*it]->send(_response[*it]);
+			if (_request[*it].getHeaders()["Connection"] == "close")
+			{
+				FD_CLR(*it, &_active_fd_set);
+				FD_CLR(*it, &reading_fd_set);
+				_active_servers[*it]->close(*it);
+				_active_servers.erase(*it);
+			}
             if (ret_val >= 0)
             {
                 _response.erase(*it); // erase the response from map when comm is over
@@ -251,6 +258,7 @@ void Looper::requestProcess(fd_set &reading_fd_set)
 
         if (FD_ISSET(socket, &reading_fd_set))
         {
+			std::cout << CYAN "socket = " << socket << RESET << std::endl;
             long ret_val = readFromClient(socket);
 
             if (ret_val > 0)
@@ -261,10 +269,10 @@ void Looper::requestProcess(fd_set &reading_fd_set)
             else if (ret_val <= 0)
             {
                 // in case of error, we clear as done previously
-                FD_CLR(socket, &_active_fd_set);
-                FD_CLR(socket, &reading_fd_set);
-                _active_servers.erase(socket);
-                // close(socket);
+				FD_CLR(socket, &_active_fd_set);
+				FD_CLR(socket, &reading_fd_set);
+				_active_servers[socket]->close(socket);
+				_active_servers.erase(socket);
                 it = _active_servers.begin();
             }
             ret_val = 0;
