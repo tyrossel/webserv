@@ -15,6 +15,7 @@ class Response {
         Server                  *_server;
         long int                _socket;
         std::string             _response;
+        int                     _status;
 
     public:
         // CONSTRUCTORS ====================================================
@@ -39,6 +40,7 @@ class Response {
         void        addHTTPHeader();
         void        writeResponseHeader();
         void        addErrorBodyToResponse();
+        void        setStatus(int new_status);
         // =================================================================
 
         // BUILDERS ========================================================
@@ -51,6 +53,7 @@ class Response {
         std::string     getResponse() const;
         int             respSize() const;
         long int        getSocket() const;
+        int             getStatus() const;
         // =================================================================
 
 };

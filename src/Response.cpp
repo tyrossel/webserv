@@ -83,15 +83,17 @@ void Response::addHTTPHeader()
     checkCode(); // checking if an error code has been parsed in request
     checkPath(); // functions will return the code catched
     writeResponseHeader();
+    addServerHeaderResponse();
+    addDate();
 }
 
 void Response::writeResponseHeader()
 {
     std::stringstream out;
 
-    out << _request.getStatus();
+    out << getStatus();
     _response.append("HTTP/1.1 ");
-    if (ft::isOkHTTP(_request.getStatus())) {
+    if (ft::isOkHTTP(getStatus())) {
         _response.append(out.str());
         _response.append(" OK\r\n");
     }
@@ -108,17 +110,17 @@ void Response::addErrorBodyToResponse()
 
     if (!_loc)
     {
-        body.append(ft::craftErrorHTML(_request.getStatus()));
+        body.append(ft::craftErrorHTML(getStatus()));
     }
     else
     {
         try
         {
-            body.append(ft::readFile(_loc->error_pages.at(_request.getStatus())));
+            body.append(ft::readFile(_loc->error_pages.at(getStatus())));
         }
         catch (const std::exception& e)
         {
-            body.append(ft::craftErrorHTML(_request.getStatus()));
+            body.append(ft::craftErrorHTML(getStatus()));
         }
     }
 
@@ -128,14 +130,15 @@ void Response::addErrorBodyToResponse()
     _response.append(body);
 }
 
+void Response::setStatus(int new_status) { _status = new_status; }
+
 /**************************************************************************************/
 /*                                  CHECKERS                                          */
 /**************************************************************************************/
-
 void    Response::checkCode()
 {
-    if (_request.getStatus() == 0)
-        _request.setStatus(HTTP_OK);
+    if (getStatus() == 0)
+        setStatus(HTTP_OK);
 }
 
 void    Response::checkPath()
@@ -143,9 +146,9 @@ void    Response::checkPath()
     std::string path = _request.getLocation();
 
     if (ft::isDirectory(path) || ft::isFile(path))
-        _request.setStatus(HTTP_OK);
+        setStatus(HTTP_OK);
     else
-        _request.setStatus(NOT_FOUND);
+        setStatus(NOT_FOUND);
 }
 
 bool    Response::secFetchImage()
@@ -190,20 +193,18 @@ bool Response::useCGI()
 void Response::buildGetResponse(Request req, const Location *loc)
 {
     this->_request = req;
-    addHTTPHeader();
-    addServerHeaderResponse();
-    addDate();
 
     if (useCGI()) // CGI or not ?
     {
         if (ft::isFile(_request.getLocation())) {
             CGI cgi(_request);
-            cgi.executeCgi(&_request, _server, loc); //TODO: do smthing with the return !
+            setStatus(cgi.executeCgi(&_request, _server, loc)));
+            addHTTPHeader();
             // Here we remove HTTP EOF because the CGI we use cannot accept HTML in it.
             // If we send HTML inside the CGI he will TOUPPER the html which is.. shitty ?
             cgi.removeEOFHTTP();
             _response.append(cgi.getRetBody());
-            if (ft::isOkHTTP(_request.getStatus()))
+            if (ft::isOkHTTP(getStatus()))
                 addBodyToResponse();
             else
                 addErrorBodyToResponse();
@@ -221,8 +222,9 @@ void Response::buildGetResponse(Request req, const Location *loc)
     }
     else
     {
+        addHTTPHeader();
         //addContentType(socket); // TODO: Mime if no CGI
-        if (ft::isOkHTTP(_request.getStatus()))
+        if (ft::isOkHTTP(getStatus()))
             addBodyToResponse();
         else
             addErrorBodyToResponse();
@@ -240,12 +242,11 @@ void Response::buildGetResponse(Request req, const Location *loc)
 void Response::buildPostResponse(Request req, const Location *loc)
 {
     this->_request = req;
-    addHTTPHeader();
-    addServerHeaderResponse();
-    addDate();
+
     addContentLengthPOST();
     CGI cgi(_request);
-    cgi.executeCgi(&_request, _server, loc); //TODO & ? and do smthing with execute return !
+    setStatus(cgi.executeCgi(&_request, _server, loc));
+    addHTTPHeader();
     _response.append(cgi.getRetBody());
     if (VERBOSE) {
         std::cout << "================== CGI ==================" << std::endl;
@@ -265,17 +266,16 @@ void Response::buildDeleteResponse(Request req)
     if (ft::isFile(path))
     {
         if (remove(path.c_str()) == 0)
-            _request.setStatus(204);
+            setStatus(204);
         else
-            _request.setStatus(403);
+            setStatus(403);
     }
     else
-        _request.setStatus(404);
+        setStatus(404);
     addHTTPHeader();
-    addServerHeaderResponse();
     addContentType();
-    addDate();
-    if (ft::isOkHTTP(_request.getStatus()))
+
+    if (ft::isOkHTTP(getStatus()))
         addBodyToResponse();
     else
         addErrorBodyToResponse();
@@ -290,8 +290,11 @@ void Response::buildDeleteResponse(Request req)
     }
 }
 
-// GETTERS
+/**************************************************************************************/
+/*                                  GETTERS                                           */
+/**************************************************************************************/
 
 std::string Response::getResponse() const { return (this->_response); }
 int         Response::respSize() const { return ((int)this->_response.size()); }
 long int    Response::getSocket() const { return (this->_socket); }
+int         Response::getStatus() const { return (this->_status); }
