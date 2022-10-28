@@ -1,6 +1,7 @@
 #ifndef WEBSERV_RESPONSE_HPP
 #define WEBSERV_RESPONSE_HPP
 
+#include "Location.hpp"
 #include "webserv.hpp"
 #include "Request.hpp"
 #include "DirectoryListing.hpp"
@@ -45,6 +46,7 @@ class Response {
         // =================================================================
 
         // BUILDERS ========================================================
+		void		buildRedirectionResponse(const Redirection &redir);
         void        buildGetResponse(Request req, const Location *loc);
         void        buildPostResponse(Request req, const Location *loc);
         void        buildDeleteResponse(Request req);

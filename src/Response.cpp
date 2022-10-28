@@ -1,5 +1,7 @@
 #include "Response.hpp"
 #include "CommonGatewayInterface.hpp"
+#include "Location.hpp"
+#include "webserv.hpp"
 
 /**************************************************************************************/
 /*                                  CONSTRUCTOR / DESTRUCTOR                          */
@@ -219,6 +221,39 @@ bool Response::useCGI()
 /**************************************************************************************/
 /*                                  BUILDERS                                          */
 /**************************************************************************************/
+
+void	Response::buildRedirectionResponse(const Redirection &redir)
+{
+	if (redir.status == 0)
+		setStatus(HTTP_FOUND);
+	else
+		setStatus(redir.status);
+	std::cout << RED "buildRedir: status = " << _status << RESET << std::endl;
+    writeResponseHeader();
+    addServerHeaderResponse();
+    addDate();
+	if (ft::isOkHTTP(getStatus()))
+	{
+		addBodyToResponse();
+	}
+	else if (_status / 100 == 3)
+	{
+		std::cout << RED "Redir to FILE" RESET << std::endl;
+		_response.append("Location: " + redir.new_url + "\r\n\r\n");
+	}
+	else
+	{
+		std::cout << RED "Redir to ERROR" RESET << std::endl;
+		addErrorBodyToResponse();
+	}
+	if (VERBOSE) {
+		std::cout << "================== RESPONSE ==================" << std::endl;
+			std::cout << GREEN << _response << RESET << std::endl;
+		std::cout << "==============================================" << std::endl << std::endl;
+	}
+
+
+}
 
 void Response::buildGetResponse(Request req, const Location *loc)
 {

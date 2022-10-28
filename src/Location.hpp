@@ -6,7 +6,7 @@
 /*   By: trossel <trossel@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/21 11:08:24 by trossel           #+#    #+#             */
-/*   Updated: 2022/10/28 09:25:35 by trossel          ###   ########.fr       */
+/*   Updated: 2022/10/28 19:59:24 by trossel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,14 @@
 #define WEBSERV_LOCATION_HPP
 
 #include "../includes/webserv.hpp"
+
+struct Redirection
+{
+	// Redirection () : new_url(""), status(0) {}
+
+	std::string	new_url;
+	int			status;
+};
 
 struct Location
 {
@@ -25,18 +33,20 @@ struct Location
 	void disableRequest(RequestType type);
 	bool isRequestAllowed(RequestType type) const;
 
-	int							max_client_body_size;
-	int							requests_allowed;
-	bool						isCGI;
-	bool						auto_index;
-	bool						directory_listing;
-	std::string					path;				// In the client request
-	std::string					root_dir;			// Where to search for file
-	std::string					cgi_bin;
-	std::vector<std::string>	cgi_extensions;
-	std::vector<std::string>	indexes;
-	std::map<int, std::string>	error_pages;
-	std::map<std::string, std::string>	redirections;
+	const Redirection *	 findRedirection(const std::string &req_path) const;
+
+	int									max_client_body_size;
+	int									requests_allowed;
+	bool								isCGI;
+	bool								auto_index;
+	bool								directory_listing;
+	std::string							path;				// In the client request
+	std::string							root_dir;			// Where to search for file
+	std::string							cgi_bin;
+	std::vector<std::string>			cgi_extensions;
+	std::vector<std::string>			indexes;
+	std::map<int, std::string>			error_pages;
+	std::map<std::string, Redirection>	redirections;
 };
 
 std::ostream &operator<<(std::ostream &os, const Location &loc);

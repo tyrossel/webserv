@@ -6,7 +6,7 @@
 /*   By: trossel <trossel@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/21 11:11:21 by trossel           #+#    #+#             */
-/*   Updated: 2022/10/28 16:28:17 by trossel          ###   ########.fr       */
+/*   Updated: 2022/10/28 20:06:10 by trossel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,6 +62,14 @@ bool Location::isRequestAllowed(RequestType type) const
 	return ((requests_allowed >> type) & 1U);
 }
 
+const Redirection *	 Location::findRedirection(const std::string &req_path) const
+{
+	std::map<std::string, Redirection>::const_iterator it = redirections.find(req_path);
+	if (it != redirections.end())
+		return &(it->second);
+	return NULL;
+}
+
 std::ostream &operator<<(std::ostream &os, const Location &loc)
 {
 	std::string method_names[] = {"GET", "POST", "DELETE", "PUT", "HEAD", "PATCH"};
@@ -95,9 +103,17 @@ std::ostream &operator<<(std::ostream &os, const Location &loc)
 	if (!loc.redirections.empty())
 	{
 		os << YELLOW << "\tredirections: " << RESET << std::endl;
-		for (std::map<std::string, std::string>::const_iterator it = loc.redirections.begin();
+		for (std::map<std::string, Redirection>::const_iterator it = loc.redirections.begin();
 				it != loc.redirections.end(); it++)
-			os << "\t\t" <<  it->first << " --> " << it->second << std::endl;
+		{
+			os << "\t\t" <<  it->first << " --> ";
+			if (it->second.new_url.empty())
+				os << it->second.status << std::endl;
+			else if (it->second.status == 0)
+				os << it->second.new_url << " (302)" << std::endl;
+			else
+				os << it->second.new_url << " (" << it->second.status << ")" << std::endl;
+		}
 	}
 
 	os << YELLOW << "\tcgi_bin: " << RESET << loc.cgi_bin;
