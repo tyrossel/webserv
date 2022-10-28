@@ -243,10 +243,10 @@ void Response::buildPostResponse(Request req, const Location *loc)
 {
     this->_request = req;
 
-    addContentLengthPOST();
     CGI cgi(_request);
     setStatus(cgi.executeCgi(&_request, _server, loc));
     addHTTPHeader();
+    addContentLengthPOST();
     _response.append(cgi.getRetBody());
     if (VERBOSE) {
         std::cout << "================== CGI ==================" << std::endl;
