@@ -138,51 +138,52 @@ int Looper::readFromClient(long socket)
 {
     char	        buffer[BUFFER_SIZE];
     int		        ret;
-    std::string     string_buffer;
-    RequestParser   parser;
-    Request         request;
 
     ft::bzero(&buffer, BUFFER_SIZE);
 
-    while ((ret = recv(socket, buffer, BUFFER_SIZE-1, 0)) > 0)
+    //TODO : timestamp
+
+    ret = recv(socket, buffer, BUFFER_SIZE-1, 0);
+    if (ret <= 0)
     {
-        string_buffer += buffer;
-        ft::bzero(&buffer, BUFFER_SIZE);
+        std::cout << strerror(errno) << std::endl;
+        if (ret == -1)
+            std::cout << RED << "An error occured when reading the request" << RESET << std::endl;
+        return -1;
+    }
+    _raw_request[socket] += buffer;
+
+    //TODO : remove
+    std::cout << MAGENTA << _raw_request[socket] << std::endl;
+
+    size_t headers_end = 0;
+    if ((headers_end = _raw_request[socket].find("\r\n\r\n")) != std::string::npos)
+    {
+        if (_raw_request[socket].find("Content-Length: ") == std::string::npos)
+        {
+            if (_raw_request[socket].find("Transfer-Encoding: chunked") != std::string::npos)
+            {
+                std::string end = _raw_request[socket].substr(_raw_request[socket].size() - 5, 5);
+                if (end == "0\r\n\r\n")
+                    return 0;   // End of chunked body found, time to process the request
+                else
+                    return 1;   // End of body not found, need to read more
+            }
+        }
+
+        // Here we want to see if our _raw_request size == Content-Length + Headers size
+        headers_end += 4; // We have to add \r\n\r\n (4 char) because find exclude them
+
+        //TODO : update this shit with our function
+        size_t len = std::atoi(_raw_request[socket].substr(_raw_request[socket].find("Content-Length: ") + 16, 10).c_str());
+        std::cout << CYAN << _raw_request[socket].size() << " || " << len + headers_end;
+        if (_raw_request[socket].size() >= len + headers_end)
+            return 0;
+        else
+            return 1;
     }
 
-    if (!string_buffer.empty()) {
-        parser.parseRequest(string_buffer);
-        request = parser.getRequest();
-
-		struct sockaddr_in req_addr;
-		socklen_t addr_len = sizeof(req_addr);
-		getsockname(socket, (struct sockaddr *)&req_addr, &addr_len);
-		const Server *srv = NULL;
-        if (request.getStatus() == 0)
-            srv = request.FindServer(_servers, req_addr);
-		if (!srv)
-		{
-			std::cerr << RED << "No corresponding server was found" << RESET << std::endl;
-			return -1;
-		}
-
-		// TODO TYR: Check if no server corresponds
-		const Location *loc = NULL;
-		if (request.getStatus() == 0)
-			loc = request.FindLocation(*srv);
-
-		if(!request.isValid(loc))
-			return (-1);
-
-        printLog(request, socket);
-
-		request.updatePathWithLocation(loc);
-
-        _request.insert(std::make_pair<long, Request>(socket, request));
-        buildResponse(socket, loc);
-		_last_activity[socket] = ::time(NULL);
-    }
-    return (string_buffer.size());
+    return 1;
 }
 
 /**************************************************************************************/
@@ -300,6 +301,47 @@ void Looper::sendResponse(fd_set &reading_fd_set, fd_set &writing_fd_set, fd_set
     }
 }
 
+int Looper::startParsingRequest(int socket)
+{
+    RequestParser   parser;
+    Request         request;
+
+    //TODO : check return of parsing ??
+    parser.parseRequest(_raw_request[socket]);
+    request = parser.getRequest();
+
+    struct sockaddr_in req_addr;
+    socklen_t addr_len = sizeof(req_addr);
+    getsockname(socket, (struct sockaddr *)&req_addr, &addr_len);
+
+    const Server *srv = NULL;
+    if (request.getStatus() == 0)
+        srv = request.FindServer(_servers, req_addr);
+    //TODO : Really need this ? Because if parsing fail, no serv will be found
+    if (!srv)
+    {
+        std::cerr << RED << "No corresponding server was found" << RESET << std::endl;
+        return -1;
+    }
+
+    // TODO TYR: Check if no server corresponds
+    const Location *loc = NULL;
+    if (request.getStatus() == 0)
+        loc = request.FindLocation(*srv);
+    if(!request.isValid(loc))
+        return (-1);
+
+    printLog(request, socket);
+
+    request.updatePathWithLocation(loc);
+    _request.insert(std::make_pair<long, Request>(socket, request));
+    buildResponse(socket, loc);
+
+    _last_activity[socket] = ::time(NULL);
+
+    return 0;
+}
+
 void Looper::requestProcess(fd_set &reading_fd_set)
 {
     for (std::map<long, Server *>::iterator it = _active_servers.begin(); it != _active_servers.end() && RUNNING;)
@@ -314,13 +356,15 @@ void Looper::requestProcess(fd_set &reading_fd_set)
 
 		long ret_val = readFromClient(socket);
 
-		if (ret_val > 0)
+		if (ret_val == 0)
 		{
 			// we store the socket fd into our ready_fd vector since we want to keep the channel open
+            startParsingRequest(socket);
+            _raw_request.erase(socket);
 			_ready_fd.push_back(socket);
 			++it;
 		}
-		else
+		else if (ret_val == -1)
 		{
 			// in case of error, we clear as done previously
 			FD_CLR(socket, &_active_fd_set);
@@ -329,6 +373,7 @@ void Looper::requestProcess(fd_set &reading_fd_set)
 			_last_activity.erase(socket);
 			_active_servers.erase(it++);
 		}
+        break;
     }
 }
 

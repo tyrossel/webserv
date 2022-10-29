@@ -20,6 +20,7 @@ class Looper {
         std::map<long int, Response>        _response;
         std::map<long int, Request>         _request;
 		std::map<long int, std::time_t>		_last_activity;
+		std::map<long int, std::string>		_raw_request;
 
         fd_set                              _active_fd_set;
 
@@ -40,6 +41,7 @@ class Looper {
         void    loop();
 		void    checkConnectionTimeout();
         void    catchCommunication(fd_set &reading_fd_set, int ret);
+        int     startParsingRequest(int socket);
         void    requestProcess(fd_set &reading_fd_set);
         void    sendResponse(fd_set &reading_fd_set, fd_set &writing_fd_set, fd_set &_active_fd_set);
         void    selectErrorHandle();
