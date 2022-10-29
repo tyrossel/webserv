@@ -298,33 +298,33 @@ void Looper::sendResponse(fd_set &reading_fd_set, fd_set &writing_fd_set, fd_set
 
 void Looper::requestProcess(fd_set &reading_fd_set)
 {
-    for (std::map<long, Server *>::iterator it = _active_servers.begin(); it != _active_servers.end() && RUNNING; it++)
+    for (std::map<long, Server *>::iterator it = _active_servers.begin(); it != _active_servers.end() && RUNNING;)
     {
         long socket = it->first;
 
-        if (FD_ISSET(socket, &reading_fd_set))
-        {
-			std::cout << CYAN "socket = " << socket << RESET << std::endl;
-            long ret_val = readFromClient(socket);
+        if (!FD_ISSET(socket, &reading_fd_set))
+		{
+			it++;
+			continue;
+		}
 
-            if (ret_val > 0)
-            {
-                // we store the socket fd into our ready_fd vector since we want to keep the channel open
-                _ready_fd.push_back(socket);
-            }
-            else if (ret_val <= 0)
-            {
-                // in case of error, we clear as done previously
-				FD_CLR(socket, &_active_fd_set);
-				FD_CLR(socket, &reading_fd_set);
-				_active_servers[socket]->close(socket);
-				_last_activity.erase(socket);
-				_active_servers.erase(socket);
-                it = _active_servers.begin();
-            }
-            ret_val = 0;
-            break;
-        }
+		long ret_val = readFromClient(socket);
+
+		if (ret_val > 0)
+		{
+			// we store the socket fd into our ready_fd vector since we want to keep the channel open
+			_ready_fd.push_back(socket);
+			++it;
+		}
+		else
+		{
+			// in case of error, we clear as done previously
+			FD_CLR(socket, &_active_fd_set);
+			FD_CLR(socket, &reading_fd_set);
+			_active_servers[socket]->close(socket);
+			_last_activity.erase(socket);
+			_active_servers.erase(it++);
+		}
     }
 }
 
