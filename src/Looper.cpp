@@ -13,7 +13,7 @@ Looper::Looper(const Looper &other) : _config(other._config), _max_fd(other._max
     *this = other;
 }
 
-Looper::Looper(const Config &cfg) : _timeout(2)
+Looper::Looper(const Config &cfg) : _timeout(cfg.getTimeout())
 {
 	_servers = cfg.getServer();
 }
@@ -235,6 +235,8 @@ void Looper::loop()
 
 void Looper::checkConnectionTimeout()
 {
+	if (_timeout < 0)
+		return ;
 	for (std::map<long int, Server *>::iterator it(_active_servers.begin()); it != _active_servers.end();)
 	{
 		long int socket = it->first;

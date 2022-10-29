@@ -37,7 +37,10 @@ bool Config::isValid() const {
     std::set<int> portList;
 
     if (_server.empty())
+	{
+		std::cerr << "No server specified" << std::endl;
         return false;
+	}
     for (std::vector<Server>::const_iterator it = _server.begin();
          it != _server.end(); it++) {
         if (it->getPort() < 1 || it->getPort() > 65535) {
@@ -106,7 +109,8 @@ bool Config::isValid() const {
 
 std::ostream &operator<<(std::ostream &out, const Config &rhs) {
     if (VERBOSE) {
-        out << "[Configuration Servers]" << std::endl;
+        out << "[Configuration]" << std::endl;
+		std::cout << CYAN "Keepalive-timeout:" RESET << rhs.getTimeout() << std::endl;
         for (int i = 0; i < rhs.getNbServer(); i++) {
             out << CYAN << "Server number : " << RESET << i
                 << YELLOW << "\nAddress : " << RESET << rhs.getServer()[i].getAddress()

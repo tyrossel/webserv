@@ -6,7 +6,7 @@
 /*   By: trossel <trossel@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 16:47:18 by trossel           #+#    #+#             */
-/*   Updated: 2022/10/28 19:58:41 by trossel          ###   ########.fr       */
+/*   Updated: 2022/10/29 19:07:39 by trossel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -186,7 +186,7 @@ Config ConfigParsor::parse() const
 	try
 	{
 		json.parseFromFile(this->_filename);
-
+		cfg.setTimeout(json.getIntOrDefault("keepalive-timeout", 15));
 		JsonArray serversArray = json.getArray("servers");
 		std::vector<JsonObject> servers = serversArray.ObjectValues();
 
