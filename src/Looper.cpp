@@ -262,37 +262,41 @@ void Looper::checkConnectionTimeout()
 
 void Looper::sendResponse(fd_set &reading_fd_set, fd_set &writing_fd_set, fd_set &_active_fd_set)
 {
-    for (std::vector<int>::iterator it = _ready_fd.begin(); it != _ready_fd.end() && RUNNING; it++)
+		std::cout << "Ready fd size = " << _ready_fd.size() << std::endl;
+    for (std::vector<int>::iterator it = _ready_fd.begin(); it != _ready_fd.end() && RUNNING;)
     {
-        if (FD_ISSET(*it, &writing_fd_set))
+		int fd(*it);
+
+		std::cout << "Ready fd = " << fd << std::endl;
+        if (!FD_ISSET(fd, &writing_fd_set))
         {
-            long ret_val = _active_servers[*it]->send(_response[*it]);
-			if (_request[*it].getHeaders()["Connection"] == "close")
-			{
-				FD_CLR(*it, &_active_fd_set);
-				FD_CLR(*it, &reading_fd_set);
-				_active_servers[*it]->close(*it);
-				_active_servers.erase(*it);
-			}
-            if (ret_val >= 0)
-            {
-                _response.erase(*it); // erase the response from map when comm is over
-                _request.erase(*it); // erase the socket from the map
-                _ready_fd.erase(it); // erase the fd from vector when comm is over
-            }
-            else
-            {
-                // Here we will remove the fd we catched in the error
-                // and clear all communication and all open channels.
-                // The fd and the active_server will be removed too
-                FD_CLR(*it, &_active_fd_set);
-                FD_CLR(*it, &reading_fd_set);
-                _active_servers.erase(*it);
-                _ready_fd.erase(it);
-            }
-            ret_val = 0;
-            break;
-        }
+			it++;
+			continue;
+		}
+
+		long ret_val = _active_servers[fd]->send(_response[fd]);
+
+		if (_request[fd].getHeaders()["Connection"] == "close")
+		{
+			FD_CLR(fd, &_active_fd_set);
+			FD_CLR(fd, &reading_fd_set);
+			_active_servers[fd]->close(fd);
+			_active_servers.erase(fd);
+		}
+		if (ret_val >= 0) // Comm OK, delete ressources
+		{
+			_response.erase(fd);
+			_request.erase(fd);
+		}
+		else
+		{
+			_response.erase(fd);
+			_request.erase(fd);
+			FD_CLR(fd, &_active_fd_set);
+			FD_CLR(fd, &reading_fd_set);
+			_active_servers.erase(fd);
+		}
+		it = _ready_fd.erase(it); // erase the fd from vector when comm is over
     }
 }
 
