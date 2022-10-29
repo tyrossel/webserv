@@ -264,12 +264,10 @@ void Looper::checkConnectionTimeout()
 
 void Looper::sendResponse(fd_set &reading_fd_set, fd_set &writing_fd_set, fd_set &_active_fd_set)
 {
-		std::cout << "Ready fd size = " << _ready_fd.size() << std::endl;
     for (std::vector<int>::iterator it = _ready_fd.begin(); it != _ready_fd.end() && RUNNING;)
     {
 		int fd(*it);
 
-		std::cout << "Ready fd = " << fd << std::endl;
         if (!FD_ISSET(fd, &writing_fd_set))
         {
 			it++;
