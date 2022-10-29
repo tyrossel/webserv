@@ -1,6 +1,7 @@
 #include "Response.hpp"
 #include "CommonGatewayInterface.hpp"
 #include "Location.hpp"
+#include "Utils.hpp"
 #include "webserv.hpp"
 
 /**************************************************************************************/
@@ -131,7 +132,7 @@ void Response::writeResponseHeader()
     }
     else {
         _response.append(out.str());
-        _response.append(" KO\r\n");
+        _response.append(ft::errorMessage(getStatus()) + "\r\n");
     }
 }
 
@@ -241,7 +242,7 @@ void	Response::buildRedirectionResponse(const Redirection &redir)
 		std::cout << RED "Redir to FILE" RESET << std::endl;
 		_response.append("Location: " + redir.new_url + "\r\n");
 		_response.append("Connection: keep-alive\r\n");
-		_response.append("Content-Length: 0\r\n\r\n");
+		addErrorBodyToResponse();
 	}
 	else
 	{

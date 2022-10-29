@@ -286,57 +286,44 @@ namespace ft {
 
     std::string errorMessage(int error)
     {
-        if (error == BAD_REQUEST)
-            return (" Bad Request");
-        else if (error == UNAUTHORIZED)
-            return (" Unauthorized");
-        else if (error == FORBIDDEN)
-            return (" Forbidden");
-        else if (error == NOT_FOUND)
-            return (" Not Found");
-        else if (error == METHOD_NOT_ALLOWED)
-            return (" Method Not Allowed");
-        else if (error == PROXY_AUTHENTICATION)
-            return (" Proxy Authentication");
-        else if (error == REQUEST_TIMEOUT)
-            return (" Request Timeout");
-        else if (error == CONFLICT)
-            return (" Conflict");
-        else if (error == LENGTH_REQUIRED)
-            return (" Length Required");
-        else if (error == PRECONDITION_FAILED)
-            return (" Precondition Failed");
-        else if (error == URI_TOO_LONG)
-            return (" URI Too Long");
-        else if (error == MEDIA_UNSUPPORTED)
-            return (" Media Unsupported");
-        else if (error == RANGE_NOT_SATISFIABLE)
-            return (" Range Not Satisfiable");
-        else if (error == EXPECTATION_FAILED)
-            return (" Expectation Failed");
-        else if (error == TEAPOT)
-            return (" I'm a teapot");
-        else if (error == TOO_MANY_REQUESTS)
-            return (" Too Many Requests");
-        else if (error == UNAVAILABLE_LEGAL_REASON)
-            return (" Unvailable Legal Reason");
-        else if (error == INTERNAL_SERVER_ERROR)
-            return (" Internal Server Error");
-        else if (error == NOT_IMPLEMENTED)
-            return (" Not Implemented");
-        else if (error == BAD_GATEWAY)
-            return (" Bad Gateway");
-        else if (error == SERVICE_UNAVAILABLE)
-            return (" Service Unavailable");
-        else if (error == GATEWAY_TIMEOUT)
-            return (" Gateway Timeout");
-        else if (error == HTTP_VERSION_UNSUPPORTED)
-            return (" HTTP Version Unsupported");
-        else if (error == NOT_EXTENDED)
-            return (" Not Extended");
-        else if (error == NETWORK_AUTHENTICATION_REQUIRED)
-            return (" Network Authentication Required");
-        else
+		std::map<int, std::string> err_map;
+        err_map[HTTP_MULTIPLE_CHOICES] = " Multiple choices";
+        err_map[HTTP_MOVED_PERMANENTLY] = " Permanent Redirect";
+        err_map[HTTP_FOUND] = " Temporary Redirect";
+        err_map[HTTP_SEE_OTHER] = " See other";
+        err_map[HTTP_NOT_MODIFIED] = " Not Modified";
+        err_map[HTTP_TEMPORARY_REDIRECT] = " Temporary Redirect";
+        err_map[HTTP_PERMANENT_REDIRECT] = " Permanent Redirect";
+        err_map[BAD_REQUEST] = " Bad Request";
+        err_map[UNAUTHORIZED] = " Unauthorized";
+        err_map[FORBIDDEN] = " Forbidden";
+        err_map[NOT_FOUND] = " Not Found";
+        err_map[METHOD_NOT_ALLOWED] = " Method Not Allowed";
+        err_map[PROXY_AUTHENTICATION] = " Proxy Authentication";
+        err_map[REQUEST_TIMEOUT] = " Request Timeout";
+        err_map[CONFLICT] = " Conflict";
+        err_map[LENGTH_REQUIRED] = " Length Required";
+        err_map[PRECONDITION_FAILED] = " Precondition Failed";
+        err_map[URI_TOO_LONG] = " URI Too Long";
+        err_map[MEDIA_UNSUPPORTED] = " Media Unsupported";
+        err_map[RANGE_NOT_SATISFIABLE] = " Range Not Satisfiable";
+        err_map[EXPECTATION_FAILED] = " Expectation Failed";
+        err_map[TEAPOT] = " I'm a teapot";
+        err_map[TOO_MANY_REQUESTS] = " Too Many Requests";
+        err_map[UNAVAILABLE_LEGAL_REASON] = " Unvailable Legal Reason";
+        err_map[INTERNAL_SERVER_ERROR] = " Internal Server Error";
+        err_map[NOT_IMPLEMENTED] = " Not Implemented";
+        err_map[BAD_GATEWAY] = " Bad Gateway";
+        err_map[SERVICE_UNAVAILABLE] = " Service Unavailable";
+        err_map[GATEWAY_TIMEOUT] = " Gateway Timeout";
+        err_map[HTTP_VERSION_UNSUPPORTED] = " HTTP Version Unsupported";
+        err_map[NOT_EXTENDED] = " Not Extended";
+        err_map[NETWORK_AUTHENTICATION_REQUIRED] = " Network Authentication Required";
+
+		std::map<int, std::string>::const_iterator error_idx = err_map.find(error);
+		if (error_idx != err_map.end())
+			return error_idx->second;
+		else
             return (" Error");
     }
 

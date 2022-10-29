@@ -30,8 +30,11 @@
 /*----------------------------- REDIRECTION MESSAGES ------------------------------*/
 # define HTTP_MULTIPLE_CHOICES 300              // request has more than one possible response
 # define HTTP_MOVED_PERMANENTLY 301             // URL of the requested resource has been changed permanently. The new URL is given in the response
-# define HTTP_FOUND 302                         // URI of requested resource has been changed temporarily
+# define HTTP_FOUND 302                         // URI of requested resource has been changed temporarily. Client will send a GET request
 # define HTTP_SEE_OTHER 303                     // response to direct the client to get the requested resource at another URI with a GET request
+# define HTTP_NOT_MODIFIED 304                  // response to direct the client to get the requested resource from the cache
+# define HTTP_TEMPORARY_REDIRECT 307            // URI of requested resource has been changed temporarily. Client should send the same request
+# define HTTP_PERMANENT_REDIRECT 308            // URI of requested resource has been changed permanently. Client should send the same request
 
 /*----------------------------- CLIENT ERROR RESPONSES -----------------------------*/
 # define BAD_REQUEST 400                        // server cannot or will not process the request due to something that is perceived to be a client error
