@@ -6,14 +6,29 @@
 /**************************************************************************************/
 /*                          CONSTRUCTORS / DESTRUCTORS                                */
 /**************************************************************************************/
-Looper::Looper() : _config(), _max_fd(), _servers() {}
+Looper::Looper() : _config(), _max_fd(), _timeout(2), _servers() {}
 
 Looper::Looper(const Looper &other) : _config(other._config), _max_fd(other._max_fd), _servers(other._servers)
 {
     *this = other;
 }
 
-Looper::Looper(const Config &cfg) { _servers = cfg.getServer(); }
+Looper::Looper(const Config &cfg) : _timeout(2)
+{
+	_servers = cfg.getServer();
+}
+
+Looper &Looper::operator=(const Looper &rhs)
+{
+	if (&rhs == this)
+		return *this;
+	_config = rhs._config;
+	_max_fd = rhs._max_fd;
+	_timeout = rhs._timeout;
+	_servers = rhs._servers;
+	// Other variables are not copied.
+	return *this;
+}
 
 Looper::~Looper()
 {
@@ -165,6 +180,7 @@ int Looper::readFromClient(long socket)
 
         _request.insert(std::make_pair<long, Request>(socket, request));
         buildResponse(socket, loc);
+		_last_activity[socket] = ::time(NULL);
     }
     return (string_buffer.size());
 }
@@ -193,8 +209,11 @@ void Looper::loop()
             // here we set the already active fd's in the writing fd's
             for (std::vector<int>::iterator it = _ready_fd.begin(); it != _ready_fd.end(); it++)
                 FD_SET(*it, &writing_fd_set);
+			// Handle connection timeouts
             // select will wait for an event on the set given
             ret = select(_max_fd + 1, &reading_fd_set, &writing_fd_set, NULL, &timeout);
+
+			checkConnectionTimeout();
         }
         // ret will be greater than 0 if any valid event is catched
         if (ret > 0 && RUNNING)
@@ -212,6 +231,33 @@ void Looper::loop()
                 selectErrorHandle();
         }
     }
+}
+
+void Looper::checkConnectionTimeout()
+{
+	for (std::map<long int, Server *>::iterator it(_active_servers.begin()); it != _active_servers.end();)
+	{
+		long int socket = it->first;
+		time_t time_now(::time(NULL)), time_last(0);
+		::time(&time_now);
+
+		// TODO TYR: Remove, in order to close if not found
+		time_last = time_now;
+
+		std::map<long int, std::time_t>::iterator time_it = _last_activity.find(socket);
+		if (time_it != _last_activity.end())
+			time_last = time_it->second;
+		if (time_now - time_last > _timeout)
+		{
+			FD_CLR(socket, &_active_fd_set);
+			_last_activity.erase(socket);
+			_active_servers[socket]->close(socket);
+			_active_servers.erase(it++);
+			it = _active_servers.begin();
+		}
+		else
+			it++;
+	}
 }
 
 void Looper::sendResponse(fd_set &reading_fd_set, fd_set &writing_fd_set, fd_set &_active_fd_set)
@@ -272,6 +318,7 @@ void Looper::requestProcess(fd_set &reading_fd_set)
 				FD_CLR(socket, &_active_fd_set);
 				FD_CLR(socket, &reading_fd_set);
 				_active_servers[socket]->close(socket);
+				_last_activity.erase(socket);
 				_active_servers.erase(socket);
                 it = _active_servers.begin();
             }
