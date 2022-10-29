@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>WetServ - POST</title>
+    <div class="POST-testing">
+      <h1>POST METHOD TESTING :</h1>
+      <h2>Enter anything in the fields below.<br>A new tab will open with the POST method served.</h2>
+      <form method="POST" target="_blank">
+        <label for="fname">First name:</label>
+        <input type="text" id="fname" name="fname"><br><br>
+        <label for="lname">Last name:</label>
+        <input type="text" id="lname" name="lname"><br><br>
+        <input class="sub-button" type="submit" value="Submit">
+      </form>
+    </div>
+</head>
+<body>
+
+</body>
+</html>
+
+<style lang="css">
+  .POST-testing {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    text-align: center;
+  }
+  .POST-testing form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    justify-items: center;
+    align-self: center;
+  }
+  .POST-testing form .sub-button {
+    color: white;
+    background: black;
+  }
+  .POST-testing form .sub-button:hover {
+    cursor: pointer;
+  }
+</style>
