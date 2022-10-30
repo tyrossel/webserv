@@ -95,7 +95,7 @@ bool Request::isValid(const Location *loc)
     if (!loc)
         return false;
 
-    if (!loc->isRequestAllowed(_method))
+    if (!loc->requests_allowed[_method])
     {
         setStatus(METHOD_NOT_ALLOWED);
         return false;

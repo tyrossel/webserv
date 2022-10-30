@@ -6,7 +6,7 @@
 /*   By: trossel <trossel@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/21 11:08:24 by trossel           #+#    #+#             */
-/*   Updated: 2022/10/30 17:16:34 by trossel          ###   ########.fr       */
+/*   Updated: 2022/10/30 12:59:46 by trossel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,13 +28,10 @@ struct Location
 	Location &operator=(const Location &rhs);
 	~Location();
 
-	void disableRequest(RequestType type);
-	bool isRequestAllowed(RequestType type) const;
-
 	const Redirection *	 findRedirection(const std::string &req_path) const;
 
 	int									max_client_body_size;
-	int									requests_allowed;
+	std::bitset<LastRequestType>		requests_allowed;
 	bool								isCGI;
 	bool								auto_index;
 	std::string							path;				// In the client request

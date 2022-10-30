@@ -6,7 +6,7 @@
 /*   By: trossel <trossel@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/21 11:11:21 by trossel           #+#    #+#             */
-/*   Updated: 2022/10/31 08:29:14 by trossel          ###   ########.fr       */
+/*   Updated: 2022/10/30 17:26:12 by trossel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,6 @@
 
 Location::Location() :
 		max_client_body_size(0),
-		requests_allowed(0xFF),
 		isCGI(false),
 		auto_index(false),
 		path(""),
@@ -22,6 +21,7 @@ Location::Location() :
 		cgi_bin(""),
 		upload_dir("")
 {
+	requests_allowed.set();
 }
 
 Location::Location(const Location &rhs)
@@ -50,16 +50,6 @@ Location &Location::operator=(const Location &rhs)
 
 Location::~Location()
 {
-}
-
-void Location::disableRequest(RequestType type)
-{
-	requests_allowed &= ~(1UL << type);
-}
-
-bool Location::isRequestAllowed(RequestType type) const
-{
-	return ((requests_allowed >> type) & 1U);
 }
 
 const Redirection *	 Location::findRedirection(const std::string &req_path) const
@@ -129,16 +119,16 @@ std::ostream &operator<<(std::ostream &os, const Location &loc)
 	os << YELLOW << "\n\tauto_index: " << RESET << (loc.auto_index ? "true" : "false");
 
 	os << YELLOW << "\n\tRequests disabled: " << RESET;
-	if (loc.requests_allowed < 0xFF)
+	if (loc.requests_allowed.all())
+		os << "none";
+	else
 	{
-		for (unsigned int i(1); i < 7; i++)
+		for (unsigned int i(0); i < Unknown; i++)
 		{
-			if (!loc.isRequestAllowed((RequestType)i))
-				os << method_names[i - 1] << " ";
+			if (!loc.requests_allowed[i])
+				os << method_names[i] << " ";
 		}
 	}
-	else
-		os << "none";
 	os << std::endl << std::endl;
 	return os;
 }

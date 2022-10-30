@@ -72,10 +72,11 @@
 
 enum RequestType
 {
-	Unknown = 0,
-	Get		= 1,
-	Post	= 2,
-	Delete	= 3
+	Get,
+	Post,
+	Delete,
+	Unknown,
+	LastRequestType
 };
 
 /***********************************************************************************
@@ -85,6 +86,7 @@ enum RequestType
 #include <algorithm>
 #include <stack>
 #include <vector>
+#include <bitset>
 #include <iostream>
 #include <fstream>
 #include <sstream>

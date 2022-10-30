@@ -126,7 +126,7 @@ Location ConfigParsor::parseLocation(const JsonObject &locObject, const Location
 	for (size_t i(0); i < disabled_requests.size(); i++)
 	{
 		RequestType type = ft::RequestFromString(disabled_requests[i]);
-		loc.disableRequest(type);
+		loc.requests_allowed.reset(type);
 	}
 
 	loc.cgi_bin = locObject.getStringOrDefault("cgi_bin", "");
