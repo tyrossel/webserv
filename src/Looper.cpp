@@ -151,7 +151,7 @@ int Looper::readFromClient(long socket)
             std::cout << RED << "An error occured when reading the request" << RESET << std::endl;
         return -1;
     }
-    _raw_request[socket] += buffer;
+    _raw_request[socket].append(buffer, ret);
 
     //TODO : remove
     std::cout << MAGENTA << _raw_request[socket] << std::endl;
