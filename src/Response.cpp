@@ -61,7 +61,14 @@ void Response::addBodyToResponse() // TODO: add file to read from (std::string p
 
     if (ft::isDirectory(loc))
     {
-        text = createDirectoryListingBody(path, loc);
+		if (_loc->directory_listing)
+			text = createDirectoryListingBody(path, loc);
+		else
+		{
+			setStatus(FORBIDDEN);
+			addErrorBodyToResponse();
+			return ;
+		}
     }
     else
     {
