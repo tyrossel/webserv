@@ -6,7 +6,7 @@
 /*   By: trossel <trossel@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 16:47:18 by trossel           #+#    #+#             */
-/*   Updated: 2022/10/29 19:07:39 by trossel          ###   ########.fr       */
+/*   Updated: 2022/10/30 12:39:38 by trossel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -134,7 +134,7 @@ Location ConfigParsor::parseLocation(const JsonObject &locObject, const Location
 	else
 		loc.cgi_bin = defaultLoc.cgi_bin;
     char *tmp = getcwd(NULL, 0);
-    if (tmp)
+    if (tmp && !loc.cgi_bin.empty())
 	{
 		std::string cwd = tmp;
 		free(tmp);
