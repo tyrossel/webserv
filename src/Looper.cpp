@@ -153,9 +153,6 @@ int Looper::readFromClient(long socket)
     }
     _raw_request[socket].append(buffer, ret);
 
-    //TODO : remove
-    std::cout << MAGENTA << _raw_request[socket] << std::endl;
-
     size_t headers_end = 0;
     if ((headers_end = _raw_request[socket].find("\r\n\r\n")) != std::string::npos)
     {
@@ -176,7 +173,6 @@ int Looper::readFromClient(long socket)
 
         //TODO : update this shit with our function
         size_t len = std::atoi(_raw_request[socket].substr(_raw_request[socket].find("Content-Length: ") + 16, 10).c_str());
-        std::cout << CYAN << _raw_request[socket].size() << " || " << len + headers_end;
         if (_raw_request[socket].size() >= len + headers_end)
             return 0;
         else

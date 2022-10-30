@@ -157,7 +157,6 @@ void CGI::removeEOFHTTP()
 // TODO: Use Location instead of server ?
 int CGI::setCGIEnvironment(const Request *request, const Server *server, const Location *loc)
 {
-
     _file_path = request->getLocation();
 	_cgi_path = loc->cgi_bin;
 
@@ -174,17 +173,18 @@ int CGI::setCGIEnvironment(const Request *request, const Server *server, const L
     _env["PATH_TRANSLATED"] = _file_path;
     _env["QUERY_STRING"] = request->getQuery();
     _env["REMOTE_HOST"] = "";
-    _env["REQUEST_METHOD"] = request->getMethod();
+    _env["REQUEST_METHOD"] = ft::RequestToString(request->getMethod());
     _env["SCRIPT_NAME"] = loc->cgi_bin;
     _env["SERVER_NAME"] = server->getAddress();
     _env["SERVER_PORT"] = ft::to_string(server->getPort());
     _env["SERVER_PROTOCOL"] = "HTTP/" + request->getVersion();
     _env["SERVER_SOFTWARE"] = "WetServ/1.0";
-    // TODO: careful
-    _env["REDIRECT_STATUS"] = "0";
-    _env["FILE_UPLOADS"] = "On"; // ??
-    // TODO: specify the method
-    _env["REQUEST_METHOD"] = "POST";
+
+    if (_env["REQUEST_METHOD"] == "POST")
+    {
+        _env["REDIRECT_STATUS"] = "0";
+        _env["FILE_UPLOADS"] = "On";
+    }
 
     for (std::map<std::string, std::string>::iterator it = _headers.begin(); it != _headers.end(); it++)
     {
