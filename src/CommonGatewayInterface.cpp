@@ -159,6 +159,9 @@ int CGI::setCGIEnvironment(const Request *request, const Server *server, const L
     _file_path = request->getLocation();
 	_cgi_path = loc->cgi_bin;
 
+    std::cout << RED <<  _file_path << RESET << std::endl;
+    std::cout << RED <<  _cgi_path << RESET << std::endl;
+
     if (_headers.find("Auth-Scheme") != _headers.end())
         _env["AUTH_TYPE"] = _headers["Authorization"];
 

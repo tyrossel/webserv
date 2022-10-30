@@ -1,14 +1,11 @@
 #include "Looper.hpp"
-#include "webserv.hpp"
-#include "Utils.hpp"
-#include <unistd.h>
 
 /**************************************************************************************/
 /*                          CONSTRUCTORS / DESTRUCTORS                                */
 /**************************************************************************************/
-Looper::Looper() : _config(), _max_fd(), _timeout(2), _servers() {}
+Looper::Looper() : _timeout(15)  {}
 
-Looper::Looper(const Looper &other) : _config(other._config), _max_fd(other._max_fd), _servers(other._servers)
+Looper::Looper(const Looper &other)
 {
     *this = other;
 }
@@ -26,7 +23,14 @@ Looper &Looper::operator=(const Looper &rhs)
 	_max_fd = rhs._max_fd;
 	_timeout = rhs._timeout;
 	_servers = rhs._servers;
-	// Other variables are not copied.
+    _active_servers = rhs._active_servers;
+    _ready_fd = rhs._ready_fd;
+    _response = rhs._response;
+    _request = rhs._request;
+    _last_activity = rhs._last_activity;
+    _raw_request = rhs._raw_request;
+    _active_fd_set = rhs._active_fd_set;
+
 	return *this;
 }
 

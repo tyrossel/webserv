@@ -4,7 +4,7 @@
 /*                          CONSTRUCTORS / DESTRUCTORS                                */
 /**************************************************************************************/
 
-RequestParser::RequestParser() : _request(), _string_request("") {}
+RequestParser::RequestParser() : _string_request("") {}
 
 RequestParser::RequestParser(const RequestParser &other)
 {
