@@ -121,7 +121,9 @@ void Response::addContentType()
 void Response::addHTTPHeader()
 {
     checkCode(); // checking if an error code has been parsed in request
-    checkPath(); // functions will return the code catched
+    if (_status == HTTP_OK) {
+        checkPath(); // functions will return the code catched
+    }
     writeResponseHeader();
     addServerHeaderResponse();
     addDate();
@@ -177,8 +179,10 @@ void Response::setStatus(int new_status) { _status = new_status; }
 /**************************************************************************************/
 void    Response::checkCode()
 {
-    if (getStatus() == 0)
+    if (_request.getStatus() == 0)
         setStatus(HTTP_OK);
+    else
+        setStatus(_request.getStatus());
 }
 
 void    Response::checkPath()
