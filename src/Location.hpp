@@ -6,7 +6,7 @@
 /*   By: trossel <trossel@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/21 11:08:24 by trossel           #+#    #+#             */
-/*   Updated: 2022/10/30 12:59:46 by trossel          ###   ########.fr       */
+/*   Updated: 2022/10/30 17:16:34 by trossel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,7 @@ struct Location
 	std::string							root_dir;			// Where to search for file
 	std::string							cgi_bin;
 	std::vector<std::string>			cgi_extensions;
+	std::string							upload_dir;
 	std::vector<std::string>			indexes;
 	std::map<int, std::string>			error_pages;
 	std::map<std::string, Redirection>	redirections;

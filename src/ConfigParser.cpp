@@ -6,7 +6,7 @@
 /*   By: trossel <trossel@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 16:47:18 by trossel           #+#    #+#             */
-/*   Updated: 2022/10/30 13:02:06 by trossel          ###   ########.fr       */
+/*   Updated: 2022/10/30 17:19:12 by trossel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,6 +56,8 @@ Location ConfigParsor::parseLocation(const JsonObject &locObject, const Location
 	loc.auto_index = locObject.getBoolOrDefault("auto_index", defaultLoc.auto_index);
 
 	loc.max_client_body_size = locObject.getIntOrDefault("max_client_body_size", defaultLoc.max_client_body_size);
+
+	loc.upload_dir = locObject.getStringOrDefault("upload_dir", defaultLoc.upload_dir);
 
 	// CGI_extensions
 	std::vector<std::string> cgi_ext = locObject.getArrayOrEmpty("cgi_extensions").stringValues();

@@ -6,7 +6,7 @@
 /*   By: trossel <trossel@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/21 11:11:21 by trossel           #+#    #+#             */
-/*   Updated: 2022/10/30 13:01:32 by trossel          ###   ########.fr       */
+/*   Updated: 2022/10/30 17:26:12 by trossel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,8 @@ Location::Location() :
 		auto_index(false),
 		path(""),
 		root_dir(""),
-		cgi_bin("")
+		cgi_bin(""),
+		upload_dir("")
 {
 }
 
@@ -38,6 +39,7 @@ Location &Location::operator=(const Location &rhs)
 	indexes = rhs.indexes;
 	auto_index = rhs.auto_index;
 	path = rhs.path;
+	upload_dir = rhs.upload_dir;
 	root_dir = rhs.root_dir;
 	cgi_bin = rhs.cgi_bin;
 	error_pages = rhs.error_pages;
