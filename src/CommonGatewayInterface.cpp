@@ -154,7 +154,6 @@ void CGI::removeEOFHTTP()
     }
 }
 
-// TODO: Use Location instead of server ?
 int CGI::setCGIEnvironment(const Request *request, const Server *server, const Location *loc)
 {
     _file_path = request->getLocation();

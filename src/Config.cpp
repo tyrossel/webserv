@@ -89,10 +89,6 @@ bool Config::isValid() const {
                     return false;
                 }
             }
-            if (loc.isCGI && !loc.root_dir.empty()) {
-                std::cerr << "Location " + loc.path + " error: Cannot have a root and a cgi_bin" << std::endl;
-                return false;
-            }
             if (!loc.isCGI) {
                 if (loc.root_dir.empty()) {
                     std::cerr << "Location error: root_dir cannot be empty if not a CGI proxy" << std::endl;

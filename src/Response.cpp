@@ -22,7 +22,7 @@ void Response::printLog(bool print_cgi)
         if (VERBOSE) {
             std::cout << "==================== CGI ====================" << std::endl;
             if (secFetchImage())
-                std::cout << _response << std::endl;
+                std::cout << GREEN << _response << RESET << std::endl;
             else
                 std::cout << GREEN << "We sent an image" << RESET << std::endl;
         }

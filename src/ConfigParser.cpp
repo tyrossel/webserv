@@ -51,7 +51,7 @@ Location ConfigParsor::parseLocation(const JsonObject &locObject, const Location
 		throw std::logic_error("Location error: location_path cannot be empty");
 	loc.path = location_path;
 
-	loc.root_dir = locObject.getStringOrDefault("root", "");
+	loc.root_dir = locObject.getStringOrDefault("root", defaultLoc.root_dir);
 
 	loc.auto_index = locObject.getBoolOrDefault("auto_index", defaultLoc.auto_index);
 
