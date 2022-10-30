@@ -130,22 +130,19 @@ void	Request::updatePathWithLocation(const Location *loc)
     if (!ft::isDirectory(_location))
         return ;
 
-    if (loc->auto_index)
-    {
-        std::vector<std::string>::const_iterator it = loc->indexes.begin();
-        for (;it != loc->indexes.end(); it++)
-        {
-            std::string new_location = _location + *it;
-            std::ifstream test_stream(new_location.c_str());
-            if (test_stream.is_open())
-            {
-                _location = new_location;
-                return ;
-            }
-            test_stream.close();
-        }
-        // TODO : Handle case if index is not found
-    }
+	// Automatic redirect to index
+    std::vector<std::string>::const_iterator it = loc->indexes.begin();
+	for (;it != loc->indexes.end(); it++)
+	{
+		std::string new_location = _location + *it;
+		std::ifstream test_stream(new_location.c_str());
+		if (test_stream.is_open())
+		{
+			_location = new_location;
+			break ;
+		}
+		test_stream.close();
+	}
 }
 
 /**************************************************************************************/

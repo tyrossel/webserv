@@ -61,7 +61,7 @@ void Response::addBodyToResponse() // TODO: add file to read from (std::string p
 
     if (ft::isDirectory(loc))
     {
-		if (_loc->directory_listing)
+		if (_loc->auto_index)
 			text = createDirectoryListingBody(path, loc);
 		else
 		{

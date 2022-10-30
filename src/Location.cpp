@@ -6,7 +6,7 @@
 /*   By: trossel <trossel@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/21 11:11:21 by trossel           #+#    #+#             */
-/*   Updated: 2022/10/28 20:06:10 by trossel          ###   ########.fr       */
+/*   Updated: 2022/10/30 13:01:32 by trossel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,6 @@ Location::Location() :
 		requests_allowed(0xFF),
 		isCGI(false),
 		auto_index(false),
-		directory_listing(false),
 		path(""),
 		root_dir(""),
 		cgi_bin("")
@@ -38,7 +37,6 @@ Location &Location::operator=(const Location &rhs)
 	isCGI = rhs.isCGI;
 	indexes = rhs.indexes;
 	auto_index = rhs.auto_index;
-	directory_listing = rhs.directory_listing;
 	path = rhs.path;
 	root_dir = rhs.root_dir;
 	cgi_bin = rhs.cgi_bin;
@@ -127,8 +125,6 @@ std::ostream &operator<<(std::ostream &os, const Location &loc)
 		os << "none";
 
 	os << YELLOW << "\n\tauto_index: " << RESET << (loc.auto_index ? "true" : "false");
-
-	os << YELLOW << "\n\tdirectory_listing: " << RESET << (loc.directory_listing ? "true" : "false");
 
 	os << YELLOW << "\n\tRequests disabled: " << RESET;
 	if (loc.requests_allowed < 0xFF)

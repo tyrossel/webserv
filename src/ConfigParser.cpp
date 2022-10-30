@@ -6,7 +6,7 @@
 /*   By: trossel <trossel@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 16:47:18 by trossel           #+#    #+#             */
-/*   Updated: 2022/10/30 12:39:38 by trossel          ###   ########.fr       */
+/*   Updated: 2022/10/30 13:02:06 by trossel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,6 @@ Location ConfigParsor::parseLocation(const JsonObject &locObject, const Location
 	loc.root_dir = locObject.getStringOrDefault("root", "");
 
 	loc.auto_index = locObject.getBoolOrDefault("auto_index", defaultLoc.auto_index);
-	loc.directory_listing = locObject.getBoolOrDefault("directory_listing", defaultLoc.directory_listing);
 
 	loc.max_client_body_size = locObject.getIntOrDefault("max_client_body_size", defaultLoc.max_client_body_size);
 
