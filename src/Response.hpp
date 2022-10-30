@@ -34,7 +34,7 @@ class Response {
 
         // TOOLS ========================================================
         void        printLog(bool print_cgi);
-        void        addContentLengthPOST();
+        void        addContentLengthPOST(CGI &cgi);
         void        addBodyToResponse();
         void        addDate();
         void        addServerHeaderResponse();

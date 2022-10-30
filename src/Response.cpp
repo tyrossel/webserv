@@ -45,11 +45,11 @@ void Response::printLog(bool print_cgi)
     }
 }
 
-void Response::addContentLengthPOST()
+void Response::addContentLengthPOST(CGI &cgi)
 {
     _response.append("Content-Length: ");
-    _response.append(_request.getHeaders().find("Content-Length")->second);
-    _response.append("\r\n");
+    _response.append(ft::to_string(cgi.getRetBody().length()));
+    _response.append("\r\n\r\n");
 }
 
 void Response::addBodyToResponse() // TODO: add file to read from (std::string path)
@@ -307,7 +307,7 @@ void Response::buildPostResponse(Request req, const Location *loc)
     CGI cgi(_request);
     setStatus(cgi.executeCgi(&_request, _server, loc));
     addHTTPHeader();
-    addContentLengthPOST();
+    addContentLengthPOST(cgi);
     _response.append(cgi.getRetBody());
     printLog(true);
 }
