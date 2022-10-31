@@ -34,7 +34,7 @@ Request &Request::operator=(const Request &other)
 /*                                      MEMBERS                                       */
 /**************************************************************************************/
 
-bool matchLocation(const std::string &path, const std::string &loc_path)
+bool Request::matchLocation(const std::string &path, const std::string &loc_path) const
 {
     // TODO TYR: allow other matching, such as those defined in Nginx:
     // = (has to be totally equal)
@@ -51,7 +51,7 @@ const Location * Request::FindLocation(const Server &server) const
          it != loc_map.end(); it++)
     {
         if (matchLocation(_path, it->first)
-            && it->first.size() > best_loc_index.size())
+                && it->first.size() > best_loc_index.size())
             best_loc_index = it->first;
     }
     return &loc_map.at(best_loc_index);
@@ -90,7 +90,7 @@ const Server * Request::FindServer(const std::vector<Server> &servers, struct so
     return NULL;
 }
 
-bool	Request::isValid(const Location *loc) const
+bool Request::isValid(const Location *loc) const
 {
     if (!loc)
         return false;
@@ -110,7 +110,7 @@ bool	Request::isValid(const Location *loc) const
     return true;
 }
 
-void	Request::updatePathWithLocation(const Location *loc)
+void Request::updatePathWithLocation(const Location *loc)
 {
     if (!loc)
         return ;
@@ -166,7 +166,6 @@ int                                 Request::getStatus() const { return (this->_
 /**************************************************************************************/
 
 void Request::setStatus(int new_status) { this->_status = new_status; }
-
 
 /**************************************************************************************/
 /*                                      NON MEMBERS                                   */

@@ -4,7 +4,7 @@
 /*                          CONSTRUCTORS / DESTRUCTORS                                */
 /**************************************************************************************/
 
-CGI::CGI(const Request &request) : _env(), _headers(request.getHeaders()), _req_body(request.getBody()), _cgi_path(""), _file_path(""), _ret_body(""), _fd_file(0), _cgi_env(NULL) {}
+CGI::CGI(const Request &request) : _env(), _headers(request.getHeaders()), _req_body(request.getBody()), _cgi_path(""), _file_path(""), _ret_body(""), _cgi_env(NULL) {}
 
 CGI::CGI(const CGI &rhs)
 {
@@ -27,7 +27,6 @@ CGI &CGI::operator=(const CGI &rhs)
         this->_cgi_path = rhs._cgi_path;
         this->_file_path = rhs._file_path;
         this->_ret_body = rhs._ret_body;
-        this->_fd_file = rhs._fd_file;
         this->_cgi_env = rhs._cgi_env;
     }
     return (*this);
@@ -210,4 +209,3 @@ std::string                         CGI::getReqBody() { return (this->_req_body)
 std::string                         CGI::getCGIPath() { return (this->_cgi_path); }
 std::string                         CGI::getFilePath() { return (this->_file_path); }
 std::string                         CGI::getRetBody() { return (this->_ret_body); }
-int                                 CGI::getFdFile() { return (this->_fd_file); }

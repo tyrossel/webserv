@@ -13,12 +13,10 @@
 #ifndef WEBSERV_LOCATION_HPP
 #define WEBSERV_LOCATION_HPP
 
-#include "../includes/webserv.hpp"
+#include "webserv.hpp"
 
 struct Redirection
 {
-	// Redirection () : new_url(""), status(0) {}
-
 	std::string	new_url;
 	int			status;
 };
@@ -50,6 +48,5 @@ struct Location
 };
 
 std::ostream &operator<<(std::ostream &os, const Location &loc);
-
 
 #endif // WEBSERV_LOCATION_HPP

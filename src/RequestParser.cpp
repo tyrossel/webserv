@@ -24,7 +24,7 @@ RequestParser &RequestParser::operator=(const RequestParser &other)
 }
 
 /**************************************************************************************/
-/*                                  MEMBER FUNCTIONS                                  */
+/*                                      UTILS                                         */
 /**************************************************************************************/
 
 /* getNextLine extract the next line, removing \r\n at the end of line */
@@ -48,16 +48,16 @@ int RequestParser::exitStatus(int exit_status)
     return (-1);
 }
 
+/**************************************************************************************/
+/*                                      CHECKERS                                      */
+/**************************************************************************************/
+
 int RequestParser::isValidEncoding(std::string &to_check)
 {
     if (to_check != "chunked" && to_check != "compress" && to_check != "deflate" && to_check != "gzip")
         return (-1);
     return (0);
 }
-
-/**************************************************************************************/
-/*                                      CHECKERS                                      */
-/**************************************************************************************/
 
 int RequestParser::checkMethod(RequestType method)
 {
@@ -151,34 +151,26 @@ int RequestParser::appendHeaderValue(std::string &key, std::string &value)
     return 0;
 }
 
-int RequestParser::parseVersion(std::string &first_line, size_t &start, size_t &end)
+int RequestParser::parseFirstLine(std::string &first_line)
 {
-    /* Stock the next ' ' index in end, and check if no ' ' are found */
-    start = first_line.find_first_not_of(' ', end);
-    if (start == std::string::npos)
+    size_t      start = 0;
+    size_t      end = 0;
+
+    /* Get the spaces after method */
+    end = first_line.find_first_of(' ');
+
+    /* If there is no spaces after method, end will be equal to npos */
+    if (end == std::string::npos)
     {
-        std::cout << "Error Not Found : There is no newline after version HTTP" << std::endl;
-        return (exitStatus(BAD_REQUEST));
+        std::cout << "Error Not Found : There is no spaces after method" << std::endl;
+        _request._status = BAD_REQUEST; //  server cannot or will not process the request due to something that is perceived to be a client error
+        return (-1);
     }
+    _request._method = ft::RequestFromString(first_line.substr(start, end));
+    if (checkMethod(_request._method) == -1)
+        return -1;
 
-    /* Get the 5 next characters. Expect that it will be HTTP/ */
-    std::string format = first_line.substr(start, 5);
-    if (format != "HTTP/")
-    {
-        std::cout << "Wrong HTTP format" << std::endl;
-        return (exitStatus(BAD_REQUEST));
-    }
-
-    /* Extract version */
-    _request._version = first_line.substr(start + 5, 3);
-
-    if (_request._version != "1.1")
-    {
-        std::cout << "Wrong HTTP version" << std::endl;
-        return (exitStatus(HTTP_VERSION_UNSUPPORTED));
-    }
-
-    return 0;
+    return parsePath(first_line, start, end);
 }
 
 int RequestParser::parsePath(std::string &first_line, size_t &start, size_t &end)
@@ -209,26 +201,34 @@ int RequestParser::parsePath(std::string &first_line, size_t &start, size_t &end
     return (parseVersion(first_line, start, end));
 }
 
-int RequestParser::parseFirstLine(std::string &first_line)
+int RequestParser::parseVersion(std::string &first_line, size_t &start, size_t &end)
 {
-    size_t      start = 0;
-    size_t      end = 0;
-
-    /* Get the spaces after method */
-    end = first_line.find_first_of(' ');
-
-    /* If there is no spaces after method, end will be equal to npos */
-    if (end == std::string::npos)
+    /* Stock the next ' ' index in end, and check if no ' ' are found */
+    start = first_line.find_first_not_of(' ', end);
+    if (start == std::string::npos)
     {
-        std::cout << "Error Not Found : There is no spaces after method" << std::endl;
-        _request._status = BAD_REQUEST; //  server cannot or will not process the request due to something that is perceived to be a client error
-        return (-1);
+        std::cout << "Error Not Found : There is no newline after version HTTP" << std::endl;
+        return (exitStatus(BAD_REQUEST));
     }
-    _request._method = ft::RequestFromString(first_line.substr(start, end));
-    if (checkMethod(_request._method) == -1)
-        return -1;
 
-    return parsePath(first_line, start, end);
+    /* Get the 5 next characters. Expect that it will be HTTP/ */
+    std::string format = first_line.substr(start, 5);
+    if (format != "HTTP/")
+    {
+        std::cout << "Wrong HTTP format" << std::endl;
+        return (exitStatus(BAD_REQUEST));
+    }
+
+    /* Extract version */
+    _request._version = first_line.substr(start + 5, 3);
+
+    if (_request._version != "1.1")
+    {
+        std::cout << "Wrong HTTP version" << std::endl;
+        return (exitStatus(HTTP_VERSION_UNSUPPORTED));
+    }
+
+    return 0;
 }
 
 int RequestParser::parseHeaders(size_t &index)
@@ -272,6 +272,61 @@ int RequestParser::parseHeaders(size_t &index)
     return (checkHeaders());
 }
 
+int RequestParser::parseBody(size_t &index)
+{
+    if (index != _string_request.size())
+    {
+        if (_request._headers.find("Transfer-Encoding") != _request._headers.end() && _request._headers["Transfer-Encoding"] == "chunked")
+        {
+            if (parseChunkedBody(index) == -1)
+                return -1;
+        }
+        else
+        {
+            /* A server MAY reject a _request that contains a message body but not a Content-Length */
+            if (_request._headers.find("Content-Length") == _request._headers.end())
+                return (exitStatus(LENGTH_REQUIRED));
+
+            _request._body = _string_request.substr(index, _string_request.size() - index);
+
+            if (_request._body_length > 0 && _request._body_length != (int)_request._body.size())
+                return (exitStatus(BAD_REQUEST));
+        }
+    }
+
+    return (0);
+}
+
+int RequestParser::parseChunkedBody(size_t &index)
+{
+    size_t end_line;
+    index = _string_request.find_first_not_of("\r\n", index);
+
+    while ((end_line = _string_request.find("\r\n", index)) != std::string::npos)
+    {
+        std::string chunk_size = _string_request.substr(index, end_line - index);
+        size_t size = ft::hexToInt(chunk_size);
+        if (size == 0)
+        {
+            if (parseTrailer(index) == -1)
+                return -1;
+            return 0;
+        }
+
+        index = _string_request.find_first_not_of("\r\n", end_line);
+        end_line = _string_request.find("\r\n", index);
+        if (size != end_line - index)
+            return (exitStatus(BAD_REQUEST));
+        else
+            _request._body += _string_request.substr(index, size);
+
+        index += size;
+        index = _string_request.find_first_not_of("\r\n", end_line);
+    }
+
+    return -1;
+}
+
 int RequestParser::parseTrailer(size_t &index)
 {
     _string_request.erase(0, index);
@@ -305,61 +360,6 @@ int RequestParser::parseTrailer(size_t &index)
     return (exitStatus(BAD_REQUEST));
 }
 
-int RequestParser::parseChunkedBody(size_t &index)
-{
-    size_t end_line;
-    index = _string_request.find_first_not_of("\r\n", index);
-
-    while ((end_line = _string_request.find("\r\n", index)) != std::string::npos)
-    {
-        std::string chunk_size = _string_request.substr(index, end_line - index);
-        size_t size = ft::hexToInt(chunk_size);
-        if (size == 0)
-        {
-            if (parseTrailer(index) == -1)
-                return -1;
-            return 0;
-        }
-
-        index = _string_request.find_first_not_of("\r\n", end_line);
-        end_line = _string_request.find("\r\n", index);
-        if (size != end_line - index)
-            return (exitStatus(BAD_REQUEST));
-        else
-            _request._body += _string_request.substr(index, size);
-
-        index += size;
-        index = _string_request.find_first_not_of("\r\n", end_line);
-    }
-
-    return -1;
-}
-
-int RequestParser::parseBody(size_t &index)
-{
-    if (index != _string_request.size())
-    {
-        if (_request._headers.find("Transfer-Encoding") != _request._headers.end() && _request._headers["Transfer-Encoding"] == "chunked")
-        {
-            if (parseChunkedBody(index) == -1)
-                return -1;
-        }
-        else
-        {
-            /* A server MAY reject a _request that contains a message body but not a Content-Length */
-            if (_request._headers.find("Content-Length") == _request._headers.end())
-                return (exitStatus(LENGTH_REQUIRED));
-
-            _request._body = _string_request.substr(index, _string_request.size() - index);
-
-            if (_request._body_length > 0 && _request._body_length != (int)_request._body.size())
-                return (exitStatus(BAD_REQUEST));
-        }
-    }
-
-    return (0);
-}
-
 int RequestParser::parseRequest(std::string &request)
 {
 //    if (!request)
@@ -386,5 +386,9 @@ int RequestParser::parseRequest(std::string &request)
 
     return (0);
 }
+
+/**************************************************************************************/
+/*                                      GETTERS                                       */
+/**************************************************************************************/
 
 Request RequestParser::getRequest() { return (this->_request); }

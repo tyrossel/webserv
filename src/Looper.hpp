@@ -3,8 +3,8 @@
 
 #include "Config.hpp"
 #include "CommonGatewayInterface.hpp"
-#include "Server.hpp"
-#include "RequestParser.hpp"
+//#include "Server.hpp"
+//#include "RequestParser.hpp"
 #include "Response.hpp"
 #include "webserv.hpp"
 #include <ctime>
@@ -17,8 +17,8 @@ class Looper {
         std::vector<Server>                 _servers;
         std::map<long int, Server *>        _active_servers;
         std::vector<int>                    _ready_fd;
-        std::map<long int, Response>        _response;
-        std::map<long int, Request>         _request;
+        std::map<long int, Response>        _responses;
+        std::map<long int, Request>         _requests;
 		std::map<long int, std::time_t>		_last_activity;
 		std::map<long int, std::string>		_raw_request;
 
@@ -29,21 +29,25 @@ class Looper {
         Looper(const Looper &other);
         Looper(const Config &cfg);
 		Looper &operator=(const Looper &rhs);
-        virtual ~Looper();
+        ~Looper();
 
-        int     setupLoop();
-        int     readFromClient(long socket);
-        void    setMaxFd();
-        void    addServer(Server &server);
+        // MEMBER FUNCTIONS ================================================
         void    printLog(const Request &request, int socket);
+        void    addServer(Server &server);
+        void    setMaxFd();
+        int     setupLoop();
+        void    checkConnectionTimeout();
+        // =================================================================
+
+        // EXTRACT REQUEST =================================================
+        int     startParsingRequest(int socket);
+        int     readFromClient(long socket);
 
         // LOOP RELATED ====================================================
         void    loop();
-		void    checkConnectionTimeout();
-        void    catchCommunication(fd_set &reading_fd_set, int ret);
-        int     startParsingRequest(int socket);
-        void    requestProcess(fd_set &reading_fd_set);
         void    sendResponse(fd_set &reading_fd_set, fd_set &writing_fd_set, fd_set &_active_fd_set);
+        void    catchCommunication(fd_set &reading_fd_set, int ret);
+        void    requestProcess(fd_set &reading_fd_set);
         void    selectErrorHandle();
         // =================================================================
 

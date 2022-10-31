@@ -27,30 +27,6 @@ namespace ft {
         return (dst);
     }
 
-//    unsigned int strToIp(std::string str)
-//    {
-//        char c_str[3];
-//        int n = 0;
-//
-//        for (int i = 0; i < str.size(); i++) {
-//            i += digitToDot(str.c_str(), i + 1);
-//            c_str[n++] = substr(x, x, );
-//        }
-//    }
-//
-//    int digitToDot(char *str, int occurence)
-//    {
-//        int ret = (occurence * -1) + 1;
-//        for (int i = 0; str[i] != '.' && occurence; i++)
-//        {
-//            if (str[i] == '.')
-//                occurence--;
-//        }
-//        ret = i;
-//        return (ret);
-//    }
-
-
     void	bzero(void *s, size_t n)
     {
         size_t	count;
@@ -66,18 +42,6 @@ namespace ft {
     /**************************************************************************************/
     /*                                     STRING                                         */
     /**************************************************************************************/
-
-    std::string toLower(std::string s)
-    {
-        std::transform(s.begin(), s.end(), s.begin(), ::tolower);
-        return s;
-    }
-
-    std::string toUpper(std::string s)
-    {
-        std::transform(s.begin(), s.end(), s.begin(), ::toupper);
-        return s;
-    }
 
     size_t  hexToInt(std::string &hex_str)
     {
@@ -105,6 +69,26 @@ namespace ft {
             return (i);
         else
             throw std::exception();
+    }
+
+    std::string toLower(std::string s)
+    {
+        std::transform(s.begin(), s.end(), s.begin(), ::tolower);
+        return s;
+    }
+
+    std::string toUpper(std::string s)
+    {
+        std::transform(s.begin(), s.end(), s.begin(), ::toupper);
+        return s;
+    }
+
+    std::string itoa(int i)
+    {
+        std::stringstream out;
+
+        out << i;
+        return (out.str());
     }
 
     std::string to_string(int number)
@@ -138,7 +122,7 @@ namespace ft {
         str.erase(lastpos + 1, str.length());
     }
 
-	void	trim(std::string &str, const std::string &chars)
+	void trim(std::string &str, const std::string &chars)
 	{
 		trimLeft(str, chars);
 		trimRight(str, chars);
@@ -149,29 +133,11 @@ namespace ft {
         str.erase(str.size() - 1);
     }
 
-
-    /**************************************************************************************/
-    /*                                     SIGNALS                                        */
-    /**************************************************************************************/
-
-    void stopLoop(int sig)
-    {
-        RUNNING = 0;
-        std::cout << RED << "Signal " << sig << " catched. Loop is being stopped." << RESET << std::endl;
-    }
-
-    void setupSignals()
-    {
-        RUNNING = 1;
-        signal(SIGINT, stopLoop);
-    }
-
-
     /**************************************************************************************/
     /*                                     ARRAY                                          */
     /**************************************************************************************/
 
-    size_t	strlen(const char *str)
+    size_t strlen(const char *str)
     {
         size_t	count;
 
@@ -181,7 +147,7 @@ namespace ft {
         return (count);
     }
 
-    char	*strdup(const char *str)
+    char *strdup(const char *str)
     {
         int		size_src;
         int		c;
@@ -201,7 +167,7 @@ namespace ft {
         return (ret);
     }
 
-    void	freeArray(char **array)
+    void freeArray(char **array)
     {
         int	i;
 
@@ -213,7 +179,7 @@ namespace ft {
         free(array);
     }
 
-    char        **mapToArray(std::map<std::string, std::string> map)
+    char **mapToArray(std::map<std::string, std::string> map)
     {
         char **array = NULL;
         int i = 0;
@@ -234,42 +200,19 @@ namespace ft {
         return (array);
     }
 
-    RequestType	RequestFromString(const std::string &str)
+    /**************************************************************************************/
+    /*                                     I/O OPERATIONS                                 */
+    /**************************************************************************************/
+
+    bool isFile(const std::string &path)
     {
-		std::map<std::string, RequestType> map;
-		map["GET"] = Get;
-		map["POST"] = Post;
-		map["DELETE"] = Delete;
-
-		try
-		{
-			return map.at(str);
-		}
-		catch (const std::exception& e)
-		{
-			return Unknown;
-		}
-	}
-
-    std::string    RequestToString(RequestType type)
-    {
-        std::map<RequestType, std::string> map;
-        map[Unknown] = "UNKNOWN";
-        map[Get] = "GET";
-        map[Post] = "POST";
-        map[Delete] = "DELETE";
-
-        try
-        {
-            return map.at(type);
-        }
-        catch (const std::exception& e)
-        {
-            return map[Unknown];
-        }
+        struct stat statbuf;
+        if (stat(path.c_str(), &statbuf) != 0)
+            return false;
+        return S_ISREG(statbuf.st_mode);
     }
 
-	bool isDirectory(const std::string path)
+    bool isDirectory(const std::string path)
 	{
 		struct stat statbuf;
 		if (stat(path.c_str(), &statbuf) != 0)
@@ -277,13 +220,23 @@ namespace ft {
 		return S_ISDIR(statbuf.st_mode);
 	}
 
-    std::string itoa(int i)
+    std::string readFile(const std::string &filename)
     {
-        std::stringstream out;
-
-        out << i;
-        return (out.str());
+        std::string content;
+        std::ifstream fs(filename.c_str());
+        if (!fs.good())
+        {
+            throw std::runtime_error("cannot open file: " + filename);
+        }
+        content.assign(std::istreambuf_iterator<char>(fs),
+                       std::istreambuf_iterator<char>());
+        fs.close();
+        return content;
     }
+
+    /**************************************************************************************/
+    /*                                     ERRORS / CHECKERS                              */
+    /**************************************************************************************/
 
     std::string errorMessage(int error)
     {
@@ -339,20 +292,6 @@ namespace ft {
         return (ret);
     }
 
-	std::string readFile(const std::string &filename)
-	{
-		std::string content;
-		std::ifstream fs(filename.c_str());
-		if (!fs.good())
-		{
-			throw std::runtime_error("cannot open file: " + filename);
-		}
-		content.assign(std::istreambuf_iterator<char>(fs),
-					std::istreambuf_iterator<char>());
-		fs.close();
-		return content;
-	}
-
     bool isOkHTTP(int status)
     {
         switch (status) {
@@ -368,15 +307,46 @@ namespace ft {
         }
     }
 
-    bool isFile(const std::string &path)
+    /**************************************************************************************/
+    /*                                    OTHER FUNCTIONS                                 */
+    /**************************************************************************************/
+
+    RequestType	RequestFromString(const std::string &str)
     {
-        struct stat statbuf;
-        if (stat(path.c_str(), &statbuf) != 0)
-            return false;
-        return S_ISREG(statbuf.st_mode);
+        std::map<std::string, RequestType> map;
+        map["GET"] = Get;
+        map["POST"] = Post;
+        map["DELETE"] = Delete;
+
+        try
+        {
+            return map.at(str);
+        }
+        catch (const std::exception& e)
+        {
+            return Unknown;
+        }
     }
 
-	std::string timestamp(const std::string &format)
+    std::string RequestToString(RequestType type)
+    {
+        std::map<RequestType, std::string> map;
+        map[Unknown] = "UNKNOWN";
+        map[Get] = "GET";
+        map[Post] = "POST";
+        map[Delete] = "DELETE";
+
+        try
+        {
+            return map.at(type);
+        }
+        catch (const std::exception& e)
+        {
+            return map[Unknown];
+        }
+    }
+
+    std::string timestamp(const std::string &format)
 	{
 		const int max_size = 100;
 		char tmp[max_size];

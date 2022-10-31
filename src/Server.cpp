@@ -5,7 +5,7 @@
 /**************************************************************************************/
 /*                          CONSTRUCTORS / DESTRUCTORS                                */
 /**************************************************************************************/
-Server::Server() : _port(), _fd(), _host(), _name(), _location(), _addr()
+Server::Server()
 {
 	addLocation("/", Location());
 }
@@ -28,7 +28,6 @@ Server &Server::operator=(const Server &rhs)
     this->_port = rhs._port;
 	this->_address = rhs._address;
     this->_fd = rhs._fd;
-    this->_host = rhs._host;
 	this->_name = rhs._name;
 	this->_location = rhs._location;
     this->_addr = rhs._addr;
@@ -44,19 +43,19 @@ void Server::log(std::string message)
     std::cout << message << std::endl;
 }
 
-long    Server::createSocket()
+long Server::createSocket()
 {
     long socket;
 
     socket = accept(_fd, NULL, NULL);
     if (socket == -1)
-        std::cout << RED << "Could not create socket for host " << _host << " socket return : " << socket << RESET << std::endl;
+        std::cout << RED << "Could not create socket for this address : " << _address << ". Socket return : " << socket << RESET << std::endl;
     else
         fcntl(socket, F_SETFL, O_NONBLOCK);
     return (socket);
 }
 
-void    Server::setAddress()
+void Server::setAddress()
 {
     memset((char *)&_addr, 0, sizeof(_addr)); //TODO : import our memset
 
@@ -65,7 +64,7 @@ void    Server::setAddress()
     _addr.sin_port = htons(_port);
 }
 
-int     Server::send(const Response &resp)
+int Server::send(const Response &resp)
 {
     int bytes_sent_total = 0;
     int bytes_sent_now = 0;
@@ -87,7 +86,7 @@ int     Server::send(const Response &resp)
         return (bytes_sent_total);
 }
 
-int    Server::setupListen()
+int Server::setupListen()
 {
     _fd = socket(AF_INET, SOCK_STREAM, 0);
     if (_fd == -1)
@@ -129,12 +128,11 @@ int Server::buildServer() { return (this->setupListen()); }
 /**************************************************************************************/
 /*                                  GETTERS                                           */
 /**************************************************************************************/
-int                                 Server::getPort() const { return (this->_port); }
-std::string							Server::getAddress() const { return (this->_address); }
-std::vector<std::string>            Server::getName() const { return (this->_name); }
-long                                Server::getFd() const { return (this->_fd); }
-unsigned int                        Server::getHost() const { return (this->_host); }
-const std::map<std::string, Location> &Server::getLocations() const { return (this->_location); }
+int                                     Server::getPort() const { return (this->_port); }
+long                                    Server::getFd() const { return (this->_fd); }
+std::string							    Server::getAddress() const { return (this->_address); }
+std::vector<std::string>                Server::getName() const { return (this->_name); }
+const std::map<std::string, Location>   &Server::getLocations() const { return (this->_location); }
 
 /**************************************************************************************/
 /*                                  ADDERS                                            */
@@ -143,4 +141,3 @@ void    Server::addPort(int port) { _port = port; }
 void	Server::addAddress(const std::string &address) { _address = address; }
 void    Server::addName(const std::string &name) { _name.push_back(name); }
 void    Server::addLocation(const std::string &key, const Location &location) { _location[key] = location; }
-void    Server::addHost(const unsigned int &host) { _host = host; }

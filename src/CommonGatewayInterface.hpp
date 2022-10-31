@@ -1,7 +1,7 @@
 #ifndef WEBSERV_COMMONGATEWAYINTERFACE_HPP
 #define WEBSERV_COMMONGATEWAYINTERFACE_HPP
 
-#include "../includes/webserv.hpp"
+#include "webserv.hpp"
 #include "RequestParser.hpp"
 #include "Server.hpp"
 
@@ -13,7 +13,6 @@ class CGI {
         std::string                         _cgi_path;
         std::string                         _file_path;
         std::string                         _ret_body;
-        int                                 _fd_file;
         char**                              _cgi_env;
 
     public:
@@ -30,7 +29,6 @@ class CGI {
         std::string                         getCGIPath();
         std::string                         getFilePath();
         std::string                         getRetBody();
-        int                                 getFdFile();
 
         int returnFail(int ret, std::string error, bool close_pipe=false, int pip_to_cgi=-1, int pip_from_cgi=-1);
         void exitFail(std::string error, int exit_value);

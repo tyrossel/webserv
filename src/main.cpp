@@ -13,6 +13,18 @@
 #include "Looper.hpp"
 #include "ConfigParser.hpp"
 
+void stopLoop(int sig)
+{
+    RUNNING = 0;
+    std::cout << RED << "Signal " << sig << " catched. Loop is being stopped." << RESET << std::endl;
+}
+
+void setupSignals()
+{
+    RUNNING = 1;
+    signal(SIGINT, stopLoop);
+}
+
 Config getConfig(const std::string &filename)
 {
 	ConfigParsor parsor(filename);
@@ -20,12 +32,8 @@ Config getConfig(const std::string &filename)
 	return conf;
 }
 
-int	main(int argc, char *argv[], char *envp[])
+int	main(int argc, char *argv[])
 {
-	(void)argc;
-	(void)argv;
-	(void)envp;
-
 	if (argc < 2 || argc > 2)
 	{
 		std::cerr << "Usage: ./webserv <config file>" << std::endl;
@@ -37,8 +45,13 @@ int	main(int argc, char *argv[], char *envp[])
 		std::cerr << "Error in config file." << std::endl;
 		return 1;
 	}
+    setupSignals();
+
     Looper loop(cfg);
-    loop.setupLoop();
+
+    if (loop.setupLoop() == -1)
+        return (1);
+
     loop.loop();
 
     return (0);

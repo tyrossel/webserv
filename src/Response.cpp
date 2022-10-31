@@ -12,9 +12,11 @@ Response::Response() {}
 Response::Response(const long int socket, const Location *loc, Server *server): _loc(loc), _server(server), _socket(socket) {}
 
 Response::~Response() {}
+
 /**************************************************************************************/
 /*                                  TOOLS                                             */
 /**************************************************************************************/
+
 void Response::printLog(bool print_cgi)
 {
 	if (VERBOSE)
@@ -41,7 +43,8 @@ void Response::addContentLengthPOST(CGI &cgi)
     _response.append("\r\n\r\n");
 }
 
-void Response::addBodyToResponse() // TODO: add file to read from (std::string path)
+// TODO: add file to read from (std::string path)
+void Response::addBodyToResponse()
 {
     std::string text;
     std::stringstream out;
@@ -161,7 +164,7 @@ void Response::setStatus(int new_status) { _status = new_status; }
 /**************************************************************************************/
 /*                                  CHECKERS                                          */
 /**************************************************************************************/
-void    Response::checkCode()
+void Response::checkCode()
 {
     if (_request.getStatus() == 0)
         setStatus(HTTP_OK);
@@ -169,7 +172,7 @@ void    Response::checkCode()
         setStatus(_request.getStatus());
 }
 
-void    Response::checkPath()
+void Response::checkPath()
 {
     std::string path = _request.getLocation();
 
@@ -179,7 +182,7 @@ void    Response::checkPath()
         setStatus(NOT_FOUND);
 }
 
-bool    Response::secFetchImage()
+bool Response::secFetchImage()
 {
     // This function just checks if the _request is for an image
     std::map<std::string, std::string> tmp = _request.getHeaders();
@@ -218,7 +221,7 @@ bool Response::useCGI()
 /*                                  BUILDERS                                          */
 /**************************************************************************************/
 
-void	Response::buildRedirectionResponse(const Redirection &redir)
+void Response::buildRedirectionResponse(const Redirection &redir)
 {
 	if (redir.status == 0)
 		setStatus(HTTP_FOUND);

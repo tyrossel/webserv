@@ -25,8 +25,8 @@ Looper &Looper::operator=(const Looper &rhs)
 	_servers = rhs._servers;
     _active_servers = rhs._active_servers;
     _ready_fd = rhs._ready_fd;
-    _response = rhs._response;
-    _request = rhs._request;
+    _responses = rhs._responses;
+    _requests = rhs._requests;
     _last_activity = rhs._last_activity;
     _raw_request = rhs._raw_request;
     _active_fd_set = rhs._active_fd_set;
@@ -41,13 +41,14 @@ Looper::~Looper()
     _servers.clear();
     _active_servers.clear();
     _ready_fd.clear();
-    _response.clear();
-    _request.clear();
+    _responses.clear();
+    _requests.clear();
 }
 
 /**************************************************************************************/
 /*                                  MEMBER FUNCTIONS                                  */
 /**************************************************************************************/
+
 void Looper::printLog(const Request &request, int socket)
 {
     struct sockaddr_in req_addr;
@@ -105,40 +106,78 @@ int Looper::setupLoop()
     return _max_fd == 0 ? -1 : 0;
 }
 
+void Looper::checkConnectionTimeout()
+{
+    if (_timeout < 0)
+        return ;
+    for (std::map<long int, Server *>::iterator it(_active_servers.begin()); it != _active_servers.end();)
+    {
+        long int socket = it->first;
+        time_t time_now(::time(NULL)), time_last(0);
+        ::time(&time_now);
+
+        // TODO TYR: Remove, in order to close if not found
+        time_last = time_now;
+
+        std::map<long int, std::time_t>::iterator time_it = _last_activity.find(socket);
+        if (time_it != _last_activity.end())
+            time_last = time_it->second;
+        if (time_now - time_last > _timeout)
+        {
+            FD_CLR(socket, &_active_fd_set);
+            _last_activity.erase(socket);
+            _active_servers[socket]->close(socket);
+            _active_servers.erase(it++);
+            it = _active_servers.begin();
+        }
+        else
+            it++;
+    }
+}
+
 /**************************************************************************************/
-/*                                  RESPONSE CRAFTING                                 */
+/*                                  EXTRACT REQUEST                                   */
 /**************************************************************************************/
 
-int Looper::buildResponse(long socket, const Location *loc)
+int Looper::startParsingRequest(int socket)
 {
-	Request &req = _request[socket];
-    Response ret(socket, loc, _active_servers[socket]);
-	const Redirection *redir = loc->findRedirection(req.getPath());
-	if (redir)
-	{
-		ret.buildRedirectionResponse(*redir);
-		_response.insert(std::pair<long int, Response>(socket, ret));
-		return 1;
-	}
-    switch (req.getMethod()) {
-        case Get:
-			// TODO: Remove loc as param
-            ret.buildGetResponse(req, loc);
-            _response.insert(std::pair<long int, Response>(socket, ret));
-            break;
-        case Post:
-            ret.buildPostResponse(req, loc);
-            _response.insert(std::pair<long int, Response>(socket, ret));
-            break;
-        case Delete:
-            ret.buildDeleteResponse(req);
-            _response.insert(std::pair<long int, Response>(socket, ret));
-            break;
-        default:
-            std::cout << RED << req.getMethod() << " is not a method that the server threats." << RESET << std::endl;
+    RequestParser   parser;
+    Request         request;
+
+    //TODO : check return of parsing ??
+    parser.parseRequest(_raw_request[socket]);
+    request = parser.getRequest();
+
+    struct sockaddr_in req_addr;
+    socklen_t addr_len = sizeof(req_addr);
+    getsockname(socket, (struct sockaddr *)&req_addr, &addr_len);
+
+    const Server *srv = NULL;
+    if (request.getStatus() == 0)
+        srv = request.FindServer(_servers, req_addr);
+    //TODO : Really need this ? Because if parsing fail, no serv will be found
+    if (!srv)
+    {
+        std::cerr << RED << "No corresponding server was found" << RESET << std::endl;
+        return -1;
     }
-    (void)ret;
-    return (1);
+
+    // TODO TYR: Check if no server corresponds
+    const Location *loc = NULL;
+    if (request.getStatus() == 0)
+        loc = request.FindLocation(*srv);
+    if(!request.isValid(loc))
+        return (-1);
+
+    printLog(request, socket);
+
+    request.updatePathWithLocation(loc);
+    _requests.insert(std::make_pair<long, Request>(socket, request));
+    buildResponse(socket, loc);
+
+    _last_activity[socket] = ::time(NULL);
+
+    return 0;
 }
 
 int Looper::readFromClient(long socket)
@@ -193,7 +232,6 @@ int Looper::readFromClient(long socket)
 /**************************************************************************************/
 void Looper::loop()
 {
-    ft::setupSignals();
     while (RUNNING)
     {
         fd_set		    reading_fd_set;
@@ -236,35 +274,6 @@ void Looper::loop()
     }
 }
 
-void Looper::checkConnectionTimeout()
-{
-	if (_timeout < 0)
-		return ;
-	for (std::map<long int, Server *>::iterator it(_active_servers.begin()); it != _active_servers.end();)
-	{
-		long int socket = it->first;
-		time_t time_now(::time(NULL)), time_last(0);
-		::time(&time_now);
-
-		// TODO TYR: Remove, in order to close if not found
-		time_last = time_now;
-
-		std::map<long int, std::time_t>::iterator time_it = _last_activity.find(socket);
-		if (time_it != _last_activity.end())
-			time_last = time_it->second;
-		if (time_now - time_last > _timeout)
-		{
-			FD_CLR(socket, &_active_fd_set);
-			_last_activity.erase(socket);
-			_active_servers[socket]->close(socket);
-			_active_servers.erase(it++);
-			it = _active_servers.begin();
-		}
-		else
-			it++;
-	}
-}
-
 void Looper::sendResponse(fd_set &reading_fd_set, fd_set &writing_fd_set, fd_set &_active_fd_set)
 {
     for (std::vector<int>::iterator it = _ready_fd.begin(); it != _ready_fd.end() && RUNNING;)
@@ -277,9 +286,9 @@ void Looper::sendResponse(fd_set &reading_fd_set, fd_set &writing_fd_set, fd_set
 			continue;
 		}
 
-		long ret_val = _active_servers[fd]->send(_response[fd]);
+		long ret_val = _active_servers[fd]->send(_responses[fd]);
 
-		if (_request[fd].getHeaders()["Connection"] == "close")
+		if (_requests[fd].getHeaders()["Connection"] == "close")
 		{
 			FD_CLR(fd, &_active_fd_set);
 			FD_CLR(fd, &reading_fd_set);
@@ -288,60 +297,19 @@ void Looper::sendResponse(fd_set &reading_fd_set, fd_set &writing_fd_set, fd_set
 		}
 		if (ret_val >= 0) // Comm OK, delete ressources
 		{
-			_response.erase(fd);
-			_request.erase(fd);
+			_responses.erase(fd);
+			_requests.erase(fd);
 		}
 		else
 		{
-			_response.erase(fd);
-			_request.erase(fd);
+			_responses.erase(fd);
+			_requests.erase(fd);
 			FD_CLR(fd, &_active_fd_set);
 			FD_CLR(fd, &reading_fd_set);
 			_active_servers.erase(fd);
 		}
 		it = _ready_fd.erase(it); // erase the fd from vector when comm is over
     }
-}
-
-int Looper::startParsingRequest(int socket)
-{
-    RequestParser   parser;
-    Request         request;
-
-    //TODO : check return of parsing ??
-    parser.parseRequest(_raw_request[socket]);
-    request = parser.getRequest();
-
-    struct sockaddr_in req_addr;
-    socklen_t addr_len = sizeof(req_addr);
-    getsockname(socket, (struct sockaddr *)&req_addr, &addr_len);
-
-    const Server *srv = NULL;
-    if (request.getStatus() == 0)
-        srv = request.FindServer(_servers, req_addr);
-    //TODO : Really need this ? Because if parsing fail, no serv will be found
-    if (!srv)
-    {
-        std::cerr << RED << "No corresponding server was found" << RESET << std::endl;
-        return -1;
-    }
-
-    // TODO TYR: Check if no server corresponds
-    const Location *loc = NULL;
-    if (request.getStatus() == 0)
-        loc = request.FindLocation(*srv);
-    if(!request.isValid(loc))
-        return (-1);
-
-    printLog(request, socket);
-
-    request.updatePathWithLocation(loc);
-    _request.insert(std::make_pair<long, Request>(socket, request));
-    buildResponse(socket, loc);
-
-    _last_activity[socket] = ::time(NULL);
-
-    return 0;
 }
 
 void Looper::requestProcess(fd_set &reading_fd_set)
@@ -415,8 +383,8 @@ void Looper::selectErrorHandle()
     std::cout << "Select had an issue !" << std::endl;
     for (std::map<long, Server *>::iterator it = _active_servers.begin(); it != _active_servers.end(); it++) {
         it->second->close(it->first);
-        _response.erase(it->first);
-        _request.erase(it->first);
+        _responses.erase(it->first);
+        _requests.erase(it->first);
     }
     _active_servers.clear();
     _ready_fd.clear();
@@ -424,4 +392,40 @@ void Looper::selectErrorHandle()
     FD_ZERO(&_active_fd_set);
     for (std::vector<Server>::iterator it = _servers.begin(); it != _servers.end(); it++)
         FD_SET((*it).getFd(), &_active_fd_set);
+}
+
+/**************************************************************************************/
+/*                                  RESPONSE CRAFTING                                 */
+/**************************************************************************************/
+
+int Looper::buildResponse(long socket, const Location *loc)
+{
+    Request &req = _requests[socket];
+    Response ret(socket, loc, _active_servers[socket]);
+    const Redirection *redir = loc->findRedirection(req.getPath());
+    if (redir)
+    {
+        ret.buildRedirectionResponse(*redir);
+        _responses.insert(std::pair<long int, Response>(socket, ret));
+        return 1;
+    }
+    switch (req.getMethod()) {
+        case Get:
+            // TODO: Remove loc as param
+            ret.buildGetResponse(req, loc);
+            _responses.insert(std::pair<long int, Response>(socket, ret));
+            break;
+        case Post:
+            ret.buildPostResponse(req, loc);
+            _responses.insert(std::pair<long int, Response>(socket, ret));
+            break;
+        case Delete:
+            ret.buildDeleteResponse(req);
+            _responses.insert(std::pair<long int, Response>(socket, ret));
+            break;
+        default:
+            std::cout << RED << req.getMethod() << " is not a method that the server threats." << RESET << std::endl;
+    }
+    (void)ret;
+    return (1);
 }
