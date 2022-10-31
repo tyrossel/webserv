@@ -6,7 +6,7 @@
 /*   By: trossel <trossel@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/21 11:11:21 by trossel           #+#    #+#             */
-/*   Updated: 2022/10/30 17:26:12 by trossel          ###   ########.fr       */
+/*   Updated: 2022/10/31 08:29:14 by trossel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,10 +80,10 @@ std::ostream &operator<<(std::ostream &os, const Location &loc)
 	else
 	{
 		os << "STANDART";
-		os << YELLOW << "\n\troot_dir:" << RESET << loc.root_dir;
+		os << YELLOW << "\n\troot_dir: " << RESET << loc.root_dir;
 	}
 
-	os << YELLOW << "\n\tmax_client_body_size : " << RESET << loc.max_client_body_size;
+	os << YELLOW << "\n\tmax_client_body_size: " << RESET << loc.max_client_body_size;
 
 	if (!loc.indexes.empty())
 	{

@@ -17,32 +17,22 @@ Response::~Response() {}
 /**************************************************************************************/
 void Response::printLog(bool print_cgi)
 {
-    if (print_cgi)
-    {
-        if (VERBOSE) {
-            std::cout << "==================== CGI ====================" << std::endl;
-            if (secFetchImage())
-                std::cout << GREEN << _response << RESET << std::endl;
-            else
-                std::cout << GREEN << "We sent an image" << RESET << std::endl;
-        }
-        else {
-            std::cout << BLUE << "Response code [" << getStatus() << "]" << std::endl;
-        }
-    }
-    else
-    {
-        if (VERBOSE) {
-            std::cout << "================== RESPONSE ==================" << std::endl;
-            if (secFetchImage())
-                std::cout << GREEN << _response << RESET << std::endl << std::endl;
-            else
-                std::cout << GREEN << "We sent an image" << RESET << std::endl;
-        }
-        else {
-            std::cout << BLUE << "Response code [" << getStatus() << "]" << std::endl;
-        }
-    }
+	if (VERBOSE)
+	{
+		if (print_cgi)
+			std::cout << "==================== CGI ====================" << std::endl;
+		else
+			std::cout << "================== RESPONSE ==================" << std::endl;
+		std::cout << ft::timestamp(TIMESTAMP_FORMAT) << std::endl;
+		if (secFetchImage())
+			std::cout << GREEN << _response << RESET << std::endl;
+		else
+			std::cout << GREEN << "We sent an image" << RESET << std::endl;
+	}
+	else {
+		std::cout << GREEN << ft::timestamp(TIMESTAMP_FORMAT) << "Response code [" << getStatus() << "]" << std::endl;
+		std::cout << GREEN << _response << RESET << std::endl;
+	}
 }
 
 void Response::addContentLengthPOST(CGI &cgi)
@@ -89,17 +79,12 @@ void Response::addBodyToResponse() // TODO: add file to read from (std::string p
     _response.append(text);
 }
 
+// Format according to RFC 7231
+// Example: Tue, 15 Nov 1994 08:12:31 GMT
 void Response::addDate()
 {
-    // current date/time based on current system
-    time_t now = time(0);
-    // convert now to string form
-    char* dt = ctime(&now);
-    // convert now to tm struct for UTC
-    tm *gmtm = gmtime(&now);
-    dt = asctime(gmtm);
-    _response.append("Date: ");
-    _response.append(dt);
+	std::string timestamp = ft::timestamp("%a, %d %b %Y %T GMT");
+    _response.append("Date: " + timestamp + "\r\n");
 }
 
 void Response::addServerHeaderResponse()
@@ -262,7 +247,8 @@ void	Response::buildRedirectionResponse(const Redirection &redir)
 	}
 	if (VERBOSE) {
 		std::cout << "================== RESPONSE ==================" << std::endl;
-			std::cout << GREEN << _response << RESET << std::endl;
+		std::cout << YELLOW << ft::timestamp(TIMESTAMP_FORMAT) << RESET << std::endl;
+		std::cout << GREEN << _response << RESET << std::endl;
 		std::cout << "==============================================" << std::endl << std::endl;
 	}
 

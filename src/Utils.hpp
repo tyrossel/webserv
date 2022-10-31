@@ -37,6 +37,8 @@ namespace ft {
     std::string craftErrorHTML(int error);
     bool        isOkHTTP(int status);
     bool        isFile(const std::string &path);
+
+	std::string timestamp(const std::string &format);
 }
 
 #endif //WEBSERV_UTILS_HPP

@@ -105,7 +105,7 @@ bool Config::isValid() const {
 
 std::ostream &operator<<(std::ostream &out, const Config &rhs) {
     if (VERBOSE) {
-        out << "[Configuration]" << std::endl;
+        out << ft::timestamp(TIMESTAMP_FORMAT) << "[Configuration]" << std::endl;
 		std::cout << CYAN "Keepalive-timeout:" RESET << rhs.getTimeout() << std::endl;
         for (int i = 0; i < rhs.getNbServer(); i++) {
             out << CYAN << "Server number : " << RESET << i
@@ -126,7 +126,7 @@ std::ostream &operator<<(std::ostream &out, const Config &rhs) {
     else
     {
         for (int i = 0; i < rhs.getNbServer(); i++) {
-            out << YELLOW << "Listening on [" << rhs.getServer()[i].getAddress() << ":" << rhs.getServer()[i].getPort() << "]\n" << RESET;
+            out << YELLOW << ft::timestamp(TIMESTAMP_FORMAT) << "Listening on [" << rhs.getServer()[i].getAddress() << ":" << rhs.getServer()[i].getPort() << "]\n" << RESET;
         }
     }
 

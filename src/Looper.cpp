@@ -57,13 +57,16 @@ void Looper::printLog(const Request &request, int socket)
 
     if (VERBOSE) {
         std::cout << "================== REQUEST ==================" << std::endl;
+		std::cout << ft::timestamp(TIMESTAMP_FORMAT) << std::endl;
         std::cout << BLUE << request << RESET;
     }
     else {
-        std::cout << GREEN << "===================================================\n"
+        std::cout << YELLOW << "===================================================\n"
+                  << ft::timestamp(TIMESTAMP_FORMAT)
                   << "Connection receive from client on ["
                   <<  addr_str << ":" << ntohs(req_addr.sin_port) << "]\n"
-                  << BLUE << "Request [" << ft::RequestToString(request.getMethod())
+                  << BLUE << ft::timestamp(TIMESTAMP_FORMAT)
+                  << "Request [" << ft::RequestToString(request.getMethod())
                   << " " << request.getPath() << " HTTP " << request.getVersion() << "]"
                   << RESET << std::endl;
     }

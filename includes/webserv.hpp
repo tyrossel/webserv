@@ -123,6 +123,7 @@ enum RequestType
 extern int RUNNING;
 
 #define VERBOSE 1
+#define TIMESTAMP_FORMAT "[%T] "
 
 #include "../src/Utils.hpp"
 

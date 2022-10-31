@@ -73,7 +73,6 @@ int     Server::send(const Response &resp)
     while (bytes_sent_total < (int)resp.respSize())
     {
         bytes_sent_now = ::send(resp.getSocket(), resp.getResponse().c_str() + bytes_sent_total, resp.respSize() - bytes_sent_total, 0);
-        //std::cout << YELLOW << "SENDING " << bytes_sent_now << " BYTES TO SOCKET " << socket << RESET << std::endl;
         if (bytes_sent_now == -1)
         {
             std::cout << "Error on sockets 🔥. Send failed" << std::endl;
@@ -122,7 +121,7 @@ void Server::close(int socket)
     if (socket <= 0)
 		return;
 	::close(socket);
-    std::cout << "Client closed connection on socket " << socket << std::endl;
+    std::cout << ft::timestamp(TIMESTAMP_FORMAT) << "Close connection on socket " << socket << std::endl;
 }
 
 int Server::buildServer() { return (this->setupListen()); }

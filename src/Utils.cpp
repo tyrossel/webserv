@@ -1,6 +1,7 @@
 # include "Utils.hpp"
 #include "webserv.hpp"
 #include "sys/stat.h"
+#include <ctime>
 #include <stdexcept>
 
 int RUNNING;
@@ -374,4 +375,18 @@ namespace ft {
             return false;
         return S_ISREG(statbuf.st_mode);
     }
+
+	std::string timestamp(const std::string &format)
+	{
+		const int max_size = 100;
+		char tmp[max_size];
+		std::string timestamp;
+		time_t now = ::time(NULL);
+		struct tm *gmtm = localtime(&now);
+
+		std::strftime(tmp, max_size, format.c_str(), gmtm);
+		timestamp = tmp;
+
+		return timestamp;
+	}
 }
