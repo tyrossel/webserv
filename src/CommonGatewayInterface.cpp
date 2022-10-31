@@ -136,7 +136,7 @@ int CGI::executeCgi(const Request *request, const Server *server, const Location
                 if (WEXITSTATUS(status) == 42)
                     return returnFail(INTERNAL_SERVER_ERROR, "Child exit with code 42", true, pip_to_cgi[1], pip_from_cgi[0]);
                 else
-                    return returnFail(BAD_GATEWAY, "Child exit with code 1", true, pip_to_cgi[1], pip_from_cgi[0]);
+                    return returnFail(BAD_GATEWAY, "Child exit with code " + ft::to_string(WEXITSTATUS(status)), true, pip_to_cgi[1], pip_from_cgi[0]);
             }
             _ret_body = readContent(pip_from_cgi[0]);
             close(pip_from_cgi[0]);
