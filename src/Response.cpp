@@ -30,8 +30,7 @@ void Response::printLog(bool print_cgi)
 			std::cout << GREEN << "We sent an image" << RESET << std::endl;
 	}
 	else {
-		std::cout << GREEN << ft::timestamp(TIMESTAMP_FORMAT) << "Response code [" << getStatus() << "]" << std::endl;
-		std::cout << GREEN << _response << RESET << std::endl;
+		std::cout << GREEN << ft::timestamp(TIMESTAMP_FORMAT) << "Response code [" << getStatus() << "]" << RESET << std::endl;
 	}
 }
 
@@ -251,8 +250,6 @@ void	Response::buildRedirectionResponse(const Redirection &redir)
 		std::cout << GREEN << _response << RESET << std::endl;
 		std::cout << "==============================================" << std::endl << std::endl;
 	}
-
-
 }
 
 void Response::buildGetResponse(Request req, const Location *loc)

@@ -177,8 +177,9 @@ std::ostream &operator<<(std::ostream &out, const Request &rhs)
     out << ft::RequestToString(rhs.getMethod()) << ' ' << rhs.getPath() << ' ' << rhs.getVersion() << "\r\n";
 
     std::map<std::string, std::string> headers = rhs.getHeaders();
-    for (std::map<std::string, std::string>::iterator it = headers.begin(); it != headers.end(); it++)
+    for (std::map<std::string, std::string>::iterator it = headers.begin(); it != headers.end(); it++) {
         out << it->first << ": " << it->second << "\r\n";
+    }
 
 	if (headers.find("Sec-Fetch-Dest") != headers.end()
 		&& (headers.at("Sec-Fetch-Dest") == "image" || headers.at("Sec-Fetch-Dest") == "document"))

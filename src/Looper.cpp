@@ -61,7 +61,7 @@ void Looper::printLog(const Request &request, int socket)
         std::cout << BLUE << request << RESET;
     }
     else {
-        std::cout << YELLOW << "===================================================\n"
+        std::cout << YELLOW << "=============================================================\n"
                   << ft::timestamp(TIMESTAMP_FORMAT)
                   << "Connection receive from client on ["
                   <<  addr_str << ":" << ntohs(req_addr.sin_port) << "]\n"
@@ -153,7 +153,6 @@ int Looper::readFromClient(long socket)
     ret = recv(socket, buffer, BUFFER_SIZE-1, 0);
     if (ret <= 0)
     {
-        std::cout << strerror(errno) << std::endl;
         if (ret == -1)
             std::cout << RED << "An error occured when reading the request" << RESET << std::endl;
         return -1;
