@@ -186,7 +186,7 @@ bool    Response::secFetchImage()
     std::map<std::string, std::string> tmp = _request.getHeaders();
     if (tmp.find("Sec-Fetch-Dest") != tmp.end())
     {
-        if (tmp.find("Sec-Fetch-Dest")->second == "image")
+        if (tmp.at("Sec-Fetch-Dest") == "image")
             return (false);
     }
     return (true);

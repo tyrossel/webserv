@@ -180,7 +180,12 @@ std::ostream &operator<<(std::ostream &out, const Request &rhs)
     for (std::map<std::string, std::string>::iterator it = headers.begin(); it != headers.end(); it++)
         out << it->first << ": " << it->second << "\r\n";
 
-    if (!(rhs.getBody().empty()))
+	if (headers.find("Sec-Fetch-Dest") != headers.end()
+		&& (headers.at("Sec-Fetch-Dest") == "image" || headers.at("Sec-Fetch-Dest") == "document"))
+	{
+		out << "\r\n<Skipped image/document body of length " << rhs.getBody().size() << ">" << std::endl;
+	}
+	else if (!(rhs.getBody().empty()))
         out << "\r\n" << rhs.getBody() << std::endl;
 
     return out;
