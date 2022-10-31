@@ -1,4 +1,5 @@
 #include "Looper.hpp"
+#include "webserv.hpp"
 
 /**************************************************************************************/
 /*                          CONSTRUCTORS / DESTRUCTORS                                */
@@ -204,8 +205,13 @@ int Looper::readFromClient(long socket)
     }
     _raw_request[socket].append(buffer, ret);
 
-    size_t headers_end = 0;
-    if ((headers_end = _raw_request[socket].find("\r\n\r\n")) != std::string::npos)
+    size_t headers_end = _raw_request[socket].find("\r\n\r\n");
+	if ((headers_end == std::string::npos && _raw_request.size() > HEADERS_MAX_LENGTH)
+			|| headers_end > HEADERS_MAX_LENGTH)
+	{
+		return HEADERS_TOO_LARGE;
+	}
+	else if (headers_end != std::string::npos)
     {
         if (_raw_request[socket].find("Content-Length: ") == std::string::npos)
         {
@@ -229,7 +235,7 @@ int Looper::readFromClient(long socket)
         else
             return 1;
     }
-
+	// TODO : What happens when returning 1 ?!?
     return 1;
 }
 
@@ -332,22 +338,29 @@ void Looper::requestProcess(fd_set &reading_fd_set)
 
 		long ret_val = readFromClient(socket);
 
-		if (ret_val == 0)
-		{
-			// we store the socket fd into our ready_fd vector since we want to keep the channel open
-            startParsingRequest(socket);
-            _raw_request.erase(socket);
-			_ready_fd.push_back(socket);
-			++it;
-		}
-		else if (ret_val == -1)
-		{
-			// in case of error, we clear as done previously
-			FD_CLR(socket, &_active_fd_set);
-			FD_CLR(socket, &reading_fd_set);
-			_active_servers[socket]->close(socket);
-			_last_activity.erase(socket);
-			_active_servers.erase(it++);
+		switch(ret_val) {
+			case 0: // Request fully received
+				startParsingRequest(socket);
+				_raw_request.erase(socket);
+				// we store the socket fd into our ready_fd vector since we want to keep the channel open
+				_ready_fd.push_back(socket);
+				++it;
+				break;
+			case 1: // Must read again to get the full request
+				break;
+			case -1: // Communication error
+				FD_CLR(socket, &_active_fd_set);
+				FD_CLR(socket, &reading_fd_set);
+				_active_servers[socket]->close(socket);
+				_last_activity.erase(socket);
+				_active_servers.erase(it++);
+				break;
+			default: // Request not conform: Respond an error
+				_responses[socket].buildErrorResponse(ret_val);
+				_raw_request.erase(socket);
+				_ready_fd.push_back(socket);
+				_last_activity[socket] = ::time(NULL);
+				break;
 		}
         break;
     }
@@ -430,8 +443,8 @@ int Looper::buildResponse(long socket, const Location *loc)
             _responses.insert(std::pair<long int, Response>(socket, ret));
             break;
         default:
-            std::cout << RED << req.getMethod() << " is not a method that the server threats." << RESET << std::endl; // TODO : Code NOT_IMPLEMENTED
+			ret.buildErrorResponse(NOT_IMPLEMENTED);
+			break;
     }
-    (void)ret;
     return (1);
 }

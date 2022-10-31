@@ -7,7 +7,7 @@
 /**************************************************************************************/
 /*                                  CONSTRUCTOR / DESTRUCTOR                          */
 /**************************************************************************************/
-Response::Response() {}
+Response::Response() : _loc(NULL) {}
 
 Response::Response(const long int socket, const Location *loc, Server *server, const int status): _loc(loc), _server(server), _socket(socket)
 {
@@ -114,9 +114,9 @@ void Response::addContentType()
     _response.append("\r\n");
 }
 
-void Response::addHTTPHeader()
+void Response::addHTTPHeader(bool check_path)
 {
-    if (_status == HTTP_OK) {
+    if (check_path && _status == HTTP_OK) {
         checkPath(); // functions will return the code catched
     }
     writeResponseHeader();
@@ -327,6 +327,14 @@ void Response::buildDeleteResponse(Request req)
     else
         addErrorBodyToResponse();
     printLog(false);
+}
+
+void	Response::buildErrorResponse(int errorCode)
+{
+	_loc = NULL;
+	setStatus(errorCode);
+	addHTTPHeader(false);
+	addErrorBodyToResponse();
 }
 
 /**************************************************************************************/

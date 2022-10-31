@@ -93,7 +93,10 @@ const Server * Request::FindServer(const std::vector<Server> &servers, struct so
 bool Request::isValid(const Location *loc)
 {
     if (!loc)
+	{
+		setStatus(INTERNAL_SERVER_ERROR);
         return false;
+	}
 
     if (!loc->requests_allowed[_method])
     {

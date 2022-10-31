@@ -69,6 +69,7 @@ int Server::send(const Response &resp)
     int bytes_sent_total = 0;
     int bytes_sent_now = 0;
 
+	std::cout << MAGENTA "Response = " << resp.getResponse() << RESET << std::endl;
     while (bytes_sent_total < (int)resp.respSize())
     {
         bytes_sent_now = ::send(resp.getSocket(), resp.getResponse().c_str() + bytes_sent_total, resp.respSize() - bytes_sent_total, 0);

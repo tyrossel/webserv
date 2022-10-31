@@ -38,7 +38,7 @@ class Response {
         void        addDate();
         void        addServerHeaderResponse();
         void        addContentType();
-        void        addHTTPHeader();
+        void        addHTTPHeader(bool checkPath = true);
         void        writeResponseHeader();
         void        addErrorBodyToResponse();
         void        setStatus(int new_status);
@@ -49,6 +49,7 @@ class Response {
         void        buildGetResponse(Request req, const Location *loc);
         void        buildPostResponse(Request req, const Location *loc);
         void        buildDeleteResponse(Request req);
+		void		buildErrorResponse(int errorCode);
         // =================================================================
 
         // GETTERS =========================================================
