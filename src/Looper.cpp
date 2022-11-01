@@ -337,7 +337,7 @@ void Looper::requestProcess(fd_set &reading_fd_set)
 
 		long ret_val = readFromClient(socket);
 
-		switch(ret_val) {
+        switch(ret_val) {
 			case 0: // Request fully received
             {
                 int status = startParsingRequest(socket);
