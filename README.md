@@ -14,6 +14,8 @@
 - [5. HTTP Methods](#http-methods)
 - [6. CGI](#cgi)
 
+Made by [Bima](https://github.com/Bima42), [YvanoffP](https://github.com/YvanoffP) and [Tyrossel](https://github.com/tyrossel)
+
 # Get Started
 ```
 make
@@ -26,7 +28,7 @@ make
 # Parsing
 ## Parse Configuration File
 
-![[readme_docs/parsing_json_file.png]]
+![parsing_json_file](readme_docs/parsing_json_file.png)
 
 - Configuration file must be JSON file
 - See how to parse JSON [here](https://www.json.org/json-en.html)
@@ -72,20 +74,20 @@ make
 
 - Client request is store in Request object
 
-![[readme_docs/parse_http_request.png]]
+![parse_http_request](readme_docs/parse_http_request.png)
 
 - Payload body accepted in our server :
   - classic payload
   - chunked without trailer
   - chunked with payload
 
-![[readme_docs/body_request.png]]
+![body_request](readme_docs/body_request.png)
 
 # Execution
 
 ## Select()
 
-![[readme_docs/select_prototype.png]]
+![select_prototype](readme_docs/select_prototype.png)
 
 - allow your program to monitor multiple file descriptor (max 1024)
 - will be waiting for _timeout_ and return a value :
@@ -96,18 +98,18 @@ make
 ## Main Loop
 - Here is the main
 
-![[readme_docs/principale_loop_resume.png]]
+![principale_loop_resume](readme_docs/principale_loop_resume.png)
 
 - When select() returns a value > 0, 3 others loop are called
 
-![[readme_docs/process_resume.png]]
+![process_resume](readme_docs/process_resume.png)
 
 ## Looper Object
 
 - Looper is the main object
 - He stores all objects required to get the client request, parse it and build a response to him
 
-![[readme_docs/looper_object.png]]
+![looper_object](readme_docs/looper_object.png)
 
 
 # Response
@@ -131,12 +133,8 @@ make
 - Server will transmit the request to the script, and sent back the CGI response
 - Communication between server and CGI will be made using pipe
 
-![[readme_docs/pipe_for_cgi.png]]
+![pipe_for_cgi](readme_docs/pipe_for_cgi.png)
 
 - Here is a simple resume of CGI process
 
-![[readme_docs/cgi_execution.png]]
-
-# Authors
-
-made by [Bima](https://github.com/Bima42), [YvanoffP](https://github.com/YvanoffP) and [Tyrossel](https://github.com/tyrossel)
+![cgi_execution](readme_docs/cgi_execution.png)
