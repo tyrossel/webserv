@@ -166,14 +166,20 @@ int Looper::startParsingRequest(int socket)
     const Location *loc = NULL;
     if (request.getStatus() == 0)
         loc = request.FindLocation(*srv);
-    if(!request.isValid(loc))
-        return (-1);
 
     printLog(request, socket);
 
-    request.updatePathWithLocation(loc);
-    _requests.insert(std::make_pair<long, Request>(socket, request));
-    buildResponse(socket, loc);
+    if (!request.isValid(loc))
+    {
+        _requests.insert(std::make_pair<long, Request>(socket, request));
+        buildResponse(socket, loc);
+    }
+    else
+    {
+        request.updatePathWithLocation(loc);
+        _requests.insert(std::make_pair<long, Request>(socket, request));
+        buildResponse(socket, loc);
+    }
 
     _last_activity[socket] = ::time(NULL);
 
@@ -401,7 +407,7 @@ void Looper::selectErrorHandle()
 int Looper::buildResponse(long socket, const Location *loc)
 {
     Request &req = _requests[socket];
-    Response ret(socket, loc, _active_servers[socket]);
+    Response ret(socket, loc, _active_servers[socket], req.getStatus());
     const Redirection *redir = loc->findRedirection(req.getPath());
     if (redir)
     {
@@ -424,7 +430,7 @@ int Looper::buildResponse(long socket, const Location *loc)
             _responses.insert(std::pair<long int, Response>(socket, ret));
             break;
         default:
-            std::cout << RED << req.getMethod() << " is not a method that the server threats." << RESET << std::endl;
+            std::cout << RED << req.getMethod() << " is not a method that the server threats." << RESET << std::endl; // TODO : Code NOT_IMPLEMENTED
     }
     (void)ret;
     return (1);

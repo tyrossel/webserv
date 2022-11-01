@@ -9,7 +9,13 @@
 /**************************************************************************************/
 Response::Response() {}
 
-Response::Response(const long int socket, const Location *loc, Server *server): _loc(loc), _server(server), _socket(socket) {}
+Response::Response(const long int socket, const Location *loc, Server *server, const int status): _loc(loc), _server(server), _socket(socket)
+{
+    if (status == 0)
+        _status = HTTP_OK;
+    else
+        _status = status;
+}
 
 Response::~Response() {}
 
@@ -32,7 +38,10 @@ void Response::printLog(bool print_cgi)
 			std::cout << GREEN << "We sent an image" << RESET << std::endl;
 	}
 	else {
-		std::cout << GREEN << ft::timestamp(TIMESTAMP_FORMAT) << "Response code [" << getStatus() << "]" << RESET << std::endl;
+        if (getStatus() >= BAD_REQUEST)
+            std::cout << RED << ft::timestamp(TIMESTAMP_FORMAT) << "Response code [" << getStatus() << "]" << RESET << std::endl;
+        else
+            std::cout << GREEN << ft::timestamp(TIMESTAMP_FORMAT) << "Response code [" << getStatus() << "]" << RESET << std::endl;
 	}
 }
 
@@ -107,7 +116,6 @@ void Response::addContentType()
 
 void Response::addHTTPHeader()
 {
-    checkCode(); // checking if an error code has been parsed in request
     if (_status == HTTP_OK) {
         checkPath(); // functions will return the code catched
     }
@@ -164,13 +172,6 @@ void Response::setStatus(int new_status) { _status = new_status; }
 /**************************************************************************************/
 /*                                  CHECKERS                                          */
 /**************************************************************************************/
-void Response::checkCode()
-{
-    if (_request.getStatus() == 0)
-        setStatus(HTTP_OK);
-    else
-        setStatus(_request.getStatus());
-}
 
 void Response::checkPath()
 {
@@ -258,7 +259,6 @@ void Response::buildRedirectionResponse(const Redirection &redir)
 void Response::buildGetResponse(Request req, const Location *loc)
 {
     this->_request = req;
-
     if (useCGI()) // CGI or not ?
     {
         if (ft::isFile(_request.getLocation())) {
@@ -275,7 +275,10 @@ void Response::buildGetResponse(Request req, const Location *loc)
                 addErrorBodyToResponse();
         }
         else
+        {
+            addHTTPHeader();
             addErrorBodyToResponse();
+        }
         printLog(true);
     }
     else

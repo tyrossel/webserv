@@ -90,20 +90,20 @@ const Server * Request::FindServer(const std::vector<Server> &servers, struct so
     return NULL;
 }
 
-bool Request::isValid(const Location *loc) const
+bool Request::isValid(const Location *loc)
 {
     if (!loc)
         return false;
 
     if (!loc->isRequestAllowed(_method))
     {
-        std::cerr << RED << "Method " << ft::RequestToString(_method) << " not allowed in location " << loc->path << RESET << std::endl;
+        setStatus(METHOD_NOT_ALLOWED);
         return false;
     }
 
     if (loc->max_client_body_size != 0 && _body_length > loc->max_client_body_size)
     {
-        std::cerr << RED << "Client body size too big for location " << loc->path << RESET << std::endl;
+        setStatus(BAD_REQUEST);
         return false;
     }
 

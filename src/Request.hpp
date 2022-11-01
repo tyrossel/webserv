@@ -31,7 +31,7 @@ class Request {
         bool                                matchLocation(const std::string &path, const std::string &loc_path) const;
         const Location *                    FindLocation(const Server &server) const;
         const Server *						FindServer(const std::vector<Server> &servers, struct sockaddr_in req_addr) const;
-        bool								isValid(const Location *loc) const;
+        bool								isValid(const Location *loc);
         void								updatePathWithLocation(const Location *loc);
 
         /* GETTERS */

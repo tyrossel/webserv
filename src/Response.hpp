@@ -21,12 +21,11 @@ class Response {
     public:
         // CONSTRUCTORS ====================================================
         Response();
-        Response(const long int socket, const Location *loc, Server *server);
+        Response(const long int socket, const Location *loc, Server *server, int status);
         ~Response();
         // =================================================================
 
         // CHECKERS ========================================================
-        void     checkCode();
         void     checkPath();
         bool     secFetchImage();
 		bool	 useCGI();
