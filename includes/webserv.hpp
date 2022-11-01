@@ -71,7 +71,7 @@
 ***********************************************************************************/
 # define BUFFER_SIZE 4096
 # define URI_MAX_SIZE 10000
-# define HEADERS_MAX_LENGTH 40
+# define HEADERS_MAX_LENGTH 1000
 
 enum RequestType
 {
@@ -127,7 +127,7 @@ enum RequestType
  ***********************************************************************************/
 extern int RUNNING;
 
-#define VERBOSE 1
+#define VERBOSE 0
 #define TIMESTAMP_FORMAT "[%T] "
 
 #include "../src/Utils.hpp"

@@ -362,16 +362,9 @@ int RequestParser::parseTrailer(size_t &index)
 
 int RequestParser::parseRequest(std::string &request)
 {
-//    if (!request)
-//    {
-//        std::cerr << "Wrong buffer sent by recv" << std::endl;
-//        return (-1);
-//    }
-
     size_t      index = 0;
     std::string line;
 
-//    std::string req_str(request);
     _string_request = request;
 
     line = getNextLine(_string_request, index);

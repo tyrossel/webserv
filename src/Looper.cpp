@@ -146,7 +146,9 @@ int Looper::startParsingRequest(int socket)
     Request         request;
 
     //TODO : check return of parsing ??
-    parser.parseRequest(_raw_request[socket]);
+    if (parser.parseRequest(_raw_request[socket]) == -1)
+        return parser.getRequest().getStatus();
+
     request = parser.getRequest();
 
     struct sockaddr_in req_addr;
@@ -156,12 +158,6 @@ int Looper::startParsingRequest(int socket)
     const Server *srv = NULL;
     if (request.getStatus() == 0)
         srv = request.FindServer(_servers, req_addr);
-    //TODO : Really need this ? Because if parsing fail, no serv will be found
-    if (!srv)
-    {
-        std::cerr << RED << "No corresponding server was found" << RESET << std::endl;
-        return -1;
-    }
 
     // TODO TYR: Check if no server corresponds
     const Location *loc = NULL;
@@ -340,12 +336,16 @@ void Looper::requestProcess(fd_set &reading_fd_set)
 
 		switch(ret_val) {
 			case 0: // Request fully received
-				startParsingRequest(socket);
-				_raw_request.erase(socket);
-				// we store the socket fd into our ready_fd vector since we want to keep the channel open
-				_ready_fd.push_back(socket);
-				++it;
-				break;
+            {
+                int status = startParsingRequest(socket);
+                if (status > 0)
+                    buildErrorResponse(socket, status);
+                _raw_request.erase(socket);
+                // we store the socket fd into our ready_fd vector since we want to keep the channel open
+                _ready_fd.push_back(socket);
+                ++it;
+                break;
+            }
 			case 1: // Must read again to get the full request
 				break;
 			case -1: // Communication error
