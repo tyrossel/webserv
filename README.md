@@ -28,7 +28,9 @@ make
 # Parsing
 ## Parse Configuration File
 
-![parsing_json_file](readme_docs/parsing_json_file.png)
+<p align="center">
+  <img src="readme_docs/parsing_json_file.png">
+</p>
 
 - Configuration file must be JSON file
 - See how to parse JSON [here](https://www.json.org/json-en.html)
@@ -74,20 +76,26 @@ make
 
 - Client request is store in Request object
 
-![parse_http_request](readme_docs/parse_http_request.png)
+<p align="center">
+  <img src="readme_docs/parse_http_request.png">
+</p>
 
 - Payload body accepted in our server :
   - classic payload
   - chunked without trailer
   - chunked with payload
 
-![body_request](readme_docs/body_request.png)
+<p align="center">
+  <img src="readme_docs/body_request.png">
+</p>
 
 # Execution
 
 ## Select()
 
-![select_prototype](readme_docs/select_prototype.png)
+<p align="center">
+  <img src="readme_docs/select_prototype.png">
+</p>
 
 - allow your program to monitor multiple file descriptor (max 1024)
 - will be waiting for _timeout_ and return a value :
@@ -98,18 +106,24 @@ make
 ## Main Loop
 - Here is the main
 
-![principale_loop_resume](readme_docs/principale_loop_resume.png)
+<p align="center">
+  <img src="readme_docs/principale_loop_resume.png">
+</p>
 
 - When select() returns a value > 0, 3 others loop are called
 
-![process_resume](readme_docs/process_resume.png)
+<p align="center">
+  <img src="readme_docs/process_resume.png">
+</p>
 
 ## Looper Object
 
 - Looper is the main object
 - He stores all objects required to get the client request, parse it and build a response to him
 
-![looper_object](readme_docs/looper_object.png)
+<p align="center">
+  <img src="readme_docs/looper_object.png">
+</p>
 
 
 # Response
@@ -133,8 +147,12 @@ make
 - Server will transmit the request to the script, and sent back the CGI response
 - Communication between server and CGI will be made using pipe
 
-![pipe_for_cgi](readme_docs/pipe_for_cgi.png)
+<p align="center">
+  <img src="readme_docs/pipe_for_cgi.png">
+</p>
 
 - Here is a simple resume of CGI process
 
-![cgi_execution](readme_docs/cgi_execution.png)
+<p align="center">
+  <img src="readme_docs/cgi_execution.png">
+</p>
