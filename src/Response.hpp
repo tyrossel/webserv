@@ -13,7 +13,7 @@ class Response {
     private:
         Request                 _request;
         const Location          *_loc;
-        Server                  *_server;
+        const Server            *_server;
         long int                _socket;
         std::string             _response;
         int                     _status;
@@ -48,8 +48,8 @@ class Response {
 
         // BUILDERS ========================================================
 		void		buildRedirectionResponse(const Redirection &redir);
-        void        buildGetResponse(Request req, const Location *loc);
-        void        buildPostResponse(Request req, const Location *loc);
+        void        buildGetResponse(Request req);
+        void        buildPostResponse(Request req);
         void        buildDeleteResponse(Request req);
 		void		buildErrorResponse(int errorCode);
         // =================================================================

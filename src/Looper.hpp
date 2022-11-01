@@ -52,7 +52,7 @@ class Looper {
         // =================================================================
 
         // RESPONSE CRAFTING ===============================================
-        int     buildResponse(long socket, const Location *loc);
+        int     buildResponse(long socket, const Location &loc);
         void    buildErrorResponse(long socket, int status);
         // =================================================================
 };

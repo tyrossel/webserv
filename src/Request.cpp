@@ -43,7 +43,7 @@ bool Request::matchLocation(const std::string &path, const std::string &loc_path
     return !path.compare(0, loc_path.size(), loc_path);
 }
 
-const Location * Request::FindLocation(const Server &server) const
+const Location & Request::FindLocation(const Server &server) const
 {
     const std::map<std::string, Location> & loc_map = server.getLocations();
     std::string best_loc_index = "/";
@@ -54,10 +54,10 @@ const Location * Request::FindLocation(const Server &server) const
                 && it->first.size() > best_loc_index.size())
             best_loc_index = it->first;
     }
-    return &loc_map.at(best_loc_index);
+    return loc_map.at(best_loc_index);
 }
 
-const Server * Request::FindServer(const std::vector<Server> &servers, struct sockaddr_in req_addr) const
+const Server & Request::FindServer(const std::vector<Server> &servers, struct sockaddr_in req_addr) const
 {
     // Splitting of Host header into host and port:
     std::string hostHeader = _headers.at("Host");
@@ -65,46 +65,42 @@ const Server * Request::FindServer(const std::vector<Server> &servers, struct so
     size_t	colon = hostHeader.find_first_of(':');
     std::string requestHost = hostHeader.substr(0, colon);
     int requestPort = ntohs(req_addr.sin_port);
+	const Server *firstServ = NULL;
 
     for(std::vector<Server>::const_iterator it_srv = servers.begin(); it_srv !=
                                                                       servers.end(); it_srv++)
     {
-        // TODO: Check request adress
         if (requestPort != it_srv->getPort())
             continue;
 		if (it_srv->getAddress() != "0.0.0.0" && inet_addr(it_srv->getAddress().c_str()) != req_addr.sin_addr.s_addr)
 			continue;
+		if (!firstServ)
+			firstServ = &(*it_srv);
 
         const std::vector<std::string> &server_names = it_srv->getName();
         if (server_names.empty())
-            return &(*it_srv);
+            return *it_srv;
 
         for (std::vector<std::string>::const_iterator it_names = server_names.begin();
              it_names != server_names.end(); it_names++)
         {
             // TODO: Handle wildcards
             if (*it_names == requestHost)
-                return &(*it_srv);
+                return *it_srv;
         }
     }
-    return NULL;
+    return *firstServ;
 }
 
-bool Request::isValid(const Location *loc)
+bool Request::isValid(const Location &loc)
 {
-    if (!loc)
-	{
-		setStatus(INTERNAL_SERVER_ERROR);
-        return false;
-	}
-
-    if (!loc->requests_allowed[_method])
+    if (!loc.requests_allowed[_method])
     {
         setStatus(METHOD_NOT_ALLOWED);
         return false;
     }
 
-    if (loc->max_client_body_size != 0 && _body_length > loc->max_client_body_size)
+    if (loc.max_client_body_size != 0 && _body_length > loc.max_client_body_size)
     {
         setStatus(PAYLOAD_TOO_LARGE);
         return false;
@@ -113,31 +109,28 @@ bool Request::isValid(const Location *loc)
     return true;
 }
 
-void Request::updatePathWithLocation(const Location *loc)
+void Request::updatePathWithLocation(const Location &loc)
 {
-    if (!loc)
-        return ;
-
     char *tmp = getcwd(NULL, 0);
     if (!tmp)
         return ;
     std::string cwd = tmp;
-    _location = _path.substr(loc->path.length());
+    _location = _path.substr(loc.path.length());
     if (_location[0] != '/')
         _location = '/' + _location;
-    _location = loc->root_dir + _location;
+    _location = loc.root_dir + _location;
     _location = (_location[0] == '/') ? _location : (cwd + '/' + _location);
     free(tmp);
 
-    if (loc->isCGI)
+    if (loc.isCGI)
         return ;
 
     if (!ft::isDirectory(_location))
         return ;
 
 	// Automatic redirect to index
-    std::vector<std::string>::const_iterator it = loc->indexes.begin();
-	for (;it != loc->indexes.end(); it++)
+    std::vector<std::string>::const_iterator it = loc.indexes.begin();
+	for (;it != loc.indexes.end(); it++)
 	{
 		std::string new_location = _location + *it;
 		std::ifstream test_stream(new_location.c_str());

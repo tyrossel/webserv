@@ -81,7 +81,7 @@ std::string CGI::readContent(int fd)
     return ret;
 }
 
-int CGI::executeCgi(const Request *request, const Server *server, const Location *loc)
+int CGI::executeCgi(const Request *request, const Server &server, const Location &loc)
 {
     if (setCGIEnvironment(request, server, loc) == -1)
         return INTERNAL_SERVER_ERROR;
@@ -153,10 +153,10 @@ int CGI::executeCgi(const Request *request, const Server *server, const Location
     return (HTTP_OK);
 }
 
-int CGI::setCGIEnvironment(const Request *request, const Server *server, const Location *loc)
+int CGI::setCGIEnvironment(const Request *request, const Server &server, const Location &loc)
 {
     _file_path = request->getLocation();
-	_cgi_path = loc->cgi_bin;
+	_cgi_path = loc.cgi_bin;
 
     if (_headers.find("Auth-Scheme") != _headers.end())
         _env["AUTH_TYPE"] = _headers["Authorization"];
@@ -172,9 +172,9 @@ int CGI::setCGIEnvironment(const Request *request, const Server *server, const L
     _env["QUERY_STRING"] = request->getQuery();
     _env["REMOTE_HOST"] = "";
     _env["REQUEST_METHOD"] = ft::RequestToString(request->getMethod());
-    _env["SCRIPT_NAME"] = loc->cgi_bin;
-    _env["SERVER_NAME"] = server->getAddress();
-    _env["SERVER_PORT"] = ft::to_string(server->getPort());
+    _env["SCRIPT_NAME"] = loc.cgi_bin;
+    _env["SERVER_NAME"] = server.getAddress();
+    _env["SERVER_PORT"] = ft::to_string(server.getPort());
     _env["SERVER_PROTOCOL"] = "HTTP/" + request->getVersion();
     _env["SERVER_SOFTWARE"] = "WetServ/1.0";
     _env["REDIRECT_STATUS"] = "0";

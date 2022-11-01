@@ -7,7 +7,7 @@
 /**************************************************************************************/
 /*                                  CONSTRUCTOR / DESTRUCTOR                          */
 /**************************************************************************************/
-Response::Response() : _loc(NULL) {}
+Response::Response() : _loc(NULL), _server(NULL) {}
 
 Response::Response(const long int socket) : _loc(NULL), _server(NULL), _socket(socket), _status(0) {}
 
@@ -146,21 +146,14 @@ void Response::addErrorBodyToResponse()
     std::string body;
     std::stringstream out;
 
-    if (!_loc)
-    {
-        body.append(ft::craftErrorHTML(getStatus()));
-    }
-    else
-    {
-        try
-        {
-            body.append(ft::readFile(_loc->error_pages.at(getStatus())));
-        }
-        catch (const std::exception& e)
-        {
-            body.append(ft::craftErrorHTML(getStatus()));
-        }
-    }
+	try
+	{
+		body.append(ft::readFile(_loc->error_pages.at(getStatus())));
+	}
+	catch (const std::exception& e)
+	{
+		body.append(ft::craftErrorHTML(getStatus()));
+	}
 
     _response.append("Content-Length: ");
     _response.append(ft::itoa(body.size()));
@@ -259,14 +252,14 @@ void Response::buildRedirectionResponse(const Redirection &redir)
 	}
 }
 
-void Response::buildGetResponse(Request req, const Location *loc)
+void Response::buildGetResponse(Request req)
 {
     this->_request = req;
     if (useCGI()) // CGI or not ?
     {
         if (ft::isFile(_request.getLocation())) {
             CGI cgi(_request);
-            setStatus(cgi.executeCgi(&_request, _server, loc));
+            setStatus(cgi.executeCgi(&_request, *_server, *_loc));
             addHTTPHeader();
             addCGIHeader(cgi);
             addContentLengthCGI(cgi);
@@ -291,12 +284,12 @@ void Response::buildGetResponse(Request req, const Location *loc)
     }
 }
 
-void Response::buildPostResponse(Request req, const Location *loc)
+void Response::buildPostResponse(Request req)
 {
     this->_request = req;
 
     CGI cgi(_request);
-    setStatus(cgi.executeCgi(&_request, _server, loc));
+    setStatus(cgi.executeCgi(&_request, *_server, *_loc));
     addHTTPHeader();
     addCGIHeader(cgi);
     addContentLengthCGI(cgi);

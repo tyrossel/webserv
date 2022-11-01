@@ -155,14 +155,8 @@ int Looper::startParsingRequest(int socket)
     socklen_t addr_len = sizeof(req_addr);
     getsockname(socket, (struct sockaddr *)&req_addr, &addr_len);
 
-    const Server *srv = NULL;
-    if (request.getStatus() == 0)
-        srv = request.FindServer(_servers, req_addr);
-
-    // TODO TYR: Check if no server corresponds
-    const Location *loc = NULL;
-    if (request.getStatus() == 0)
-        loc = request.FindLocation(*srv);
+    const Server &srv = request.FindServer(_servers, req_addr);
+    const Location &loc = request.FindLocation(srv);
 
     printLog(request, socket);
 
@@ -420,11 +414,11 @@ void Looper::selectErrorHandle()
 /*                                  RESPONSE CRAFTING                                 */
 /**************************************************************************************/
 
-int Looper::buildResponse(long socket, const Location *loc)
+int Looper::buildResponse(long socket, const Location &loc)
 {
     Request &req = _requests[socket];
-    Response ret(socket, loc, _active_servers[socket], req.getStatus());
-    const Redirection *redir = loc->findRedirection(req.getPath());
+    Response ret(socket, &loc, _active_servers[socket], req.getStatus());
+    const Redirection *redir = loc.findRedirection(req.getPath());
     if (redir)
     {
         ret.buildRedirectionResponse(*redir);
@@ -433,12 +427,11 @@ int Looper::buildResponse(long socket, const Location *loc)
     }
     switch (req.getMethod()) {
         case Get:
-            // TODO: Remove loc as param
-            ret.buildGetResponse(req, loc);
+            ret.buildGetResponse(req);
             _responses.insert(std::pair<long int, Response>(socket, ret));
             break;
         case Post:
-            ret.buildPostResponse(req, loc);
+            ret.buildPostResponse(req);
             _responses.insert(std::pair<long int, Response>(socket, ret));
             break;
         case Delete:

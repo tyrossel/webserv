@@ -27,8 +27,8 @@ class CGI {
 
         std::string readContent(int fd);
         void        splitContent(std::string &content);
-        int         setCGIEnvironment(const Request *request, const Server *server, const Location *loc);
-        int         executeCgi(const Request *request, const Server *server, const Location *loc);
+        int         setCGIEnvironment(const Request *request, const Server &server, const Location &loc);
+        int         executeCgi(const Request *request, const Server &server, const Location &loc);
 
         /* GETTERS */
         std::map<std::string, std::string>  getEnv();
@@ -37,8 +37,8 @@ class CGI {
         std::string                         getCwd();
         std::string                         getCGIPath();
         std::string                         getFilePath();
-        std::string                         getRetHeaders();
-        std::string                         getRetBody();
+		std::string                         getRetHeaders();
+		std::string                         getRetBody();
 };
 
 #endif //WEBSERV_COMMONGATEWAYINTERFACE_HPP
