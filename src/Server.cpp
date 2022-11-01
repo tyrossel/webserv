@@ -59,14 +59,14 @@ void Server::setAddress()
     _addr.sin_port = htons(_port);
 }
 
-int Server::send(const Response &resp)
+int Server::send(int socket, const Response &resp)
 {
     int bytes_sent_total = 0;
     int bytes_sent_now = 0;
 
     while (bytes_sent_total < (int)resp.respSize())
     {
-        bytes_sent_now = ::send(resp.getSocket(), resp.getResponse().c_str() + bytes_sent_total, resp.respSize() - bytes_sent_total, 0);
+        bytes_sent_now = ::send(socket, resp.getResponse().c_str() + bytes_sent_total, resp.respSize() - bytes_sent_total, 0);
         if (bytes_sent_now == -1)
         {
             std::cout << "Error on sockets 🔥. Send failed" << std::endl;

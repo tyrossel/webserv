@@ -120,7 +120,7 @@ void Looper::checkConnectionTimeout()
         // TODO TYR: Remove, in order to close if not found
         time_last = time_now;
 
-        std::map<long int, std::time_t>::iterator time_it = _last_activity.find(socket);
+        std::map<int, std::time_t>::iterator time_it = _last_activity.find(socket);
         if (time_it != _last_activity.end())
             time_last = time_it->second;
         if (time_now - time_last > _timeout)
@@ -291,7 +291,7 @@ void Looper::sendResponse(fd_set &reading_fd_set, fd_set &writing_fd_set, fd_set
 			continue;
 		}
 
-		long ret_val = _active_servers[fd]->send(_responses[fd]);
+		long ret_val = _active_servers[fd]->send(fd, _responses[fd]);
 
 		if (_requests[fd].getHeaders()["Connection"] == "close")
 		{

@@ -27,7 +27,7 @@ class Server {
         int     setupListen();
         int     buildServer();
         void    close(int socket);
-        int     send(const Response &Resp);
+        int     send(int socket, const Response &Resp);
 
         // GETTERS =========================================================
         int                                         getPort() const;
