@@ -17,10 +17,10 @@ class Looper {
         std::vector<Server>                 _servers;
         std::map<long int, Server *>        _active_servers;
         std::vector<int>                    _ready_fd;
-        std::map<long int, Response>        _responses;
-        std::map<long int, Request>         _requests;
-		std::map<long int, std::time_t>		_last_activity;
-		std::map<long int, std::string>		_raw_request;
+        std::map<int, Response *>        _responses;
+        std::map<int, Request>         _requests;
+		std::map<int, std::time_t>		_last_activity;
+		std::map<int, std::string>		_raw_request;
 
         fd_set                              _active_fd_set;
 

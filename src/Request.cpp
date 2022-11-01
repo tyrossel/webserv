@@ -106,6 +106,7 @@ bool Request::isValid(const Location &loc)
         return false;
     }
 
+	setStatus(HTTP_OK);
     return true;
 }
 

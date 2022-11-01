@@ -1,4 +1,6 @@
 #include "Looper.hpp"
+#include "ErrorResponse.hpp"
+#include "ValidResponse.hpp"
 #include "webserv.hpp"
 
 /**************************************************************************************/
@@ -291,7 +293,7 @@ void Looper::sendResponse(fd_set &reading_fd_set, fd_set &writing_fd_set, fd_set
 			continue;
 		}
 
-		long ret_val = _active_servers[fd]->send(fd, _responses[fd]);
+		int ret_val = _active_servers[fd]->send(fd, *_responses[fd]);
 
 		if (_requests[fd].getHeaders()["Connection"] == "close")
 		{
@@ -302,11 +304,13 @@ void Looper::sendResponse(fd_set &reading_fd_set, fd_set &writing_fd_set, fd_set
 		}
 		if (ret_val >= 0) // Comm OK, delete ressources
 		{
+			delete _responses[fd];
 			_responses.erase(fd);
 			_requests.erase(fd);
 		}
 		else
 		{
+			delete _responses[fd];
 			_responses.erase(fd);
 			_requests.erase(fd);
 			FD_CLR(fd, &_active_fd_set);
@@ -399,6 +403,7 @@ void Looper::selectErrorHandle()
     std::cout << "Select had an issue !" << std::endl;
     for (std::map<long, Server *>::iterator it = _active_servers.begin(); it != _active_servers.end(); it++) {
         it->second->close(it->first);
+		delete _responses[it->first];
         _responses.erase(it->first);
         _requests.erase(it->first);
     }
@@ -416,39 +421,17 @@ void Looper::selectErrorHandle()
 
 int Looper::buildResponse(long socket, const Location &loc)
 {
-    Request &req = _requests[socket];
-    Response ret(socket, &loc, _active_servers[socket], req.getStatus());
-    const Redirection *redir = loc.findRedirection(req.getPath());
-    if (redir)
-    {
-        ret.buildRedirectionResponse(*redir);
-        _responses.insert(std::pair<long int, Response>(socket, ret));
-        return 1;
-    }
-    switch (req.getMethod()) {
-        case Get:
-            ret.buildGetResponse(req);
-            _responses.insert(std::pair<long int, Response>(socket, ret));
-            break;
-        case Post:
-            ret.buildPostResponse(req);
-            _responses.insert(std::pair<long int, Response>(socket, ret));
-            break;
-        case Delete:
-            ret.buildDeleteResponse(req);
-            _responses.insert(std::pair<long int, Response>(socket, ret));
-            break;
-        default:
-			ret.buildErrorResponse(NOT_IMPLEMENTED);
-			break;
-    }
+    Response *response = new ValidResponse(loc, *_active_servers[socket], _requests[socket]);
+
+	response->buildResponse();
+	_responses.insert(std::pair<int, Response *>(socket, response));
     return (1);
 }
 
 void Looper::buildErrorResponse(long socket, int status)
 {
-    Response ret(socket);
+    Response *ret = new ErrorResponse(status);
 
-    ret.buildErrorResponse(status);
-    _responses.insert(std::pair<long int, Response>(socket, ret));
+    ret->buildResponse();
+    _responses.insert(std::pair<long int, Response*>(socket, ret));
 }

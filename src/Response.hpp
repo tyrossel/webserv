@@ -1,65 +1,46 @@
 #ifndef WEBSERV_RESPONSE_HPP
 #define WEBSERV_RESPONSE_HPP
 
-#include "Location.hpp"
 #include "webserv.hpp"
-#include "Request.hpp"
-#include "DirectoryListing.hpp"
-
-class Server;
-class CGI;
 
 class Response {
+
     private:
-        Request                 _request;
-        const Location          *_loc;
-        const Server            *_server;
-        long int                _socket;
-        std::string             _response;
+
         int                     _status;
 
-    public:
-        // CONSTRUCTORS ====================================================
-        Response();
-        Response(const long int socket);
-        Response(const long int socket, const Location *loc, Server *server, int status);
-        ~Response();
-        // =================================================================
+	protected:
 
-        // CHECKERS ========================================================
-        void     checkPath();
-        bool     secFetchImage();
-		bool	 useCGI();
-        // =================================================================
+        std::string             _response;
+
+    public:
+
+        Response(int status = 0);
+		Response(const Response &rhs);
+        virtual ~Response();
+		Response &operator=(const Response &rhs);
 
         // TOOLS ========================================================
-        void        printLog(bool print_cgi);
-        void        addContentLengthCGI(CGI &cgi);
-        void        addBodyToResponse();
-        void        addDate();
-        void        addServerHeaderResponse();
-        void        addContentType();
-        void        addHTTPHeader(bool checkPath = true);
-        void        writeResponseHeader();
-        void        addErrorBodyToResponse();
-        void        setStatus(int new_status);
-        void        addCGIHeader(CGI &cgi);
-        // =================================================================
+        virtual void		printLog(const std::string &title) = 0;
 
         // BUILDERS ========================================================
-		void		buildRedirectionResponse(const Redirection &redir);
-        void        buildGetResponse(Request req);
-        void        buildPostResponse(Request req);
-        void        buildDeleteResponse(Request req);
-		void		buildErrorResponse(int errorCode);
-        // =================================================================
+		virtual std::string buildResponse() = 0;
 
-        // GETTERS =========================================================
-        std::string     getResponse() const;
-        int             respSize() const;
-        long int        getSocket() const;
-        int             getStatus() const;
-        // =================================================================
+        // GETTERS & SETTERS ===============================================
+        std::string			getResponse() const;
+        int					respSize() const;
+        int					getStatus() const;
+        void				setStatus(int new_status);
+
+	protected:
+
+        void				addHTTPHeader();
+
+	private:
+
+        void				addServerHeaderResponse();
+        void				addDate();
+        void				writeResponseHeader();
 
 };
 
