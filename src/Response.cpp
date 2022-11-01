@@ -54,7 +54,6 @@ void Response::addContentLengthPOST(CGI &cgi)
     _response.append("\r\n\r\n");
 }
 
-// TODO: add file to read from (std::string path)
 void Response::addBodyToResponse()
 {
     std::string text;
@@ -171,6 +170,8 @@ void Response::addErrorBodyToResponse()
 
 void Response::setStatus(int new_status) { _status = new_status; }
 
+void Response::addCGIHeader(CGI &cgi) { _response.append(cgi.getRetHeaders() + "\r\n"); }
+
 /**************************************************************************************/
 /*                                  CHECKERS                                          */
 /**************************************************************************************/
@@ -267,6 +268,7 @@ void Response::buildGetResponse(Request req, const Location *loc)
             CGI cgi(_request);
             setStatus(cgi.executeCgi(&_request, _server, loc));
             addHTTPHeader();
+            addCGIHeader(cgi);
             // Here we remove HTTP EOF because the CGI we use cannot accept HTML in it.
             // If we send HTML inside the CGI he will TOUPPER the html which is.. shitty ?
             cgi.removeEOFHTTP();
@@ -302,6 +304,7 @@ void Response::buildPostResponse(Request req, const Location *loc)
     CGI cgi(_request);
     setStatus(cgi.executeCgi(&_request, _server, loc));
     addHTTPHeader();
+    addCGIHeader(cgi);
     addContentLengthPOST(cgi);
     _response.append(cgi.getRetBody());
     printLog(true);

@@ -43,6 +43,7 @@ class Response {
         void        writeResponseHeader();
         void        addErrorBodyToResponse();
         void        setStatus(int new_status);
+        void        addCGIHeader(CGI &cgi);
         // =================================================================
 
         // BUILDERS ========================================================
