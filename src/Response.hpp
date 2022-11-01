@@ -21,6 +21,7 @@ class Response {
     public:
         // CONSTRUCTORS ====================================================
         Response();
+        Response(const long int socket);
         Response(const long int socket, const Location *loc, Server *server, int status);
         ~Response();
         // =================================================================

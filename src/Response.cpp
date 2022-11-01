@@ -9,7 +9,9 @@
 /**************************************************************************************/
 Response::Response() : _loc(NULL) {}
 
-Response::Response(const long int socket, const Location *loc, Server *server, const int status): _loc(loc), _server(server), _socket(socket)
+Response::Response(const long int socket) : _loc(NULL), _server(NULL), _socket(socket), _status(0) {}
+
+Response::Response(const long int socket, const Location *loc, Server *server, const int status) : _loc(loc), _server(server), _socket(socket)
 {
     if (status == 0)
         _status = HTTP_OK;
@@ -331,10 +333,11 @@ void Response::buildDeleteResponse(Request req)
 
 void	Response::buildErrorResponse(int errorCode)
 {
-	_loc = NULL;
+	//_loc = NULL;
 	setStatus(errorCode);
 	addHTTPHeader(false);
 	addErrorBodyToResponse();
+    printLog(false);
 }
 
 /**************************************************************************************/

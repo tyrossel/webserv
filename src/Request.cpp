@@ -106,7 +106,7 @@ bool Request::isValid(const Location *loc)
 
     if (loc->max_client_body_size != 0 && _body_length > loc->max_client_body_size)
     {
-        setStatus(BAD_REQUEST);
+        setStatus(PAYLOAD_TOO_LARGE);
         return false;
     }
 

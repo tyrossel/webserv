@@ -46,7 +46,7 @@
 # define CONFLICT 409                           // request conflicts with the current state of the server
 # define LENGTH_REQUIRED 411                    // server rejected the request because the Content-Length header field is not defined and the server requires it
 # define PRECONDITION_FAILED 412                // client has indicated preconditions in its headers which the server does not meet
-# define BODY_TOO_LONG 413						// The request is larger than the server is willing or able to process.
+# define PAYLOAD_TOO_LARGE 413					// The request is larger than the server is willing or able to process.
 # define URI_TOO_LONG 414                       // URI requested by the client is longer than the server is willing to interpret
 # define MEDIA_UNSUPPORTED 415                  // media format of the requested data is not supported by the server
 # define RANGE_NOT_SATISFIABLE 416              // range specified by the Range header field in the request cannot be fulfilled (possible that the range is outside the size of the target URI's data)

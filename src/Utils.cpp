@@ -273,7 +273,8 @@ namespace ft {
         err_map[HTTP_VERSION_UNSUPPORTED] = " HTTP Version Unsupported";
         err_map[NOT_EXTENDED] = " Not Extended";
         err_map[NETWORK_AUTHENTICATION_REQUIRED] = " Network Authentication Required";
-		// TODO: Add 413, 431
+        err_map[HEADERS_TOO_LARGE] = " Headers Too Large";
+        err_map[PAYLOAD_TOO_LARGE] = " Payload Body Size Too Large";
 
 		std::map<int, std::string>::const_iterator error_idx = err_map.find(error);
 		if (error_idx != err_map.end())

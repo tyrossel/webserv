@@ -356,7 +356,7 @@ void Looper::requestProcess(fd_set &reading_fd_set)
 				_active_servers.erase(it++);
 				break;
 			default: // Request not conform: Respond an error
-				_responses[socket].buildErrorResponse(ret_val);
+                buildErrorResponse(socket, ret_val);
 				_raw_request.erase(socket);
 				_ready_fd.push_back(socket);
 				_last_activity[socket] = ::time(NULL);
@@ -447,4 +447,12 @@ int Looper::buildResponse(long socket, const Location *loc)
 			break;
     }
     return (1);
+}
+
+void Looper::buildErrorResponse(long socket, int status)
+{
+    Response ret(socket);
+
+    ret.buildErrorResponse(status);
+    _responses.insert(std::pair<long int, Response>(socket, ret));
 }
