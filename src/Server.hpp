@@ -22,7 +22,6 @@ class Server {
 		Server &operator=(const Server &rhs);
         ~Server();
 
-        void    log(std::string message);
         long    createSocket();
         void    setAddress();
         int     setupListen();
