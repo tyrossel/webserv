@@ -113,7 +113,7 @@ make
 - When select() returns a value > 0, 3 others loop are called
 
 <p align="center">
-  <img src="readme_docs/process_resume.png">
+  <img src="readme_docs/process.png">
 </p>
 
 ## Looper Object
