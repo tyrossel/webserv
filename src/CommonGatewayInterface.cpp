@@ -4,7 +4,7 @@
 /*                          CONSTRUCTORS / DESTRUCTORS                                */
 /**************************************************************************************/
 
-CGI::CGI(const Request &request) : _env(), _headers(request.getHeaders()), _req_body(request.getBody()), _cgi_path(""), _file_path(""), _ret_body(""), _cgi_env(NULL) {}
+CGI::CGI(const Request &request) : _env(), _headers(request.getHeaders()), _req_body(request.getBody()), _cgi_path(""), _file_path(""), _ret_headers(""), _ret_body(""), _cgi_env(NULL) {}
 
 CGI::CGI(const CGI &rhs)
 {
@@ -26,6 +26,7 @@ CGI &CGI::operator=(const CGI &rhs)
         this->_req_body = rhs._req_body;
         this->_cgi_path = rhs._cgi_path;
         this->_file_path = rhs._file_path;
+        this->_ret_body = rhs._ret_headers;
         this->_ret_body = rhs._ret_body;
         this->_cgi_env = rhs._cgi_env;
     }
@@ -53,6 +54,14 @@ void CGI::exitFail(std::string error, int exit_value)
 {
     std::cerr << RED << error << RESET << std::endl;
     exit(exit_value);
+}
+
+void CGI::splitContent(std::string &content)
+{
+    content.erase(0, content.find_first_of("\r\n") + 2);
+    _ret_headers = content.substr(0, content.find_first_of("\r\n\r\n"));
+    content.erase(0, _ret_headers.size() + 4);
+    _ret_body = content;
 }
 
 std::string CGI::readContent(int fd)
@@ -137,7 +146,8 @@ int CGI::executeCgi(const Request *request, const Server *server, const Location
                 else
                     return returnFail(BAD_GATEWAY, "Child exit with code " + ft::to_string(WEXITSTATUS(status)), true, pip_to_cgi[1], pip_from_cgi[0]);
             }
-            _ret_body = readContent(pip_from_cgi[0]);
+            std::string ret = readContent(pip_from_cgi[0]);
+            splitContent(ret);
             close(pip_from_cgi[0]);
     }
     return (HTTP_OK);
@@ -208,4 +218,5 @@ std::map<std::string, std::string>  CGI::getHeaders() { return (this->_headers);
 std::string                         CGI::getReqBody() { return (this->_req_body); }
 std::string                         CGI::getCGIPath() { return (this->_cgi_path); }
 std::string                         CGI::getFilePath() { return (this->_file_path); }
+std::string                         CGI::getRetHeaders() { return (this->_ret_headers); }
 std::string                         CGI::getRetBody() { return (this->_ret_body); }
