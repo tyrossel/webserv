@@ -228,7 +228,7 @@ int Looper::readFromClient(long socket)
 
         size_t len = 0;
 		if (_raw_request[socket].find("Content-Length:") != std::string::npos)
-			len = std::atoi(_raw_request[socket].substr(_raw_request[socket].find("Content-Length:") + 16, 10).c_str());
+			len = std::atoi(_raw_request[socket].substr(_raw_request[socket].find("Content-Length:") + 15, 10).c_str());
         if (_raw_request[socket].size() >= len + headers_end)
             return 0;
         else
