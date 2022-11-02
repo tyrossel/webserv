@@ -153,16 +153,6 @@ int CGI::executeCgi(const Request *request, const Server *server, const Location
     return (HTTP_OK);
 }
 
-void CGI::removeEOFHTTP()
-{
-    if (!_ret_body.empty()) {
-        for (int i = 0; i < 2; i++) {
-            std::string::iterator it = _ret_body.end();
-            _ret_body.erase(--it);
-        }
-    }
-}
-
 int CGI::setCGIEnvironment(const Request *request, const Server *server, const Location *loc)
 {
     _file_path = request->getLocation();

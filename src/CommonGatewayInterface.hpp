@@ -30,8 +30,6 @@ class CGI {
         int         setCGIEnvironment(const Request *request, const Server *server, const Location *loc);
         int         executeCgi(const Request *request, const Server *server, const Location *loc);
 
-        void        removeEOFHTTP();
-
         /* GETTERS */
         std::map<std::string, std::string>  getEnv();
         std::map<std::string, std::string>  getHeaders();

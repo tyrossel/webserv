@@ -47,7 +47,7 @@ void Response::printLog(bool print_cgi)
 	}
 }
 
-void Response::addContentLengthPOST(CGI &cgi)
+void Response::addContentLengthCGI(CGI &cgi)
 {
     _response.append("Content-Length: ");
     _response.append(ft::to_string(cgi.getRetBody().length()));
@@ -268,11 +268,8 @@ void Response::buildGetResponse(Request req, const Location *loc)
             CGI cgi(_request);
             setStatus(cgi.executeCgi(&_request, _server, loc));
             addHTTPHeader();
-            // Here we remove HTTP EOF because the CGI we use cannot accept HTML in it.
-            // If we send HTML inside the CGI he will TOUPPER the html which is.. shitty ?
-            //cgi.removeEOFHTTP();   //Dirty fix for this retarded CGI
             addCGIHeader(cgi);
-            addContentLengthPOST(cgi);
+            addContentLengthCGI(cgi);
             _response.append(cgi.getRetBody());
         }
         else
@@ -302,7 +299,7 @@ void Response::buildPostResponse(Request req, const Location *loc)
     setStatus(cgi.executeCgi(&_request, _server, loc));
     addHTTPHeader();
     addCGIHeader(cgi);
-    addContentLengthPOST(cgi);
+    addContentLengthCGI(cgi);
     _response.append(cgi.getRetBody());
     printLog(true);
 }
