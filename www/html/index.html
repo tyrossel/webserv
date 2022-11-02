@@ -47,7 +47,6 @@
         const heart = document.createElement('div');
         heart.classList.add('heart');
         heart.style.left = Math.random() * 100 + "vw";
-        heart.style.animationDuration = Math.random() * 2 + 3 + "s";
 
         heart.innerText = '💗';
 
@@ -55,16 +54,16 @@
 
         setTimeout(() => {
             heart.remove();
-        }, 5000);
+        }, 20000);
     }
 
     let n = 0;
     function countClick()
     {
         n++;
-        if (n === 42) {
+        if (n === 2) {
             createHeart();
-            setInterval(createHeart, 300);
+            setInterval(createHeart,100);
         }
     }
 </script>
@@ -72,10 +71,15 @@
 <style lang="css">
     .heart {
         position: fixed;
-        font-size: 1.5rem;
+        font-size: 2.5rem;
         top: -1vh;
         transform: translateY(0);
-        animation: fall 3s linear forwards;
+        animation: fall 20s linear forwards, beat 1s infinite;
+    }
+    @keyframes beat {
+        0% {font-size: 2.5rem;}
+        50% {font-size: 2rem;}
+        100% {font-size: 2.5rem;}
     }
 
     @keyframes fall {
