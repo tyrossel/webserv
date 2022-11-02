@@ -209,7 +209,7 @@ int Looper::readFromClient(long socket)
 	}
 	else if (headers_end != std::string::npos)
     {
-        if (_raw_request[socket].find("Content-Length: ") == std::string::npos)
+        if (_raw_request[socket].find("Content-Length:") == std::string::npos)
         {
             if (_raw_request[socket].find("Transfer-Encoding: chunked") != std::string::npos)
             {
@@ -225,7 +225,10 @@ int Looper::readFromClient(long socket)
         headers_end += 4; // We have to add \r\n\r\n (4 char) because find exclude them
 
         //TODO : update this shit with our function
-        size_t len = std::atoi(_raw_request[socket].substr(_raw_request[socket].find("Content-Length: ") + 16, 10).c_str());
+
+        size_t len = 0;
+		if (_raw_request[socket].find("Content-Length:") != std::string::npos)
+			len = std::atoi(_raw_request[socket].substr(_raw_request[socket].find("Content-Length:") + 16, 10).c_str());
         if (_raw_request[socket].size() >= len + headers_end)
             return 0;
         else
