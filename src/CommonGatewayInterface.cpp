@@ -187,12 +187,9 @@ int CGI::setCGIEnvironment(const Request *request, const Server *server, const L
     _env["SERVER_PORT"] = ft::to_string(server->getPort());
     _env["SERVER_PROTOCOL"] = "HTTP/" + request->getVersion();
     _env["SERVER_SOFTWARE"] = "WetServ/1.0";
+    _env["REDIRECT_STATUS"] = "0";
+    _env["FILE_UPLOADS"] = "On";
 
-    if (_env["REQUEST_METHOD"] == "POST")
-    {
-        _env["REDIRECT_STATUS"] = "0";
-        _env["FILE_UPLOADS"] = "On";
-    }
 
     for (std::map<std::string, std::string>::iterator it = _headers.begin(); it != _headers.end(); it++)
     {

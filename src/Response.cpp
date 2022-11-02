@@ -268,15 +268,12 @@ void Response::buildGetResponse(Request req, const Location *loc)
             CGI cgi(_request);
             setStatus(cgi.executeCgi(&_request, _server, loc));
             addHTTPHeader();
-            addCGIHeader(cgi);
             // Here we remove HTTP EOF because the CGI we use cannot accept HTML in it.
             // If we send HTML inside the CGI he will TOUPPER the html which is.. shitty ?
-            cgi.removeEOFHTTP();
+            //cgi.removeEOFHTTP();   //Dirty fix for this retarded CGI
+            addCGIHeader(cgi);
+            addContentLengthPOST(cgi);
             _response.append(cgi.getRetBody());
-            if (ft::isOkHTTP(getStatus()))
-                addBodyToResponse();
-            else
-                addErrorBodyToResponse();
         }
         else
         {
