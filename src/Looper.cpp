@@ -224,22 +224,22 @@ int Looper::readFromClient(long socket)
         // Here we want to see if our _raw_request size == Content-Length + Headers size
         headers_end += 4; // We have to add \r\n\r\n (4 char) because find exclude them
 
-        size_t len = 10000;
-//		size_t pos = _raw_request[socket].find("Content-Length");
-//		if ( pos != std::string::npos)
-//		{
-//			// If the buffer is split exactly between Content-Length and the integer
-//			if (_raw_request[socket].size() - pos < 26)
-//				return 1;
-//			try
-//			{
-//				len = ft::stoi(_raw_request[socket].substr(pos + 15, 10));
-//			}
-//			catch (const std::exception& e)
-//			{
-//				return BAD_REQUEST;
-//			}
-//		}
+        size_t len = 0;
+		size_t pos = _raw_request[socket].find("Content-Length");
+		if ( pos != std::string::npos)
+		{
+			// If the buffer is split exactly between Content-Length and the integer
+			if (_raw_request[socket].size() - pos < 26)
+				return 1;
+			try
+			{
+				len = ft::stoi(_raw_request[socket].substr(pos + 15, 10));
+			}
+			catch (const std::exception& e)
+			{
+				return BAD_REQUEST;
+			}
+		}
         if (_raw_request[socket].size() >= len + headers_end)
             return 0;
         else
