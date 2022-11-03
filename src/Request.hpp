@@ -47,6 +47,7 @@ class Request {
 
         /* SETTERS */
         void                                setStatus(int new_status);
+        void                                setPath(std::string new_path);
 };
 
 std::ostream &operator<<(std::ostream &out, const Request &rhs);
