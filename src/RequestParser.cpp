@@ -209,6 +209,10 @@ int RequestParser::parsePath(std::string &first_line, size_t &start, size_t &end
     for (size_t pos = formated_path.find("+"); formated_path.find("+") != std::string::npos; pos = formated_path.find("+")) {
         formated_path.replace(pos, 1, " ");
     }
+    for (size_t pos = formated_path.find("%20"); formated_path.find("%20") != std::string::npos; pos = formated_path.find("%20")) {
+        formated_path.replace(pos, 3, " ");
+    }
+
     _request.setPath(formated_path);
 
     return (parseVersion(first_line, start, end));

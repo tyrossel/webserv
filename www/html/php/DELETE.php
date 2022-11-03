@@ -73,6 +73,7 @@ You can also send a delete request on the currently selected picture by clicking
 
   function deleteClick(e) {
     let url = `http://${window.location.host}/images/${e.target.getAttribute("data-filename")}`
+    url = encodeURI(url)
     console.log(window.location)
     console.log(url)
 
