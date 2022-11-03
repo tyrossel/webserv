@@ -38,6 +38,7 @@ namespace ft {
     bool        isFile(const std::string &path);
 	bool		isDirectory(const std::string path);
 	std::string	readFile(const std::string &filename);
+    int         writeFile(std::string path, std::string body);
     // =======================================================
 
     // ERRORS / CHECKERS =====================================
