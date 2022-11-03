@@ -63,7 +63,7 @@ std::string	ErrorResponse::buildResponse()
     _response.append("Content-Type: html\r\n");
     if (_close)
         _response.append("Connection: close\r\n");
-	addBodyToResponse();
+    addBodyToResponse();
     printLog("Error");
 	return _response;
 }
