@@ -323,7 +323,7 @@ void Looper::sendResponse(fd_set &reading_fd_set, fd_set &writing_fd_set, fd_set
 		    ret_val = _active_servers[fd]->send(fd, *_responses[fd]);
 
 		if (_requests[fd].getHeaders()["Connection"] == "close"
-            || _responses[fd]->getResponse().find("Connection: close") != std::string::npos)
+            || _responses[fd]->getHeader("Connection") == "close")
 		{
 			FD_CLR(fd, &_active_fd_set);
 			FD_CLR(fd, &reading_fd_set);
@@ -457,7 +457,6 @@ int Looper::buildResponse(long socket, const Location &loc)
 	else
 		response = new ValidResponse(loc, *_active_servers[socket], _requests[socket]);
 
-	response->buildResponse();
 	_responses.insert(std::pair<int, Response *>(socket, response));
     return (1);
 }
@@ -466,6 +465,5 @@ void Looper::buildErrorResponse(long socket, int status, bool close)
 {
     Response *ret = new ErrorResponse(status, close);
 
-    ret->buildResponse();
     _responses.insert(std::pair<long int, Response*>(socket, ret));
 }

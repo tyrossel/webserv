@@ -173,7 +173,7 @@ std::ostream &operator<<(std::ostream &out, const Request &rhs)
         out << it->first << ": " << it->second << "\r\n";
     }
 
-	if (headers.find("Sec-Fetch-Dest") != headers.end()
+	if (rhs.getBody().size() > 0 && headers.find("Sec-Fetch-Dest") != headers.end()
 		&& (headers.at("Sec-Fetch-Dest") == "image" || headers.at("Sec-Fetch-Dest") == "document"))
 	{
 		out << "\r\n<Skipped image/document body of length " << rhs.getBody().size() << ">" << std::endl;

@@ -23,55 +23,87 @@ Response::Response(const Response &rhs)
 Response &Response::operator=(const Response &rhs)
 {
 	_status = rhs._status;
-	_response = rhs._response;
 	return *this;
 }
+
 /**************************************************************************************/
 /*                                  TOOLS                                             */
 /**************************************************************************************/
 
-// Format according to RFC 7231
-// Example: Tue, 15 Nov 1994 08:12:31 GMT
-void Response::addDate()
-{
-	std::string timestamp = ft::timestamp("%a, %d %b %Y %T GMT");
-    _response.append("Date: " + timestamp + "\r\n");
-}
-
-void Response::addServerHeaderResponse()
-{
-    _response.append("Server: WetServ/1.0.0\r\n");
-}
-
-void Response::writeResponseHeader()
+void Response::writeResponseHeader(std::string &txt) const
 {
     std::stringstream out;
 
     out << getStatus();
-    _response.append("HTTP/1.1 ");
+    txt.append("HTTP/1.1 ");
     if (ft::isOkHTTP(getStatus())) {
-        _response.append(out.str());
-        _response.append(" OK\r\n");
+        txt.append(out.str());
+        txt.append(" OK\r\n");
     }
     else {
-        _response.append(out.str());
-        _response.append(ft::errorMessage(getStatus()) + "\r\n");
+        txt.append(out.str());
+        txt.append(ft::errorMessage(getStatus()) + "\r\n");
     }
 }
 
-void Response::addHTTPHeader()
+
+std::string		Response::headersToString() const
 {
-    writeResponseHeader();
-    addServerHeaderResponse();
-    addDate();
+	std::string txt;
+	std::string timestamp = ft::timestamp("%a, %d %b %Y %T GMT");
+
+	writeResponseHeader(txt);
+    txt.append("Server: WetServ/1.0.0\r\n");
+    txt.append("Date: " + timestamp + "\r\n");
+
+	for (std::map<std::string, std::string>::const_iterator it = _headers.begin();
+			it != _headers.end(); it++)
+	{
+		txt.append(it->first + ": " + it->second + "\r\n");
+	}
+    std::stringstream out;
+    out << _body.size();
+    std::string content_len = "Content-Length: " + out.str();
+    txt.append(content_len);
+	return txt;
+}
+
+std::string Response::to_string() const
+{
+	std::string txt;
+
+	txt.append(headersToString());
+	txt.append("\r\n\r\n");
+	txt.append(_body);
+	return txt;
 }
 
 /**************************************************************************************/
 /*                                  GETTERS                                           */
 /**************************************************************************************/
+void	Response::setHeader(const std::string &key, const std::string &value)
+{
+	this->_headers[key] = value;
+}
 
-std::string Response::getResponse() const { return (this->_response); }
-int         Response::respSize() const { return ((int)this->_response.size()); }
+std::string	Response::getHeader(const std::string &key) const
+{
+	std::map<std::string, std::string>::const_iterator it = _headers.find(key);
+	if (it == _headers.end())
+		return "";
+	return it->second;
+}
+
+std::string	Response::getBody() const
+{
+	return _body;
+}
+
+void	Response::setBody(const std::string &str)
+{
+	this->_body = str;
+}
+
 int         Response::getStatus() const { return (this->_status); }
 void		Response::setStatus(int new_status)
 {

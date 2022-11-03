@@ -12,7 +12,9 @@ class Response {
 	protected:
 
         std::map<std::string, std::string>  _mime_map;
-        std::string                         _response;
+        std::string                         _body;
+
+		std::map<std::string, std::string>  _headers;
 
     public:
 
@@ -27,21 +29,26 @@ class Response {
         // BUILDERS ========================================================
 		virtual std::string buildResponse() = 0;
 
+
+		std::string	to_string() const;
+
         // GETTERS & SETTERS ===============================================
-        std::string			getResponse() const;
-        int					respSize() const;
+
+		std::string			getHeader(const std::string &key) const;
         int					getStatus() const;
-        void				setStatus(int new_status);
+        std::string			getBody() const;
+        int					respSize() const;
 
 	protected:
-
-        void				addHTTPHeader();
+		std::string			headersToString() const;
+        void				setBody(const std::string &str);
+        void				setStatus(int new_status);
+		void				setHeader(const std::string &key, const std::string &value);
+		void				setError(int status);
 
 	private:
 
-        void				addServerHeaderResponse();
-        void				addDate();
-        void				writeResponseHeader();
+        void				writeResponseHeader(std::string &txt) const;
 
 };
 

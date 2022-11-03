@@ -23,8 +23,8 @@ class RedirResponse : public Response {
 
 	private:
 
-        void        addBodyToResponse();
-        void        AddErrorBodyToResponse();
+        void        buildBody();
+        void        setError(int status);
 
 };
 

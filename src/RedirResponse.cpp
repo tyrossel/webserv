@@ -9,6 +9,7 @@
 RedirResponse::RedirResponse(const Location &loc, const Request &req, const Redirection &redir) :
 	Response(301), _loc(loc), _req(req), _redir(redir)
 {
+	buildResponse();
 }
 
 RedirResponse::~RedirResponse()
@@ -21,27 +22,19 @@ std::string	RedirResponse::buildResponse()
 		setStatus(HTTP_FOUND);
 	else
 		setStatus(_redir.status);
-	Response::addHTTPHeader();
 	if (getStatus() / 100 == 3)
 	{
-		_response.append("Location: " + _redir.new_url + "\r\n");
-		_response.append("Connection: keep-alive\r\n");
-		AddErrorBodyToResponse();
+		setHeader("Location", _redir.new_url);
+		setHeader("Connection", "keep-alive");
+		setError(getStatus());
 	}
 	else
 	{
-		ErrorResponse err(getStatus());
-		_response = err.buildResponse();
+		setError(getStatus());
 	}
-	if (VERBOSE)
-	{
-		std::cout << "================== RESPONSE ==================" << std::endl;
-		std::cout << YELLOW << ft::timestamp(TIMESTAMP_FORMAT) << RESET << std::endl;
-		std::cout << GREEN << _response << RESET << std::endl;
-		std::cout << "==============================================" << std::endl << std::endl;
-	}
+
 	printLog("Redirection");
-	return _response;
+	return to_string();
 }
 
 /**************************************************************************************/
@@ -54,7 +47,7 @@ void	RedirResponse::printLog(const std::string &title)
 	{
 		std::cout << "================== " + title + " ==================" << std::endl;
 		std::cout << ft::timestamp(TIMESTAMP_FORMAT) << std::endl;
-		std::cout << CYAN << getResponse() << RESET << std::endl;
+		std::cout << CYAN << to_string() << RESET << std::endl;
 	}
 	else
 	{
@@ -65,10 +58,9 @@ void	RedirResponse::printLog(const std::string &title)
 	}
 }
 
-void RedirResponse::addBodyToResponse()
+void RedirResponse::buildBody()
 {
     std::string text;
-    std::stringstream out;
     std::string loc = _req.getLocation();
     std::string path = _req.getPath();
 
@@ -78,9 +70,7 @@ void RedirResponse::addBodyToResponse()
 			text = createDirectoryListingBody(path, loc);
 		else
 		{
-			setStatus(FORBIDDEN);
-			AddErrorBodyToResponse();
-			return ;
+			return setError(FORBIDDEN);
 		}
     }
     else
@@ -92,34 +82,20 @@ void RedirResponse::addBodyToResponse()
         catch (const std::exception& e)
         {
             std::cerr << e.what() << std::endl;
-			ErrorResponse err(FORBIDDEN);
-			_response = err.buildResponse();
-			return ;
+			return setError(FORBIDDEN);
         }
     }
-    out << text.size();
-    std::string content_len = "Content-Length: " + out.str();
-    _response.append(content_len);
-    _response.append("\r\n\r\n");
-    _response.append(text);
 }
 
-void RedirResponse::AddErrorBodyToResponse()
+void RedirResponse::setError(int status)
 {
-    std::string body;
-    std::stringstream out;
+	std::map<int, std::string>::const_iterator it = _loc.error_pages.find(status);
+	std::string custom_page;
 
-	try
-	{
-		body.append(ft::readFile(_loc.error_pages.at(getStatus())));
-	}
-	catch (const std::exception& e)
-	{
-		body.append(ft::craftErrorHTML(getStatus()));
-	}
+	if (it == _loc.error_pages.end())
+		custom_page = it->second;
 
-    _response.append("Content-Length: ");
-    _response.append(ft::itoa(body.size()));
-    _response.append("\r\n\r\n");
-    _response.append(body);
+	ErrorResponse err(status, false, custom_page);
+	setBody(err.getBody());
+	setStatus(status);
 }

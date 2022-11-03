@@ -61,12 +61,13 @@ void Server::setAddress()
 
 int Server::send(int socket, const Response &resp)
 {
-    int bytes_sent_total = 0;
-    int bytes_sent_now = 0;
+    long bytes_sent_total = 0;
+    long bytes_sent_now = 0;
+	std::string response_txt = resp.to_string();
 
-    while (bytes_sent_total < (int)resp.respSize())
+    while (bytes_sent_total < static_cast<long>(response_txt.size()))
     {
-        bytes_sent_now = ::send(socket, resp.getResponse().c_str() + bytes_sent_total, resp.respSize() - bytes_sent_total, 0);
+        bytes_sent_now = ::send(socket, response_txt.c_str() + bytes_sent_total, response_txt.size() - bytes_sent_total, 0);
         if (bytes_sent_now == -1)
         {
             std::cout << "Error on sockets 🔥. Send failed" << std::endl;

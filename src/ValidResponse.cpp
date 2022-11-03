@@ -11,6 +11,7 @@
 ValidResponse::ValidResponse(const Location &loc, const Server &server, const Request &req)
 	: Response(req.getStatus()), _loc(loc), _server(server), _req(req)
 {
+	buildResponse();
 }
 
 ValidResponse::ValidResponse(const ValidResponse &rhs) :
@@ -33,10 +34,14 @@ void ValidResponse::printLog(const std::string &title)
 	{
 		std::cout << "==================== " + title + " ====================" << std::endl;
 		std::cout << ft::timestamp(TIMESTAMP_FORMAT) << std::endl;
-		if (secFetchImage())
-			std::cout << GREEN << _response << RESET << std::endl;
+		if (getHeader("Content-Type").substr(0, 5) == "image")
+		{
+			std::cout << GREEN;
+			std::cout << headersToString() << std::endl;
+			std::cout << std::endl << "Image body skipped" << RESET << std::endl;
+		}
 		else
-			std::cout << GREEN << "We sent an image" << RESET << std::endl;
+			std::cout << GREEN << to_string() << RESET << std::endl;
 	}
 	else {
         if (getStatus() >= BAD_REQUEST)
@@ -46,19 +51,9 @@ void ValidResponse::printLog(const std::string &title)
 	}
 }
 
-void ValidResponse::addContentLengthCGI(CGI &cgi)
-{
-	if (cgi.getRetHeaders().find("Content-Length:") != std::string::npos)
-		return ;
-    _response.append("Content-Length: ");
-    _response.append(ft::to_string(cgi.getRetBody().length()));
-    _response.append("\r\n\r\n");
-}
-
-void ValidResponse::addBodyToResponse()
+void ValidResponse::buildGetBody()
 {
     std::string text;
-    std::stringstream out;
     std::string loc = _req.getLocation();
     std::string path = _req.getPath();
 
@@ -68,9 +63,7 @@ void ValidResponse::addBodyToResponse()
 			text = createDirectoryListingBody(path, loc);
 		else
 		{
-			setStatus(FORBIDDEN);
-			AddErrorBodyToResponse();
-			return ;
+			return setError(FORBIDDEN);
 		}
     }
     else
@@ -82,83 +75,36 @@ void ValidResponse::addBodyToResponse()
         catch (const std::exception& e)
         {
             std::cerr << e.what() << std::endl;
-			ErrorResponse err(FORBIDDEN);
-			_response = err.buildResponse();
-			return ;
+			return setError(FORBIDDEN);
         }
     }
-    out << text.size();
-    std::string content_len = "Content-Length: " + out.str();
-    _response.append(content_len);
-    _response.append("\r\n\r\n");
-    _response.append(text);
+	setBody(text);
 }
 
-void ValidResponse::AddErrorBodyToResponse()
-{
-    std::string body;
-    std::stringstream out;
-
-	try
-	{
-		body.append(ft::readFile(_loc.error_pages.at(getStatus())));
-	}
-	catch (const std::exception& e)
-	{
-		body.append(ft::craftErrorHTML(getStatus()));
-	}
-
-    _response.append("Content-Length: ");
-    _response.append(ft::itoa(body.size()));
-    _response.append("\r\n\r\n");
-    _response.append(body);
-}
-
-void ValidResponse::addContentType()
+void ValidResponse::setContentType()
 {
     std::string extension = ft::getExtension(_req.getPath());
     if (!extension.empty())
-    {
-        _response.append("Content-Type: ");
-        _response.append(ft::getMimeExtension(_mime_map, extension));
-        _response.append("\r\n");
-    }
-
+        setHeader("Content-Type", ft::getMimeExtension(_mime_map, extension));
 }
 
-void ValidResponse::addHTTPHeader(bool check_path)
+void	ValidResponse::setError(int status)
 {
-    if (check_path && getStatus() == HTTP_OK) {
-        checkPath(); // functions will return the code catched
-    }
-	Response::addHTTPHeader();
+	std::map<int, std::string>::const_iterator it = _loc.error_pages.find(status);
+	std::string custom_page;
+
+	if (it == _loc.error_pages.end())
+		custom_page = it->second;
+
+	ErrorResponse err(status, false, custom_page);
+	setBody(err.getBody());
+	setStatus(status);
 }
+
 
 /**************************************************************************************/
 /*                                  CHECKERS                                          */
 /**************************************************************************************/
-
-void ValidResponse::checkPath()
-{
-    std::string path = _req.getLocation();
-
-    if (ft::isDirectory(path) || ft::isFile(path))
-        setStatus(HTTP_OK);
-    else
-        setStatus(NOT_FOUND);
-}
-
-bool ValidResponse::secFetchImage()
-{
-    // This function just checks if the _request is for an image
-    std::map<std::string, std::string> tmp = _req.getHeaders();
-    if (tmp.find("Sec-Fetch-Dest") != tmp.end())
-    {
-        if (tmp.at("Sec-Fetch-Dest") == "image")
-            return (false);
-    }
-    return (true);
-}
 
 bool ValidResponse::useCGI()
 {
@@ -194,43 +140,36 @@ std::string ValidResponse::buildResponse()
             buildDeleteResponse();
             break;
         default:
-			{
-				ErrorResponse err(NOT_IMPLEMENTED);
-				_response = err.buildResponse();
-				break;
-			}
+			setError(NOT_IMPLEMENTED);
+			break;
     }
-	return _response;
+	return to_string();
 }
 
 void ValidResponse::buildGetResponse()
 {
-    if (useCGI()) // CGI or not ?
+    if (useCGI())
     {
         if (ft::isFile(_req.getLocation())) {
             CGI cgi(_req);
             setStatus(cgi.executeCgi(&_req, _server, _loc));
-            addHTTPHeader();
-			addContentLengthCGI(cgi);
-            _response.append(cgi.getRetBody());
+            setBody(cgi.getRetBody());
         }
         else
-        {
-            addHTTPHeader();
-            AddErrorBodyToResponse();
-        }
-        printLog("CGI");
+			setError(NOT_FOUND);
+        printLog("CGI Get");
     }
     else
     {
-        addHTTPHeader();
+		if (!ft::isDirectory(_req.getLocation()) && !ft::isFile(_req.getLocation()))
+			return setError(NOT_FOUND);
 
-        addContentType();
+        setContentType();
         if (ft::isOkHTTP(getStatus()))
-            addBodyToResponse();
+            buildGetBody();
         else
-            AddErrorBodyToResponse();
-        printLog("Valid");
+			setError(getStatus());
+        printLog("Valid Get");
     }
 }
 
@@ -239,28 +178,18 @@ void ValidResponse::buildPostResponse()
 {
     if (useCGI()) {
         CGI cgi(_req);
+
         setStatus(cgi.executeCgi(&_req, _server, _loc));
-        addHTTPHeader();
-        addContentLengthCGI(cgi);
-        _response.append(cgi.getRetBody());
-        printLog("CGI");
+		setBody(cgi.getRetBody());
+        printLog("CGI Post");
     }
     else {
         if (!ft::isFile(_req.getLocation()))
-            setStatus(NOT_FOUND);
-        else {
-            if (ft::writeFile(_req.getLocation(), _req.getBody()) == -1)
-                setStatus(FORBIDDEN);
-        }
+            setError(NOT_FOUND);
+        else if (ft::writeFile(_req.getLocation(), _req.getBody()) == -1)
+            setError(FORBIDDEN);
 
-        addHTTPHeader();
-        if (ft::isOkHTTP(getStatus())) {
-            _response.append("Content-Length: 0\r\n\r\n");
-        }
-        else {
-            AddErrorBodyToResponse();
-        }
-        printLog("Valid");
+        printLog("Valid Post");
     }
 }
 
@@ -278,12 +207,8 @@ void ValidResponse::buildDeleteResponse()
     }
     else
         setStatus(NOT_FOUND);
-    addHTTPHeader();
-    addContentType();
 
-    if (ft::isOkHTTP(getStatus()))
-        _response.append("\r\n");
-    else
-        AddErrorBodyToResponse();
-    printLog("Valid");
+    setContentType();
+
+    printLog("Valid Delete");
 }

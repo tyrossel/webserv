@@ -12,7 +12,9 @@ ErrorResponse::ErrorResponse(int status, bool close, const std::string &custom_p
 	Response(status),
 	_custom_file(custom_page),
     _close(close)
-{}
+{
+	buildResponse();
+}
 
 ErrorResponse::~ErrorResponse() {}
 
@@ -26,17 +28,21 @@ ErrorResponse &ErrorResponse::operator=(const ErrorResponse &rhs)
 {
 	Response::operator=(rhs);
 	_custom_file = rhs._custom_file;
+	_close = rhs._close;
 	return *this;
 }
 
 /**************************************************************************************/
-/*                                  TOOLS                                             */
+/*                                  BUILDERS                                          */
 /**************************************************************************************/
 
-void ErrorResponse::addBodyToResponse()
+std::string	ErrorResponse::buildResponse()
 {
     std::string body;
-    std::stringstream out;
+
+	setHeader("Content-Type", "html");
+    if (_close)
+		setHeader("Connection", "close");
 
 	try
 	{
@@ -46,26 +52,9 @@ void ErrorResponse::addBodyToResponse()
 	{
 		body.append(ft::craftErrorHTML(getStatus()));
 	}
-
-    _response.append("Content-Length: ");
-    _response.append(ft::itoa(body.size()));
-    _response.append("\r\n\r\n");
-    _response.append(body);
-}
-
-/**************************************************************************************/
-/*                                  BUILDERS                                          */
-/**************************************************************************************/
-
-std::string	ErrorResponse::buildResponse()
-{
-	addHTTPHeader();
-    _response.append("Content-Type: html\r\n");
-    if (_close)
-        _response.append("Connection: close\r\n");
-    addBodyToResponse();
+	setBody(body);
     printLog("Error");
-	return _response;
+	return to_string();
 }
 
 /**************************************************************************************/
@@ -78,7 +67,7 @@ void	ErrorResponse::printLog(const std::string &title)
 	{
 		std::cout << "================== " + title + " ==================" << std::endl;
 		std::cout << ft::timestamp(TIMESTAMP_FORMAT) << std::endl;
-		std::cout << GREEN << getResponse() << RESET << std::endl;
+		std::cout << GREEN << to_string() << RESET << std::endl;
 	}
 	else
 	{

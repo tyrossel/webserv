@@ -29,17 +29,13 @@ class ValidResponse : public Response {
 
 	protected:
         // CHECKERS ========================================================
-        void     checkPath();
-        bool     secFetchImage();
 		bool	 useCGI();
         // =================================================================
 
         // TOOLS ========================================================
         void        addContentLengthCGI(CGI &cgi);
-        void        addBodyToResponse();
-        void        AddErrorBodyToResponse();
-        void        addContentType();
-        void        addHTTPHeader(bool checkPath = true);
+        void        buildGetBody();
+        void        setContentType();
         // =================================================================
 
         // BUILDERS ========================================================
@@ -47,6 +43,9 @@ class ValidResponse : public Response {
         void        buildPostResponse();
         void        buildDeleteResponse();
         // =================================================================
+		//
+	private:
+		void		setError(int status);
 
 };
 
