@@ -8,9 +8,10 @@
 /**************************************************************************************/
 /*                                  CONSTRUCTOR / DESTRUCTOR                          */
 /**************************************************************************************/
-ErrorResponse::ErrorResponse(int status, const std::string &custom_page) :
+ErrorResponse::ErrorResponse(int status, bool close, const std::string &custom_page) :
 	Response(status),
-	_custom_file(custom_page)
+	_custom_file(custom_page),
+    _close(close)
 {}
 
 ErrorResponse::~ErrorResponse() {}
@@ -60,6 +61,8 @@ std::string	ErrorResponse::buildResponse()
 {
 	addHTTPHeader();
     _response.append("Content-Type: html\r\n");
+    if (_close)
+        _response.append("Connection: close\r\n");
 	addBodyToResponse();
     printLog("Error");
 	return _response;

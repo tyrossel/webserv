@@ -132,11 +132,12 @@ void Looper::checkConnectionTimeout()
         long int socket = it->first;
         if (isInTimeout(socket))
         {
-            FD_CLR(socket, &_active_fd_set);
+            if (std::find(_ready_fd.begin(), _ready_fd.end(), socket) == _ready_fd.end())
+                _ready_fd.push_back(socket);
+            buildErrorResponse(socket, REQUEST_TIMEOUT, true);
             _last_activity.erase(socket);
-            _active_servers[socket]->close(socket);
-            _active_servers.erase(it++);
-            it = _active_servers.begin();
+            FD_CLR(socket, &_active_fd_set);
+            it++;
         }
         else
             it++;
@@ -178,7 +179,6 @@ int Looper::startParsingRequest(int socket)
         buildResponse(socket, loc);
     }
 
-
     return 0;
 }
 
@@ -189,8 +189,8 @@ int Looper::readFromClient(long socket)
 
     ft::bzero(&buffer, BUFFER_SIZE);
 
-    //TODO : timestamp
-    _last_activity[socket] = ::time(NULL);
+    if (_raw_request[socket].empty())
+        _last_activity[socket] = ::time(NULL);
 
     ret = recv(socket, buffer, BUFFER_SIZE-1, 0);
     if (ret <= 0)
@@ -224,22 +224,22 @@ int Looper::readFromClient(long socket)
         // Here we want to see if our _raw_request size == Content-Length + Headers size
         headers_end += 4; // We have to add \r\n\r\n (4 char) because find exclude them
 
-        size_t len = 0;
-		size_t pos = _raw_request[socket].find("Content-Length");
-		if ( pos != std::string::npos)
-		{
-			// If the buffer is split exactly between Content-Length and the integer
-			if (_raw_request[socket].size() - pos < 26)
-				return 1;
-			try
-			{
-				len = ft::stoi(_raw_request[socket].substr(pos + 15, 10));
-			}
-			catch (const std::exception& e)
-			{
-				return BAD_REQUEST;
-			}
-		}
+        size_t len = 10000;
+//		size_t pos = _raw_request[socket].find("Content-Length");
+//		if ( pos != std::string::npos)
+//		{
+//			// If the buffer is split exactly between Content-Length and the integer
+//			if (_raw_request[socket].size() - pos < 26)
+//				return 1;
+//			try
+//			{
+//				len = ft::stoi(_raw_request[socket].substr(pos + 15, 10));
+//			}
+//			catch (const std::exception& e)
+//			{
+//				return BAD_REQUEST;
+//			}
+//		}
         if (_raw_request[socket].size() >= len + headers_end)
             return 0;
         else
@@ -262,20 +262,27 @@ void Looper::loop()
 
         while (ret == 0)
         {
+
             // Setting the timeout for select
             timeout.tv_sec  = 3;
             timeout.tv_usec = 0;
             // Copying the content for the reading set into the active set
             ft::memcpy(&reading_fd_set, &_active_fd_set, sizeof(_active_fd_set));
             FD_ZERO(&writing_fd_set);
+
+            checkConnectionTimeout();
+
             // here we set the already active fd's in the writing fd's
-            for (std::vector<int>::iterator it = _ready_fd.begin(); it != _ready_fd.end(); it++)
+            for (std::vector<int>::iterator it = _ready_fd.begin(); it != _ready_fd.end(); it++) {
+                std::cout << "New active fd: " << *it << std::endl;
                 FD_SET(*it, &writing_fd_set);
+            }
 			// Handle connection timeouts
             // select will wait for an event on the set given
+
+
             ret = select(_max_fd + 1, &reading_fd_set, &writing_fd_set, NULL, &timeout);
 
-			checkConnectionTimeout();
         }
         // ret will be greater than 0 if any valid event is catched
         if (ret > 0 && RUNNING)
@@ -307,9 +314,12 @@ void Looper::sendResponse(fd_set &reading_fd_set, fd_set &writing_fd_set, fd_set
 			continue;
 		}
 
-		int ret_val = _active_servers[fd]->send(fd, *_responses[fd]);
+        int ret_val = 0;
+        if (_responses[fd] != NULL)
+		    ret_val = _active_servers[fd]->send(fd, *_responses[fd]);
 
-		if (_requests[fd].getHeaders()["Connection"] == "close")
+		if (_requests[fd].getHeaders()["Connection"] == "close"
+            || _responses[fd]->getResponse().find("Connection: close"))
 		{
 			FD_CLR(fd, &_active_fd_set);
 			FD_CLR(fd, &reading_fd_set);
@@ -374,7 +384,6 @@ void Looper::requestProcess(fd_set &reading_fd_set)
                 buildErrorResponse(socket, ret_val);
 				_raw_request.erase(socket);
 				_ready_fd.push_back(socket);
-				_last_activity[socket] = ::time(NULL);
 				break;
 		}
         break;
@@ -443,9 +452,9 @@ int Looper::buildResponse(long socket, const Location &loc)
     return (1);
 }
 
-void Looper::buildErrorResponse(long socket, int status)
+void Looper::buildErrorResponse(long socket, int status, bool close)
 {
-    Response *ret = new ErrorResponse(status);
+    Response *ret = new ErrorResponse(status, close);
 
     ret->buildResponse();
     _responses.insert(std::pair<long int, Response*>(socket, ret));

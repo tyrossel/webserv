@@ -10,10 +10,11 @@ class ErrorResponse : public Response {
 	private:
 
 		std::string		_custom_file;
+        bool            _close;
 
     public:
         // CONSTRUCTORS ====================================================
-        ErrorResponse(int status = 500, const std::string &custom_file = "");
+        ErrorResponse(int status = 500, bool close=false, const std::string &custom_file = "");
 		ErrorResponse(const ErrorResponse &rhs);
         ~ErrorResponse();
 		ErrorResponse &operator=(const ErrorResponse &rhs);

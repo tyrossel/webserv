@@ -3,8 +3,6 @@
 
 #include "Config.hpp"
 #include "CommonGatewayInterface.hpp"
-//#include "Server.hpp"
-//#include "RequestParser.hpp"
 #include "Response.hpp"
 #include "webserv.hpp"
 #include <ctime>
@@ -54,7 +52,7 @@ class Looper {
 
         // RESPONSE CRAFTING ===============================================
         int     buildResponse(long socket, const Location &loc);
-        void    buildErrorResponse(long socket, int status);
+        void    buildErrorResponse(long socket, int status, bool close=false);
         // =================================================================
 };
 
