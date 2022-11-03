@@ -230,7 +230,7 @@ void ValidResponse::buildGetResponse()
             addBodyToResponse();
         else
             AddErrorBodyToResponse();
-        printLog("Valid2");
+        printLog("Valid");
     }
 }
 
@@ -246,11 +246,13 @@ void ValidResponse::buildPostResponse()
         printLog("CGI");
     }
     else {
-        std::cout << "salut" << std::endl;
         if (!ft::isFile(_req.getLocation()))
             setStatus(NOT_FOUND);
-        if (ft::writeFile(_req.getLocation(), _req.getBody()) == -1)
-            setStatus(FORBIDDEN);
+        else {
+            if (ft::writeFile(_req.getLocation(), _req.getBody()) == -1)
+                setStatus(FORBIDDEN);
+        }
+
         addHTTPHeader();
         if (ft::isOkHTTP(getStatus())) {
             _response.append("Content-Length: 0\r\n\r\n");
@@ -258,6 +260,7 @@ void ValidResponse::buildPostResponse()
         else {
             AddErrorBodyToResponse();
         }
+        printLog("Valid");
     }
 }
 
