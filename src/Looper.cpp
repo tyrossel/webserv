@@ -1,5 +1,6 @@
 #include "Looper.hpp"
 #include "ErrorResponse.hpp"
+#include "RedirResponse.hpp"
 #include "ValidResponse.hpp"
 #include "webserv.hpp"
 
@@ -454,7 +455,12 @@ void Looper::selectErrorHandle()
 int Looper::buildResponse(long socket, const Location &loc)
 {
 	// TODO: Create RedirectionResponse class
-    Response *response = new ValidResponse(loc, *_active_servers[socket], _requests[socket]);
+	const Redirection *redir = loc.findRedirection(_requests[socket].getPath());
+	Response *response;
+	if (redir)
+		response = new RedirResponse(loc, _requests[socket], *redir);
+	else
+		response = new ValidResponse(loc, *_active_servers[socket], _requests[socket]);
 
 	response->buildResponse();
 	_responses.insert(std::pair<int, Response *>(socket, response));

@@ -209,39 +209,6 @@ std::string ValidResponse::buildResponse()
 	return _response;
 }
 
-void ValidResponse::buildRedirectionResponse(const Redirection &redir)
-{
-	if (redir.status == 0)
-		setStatus(HTTP_FOUND);
-	else
-		setStatus(redir.status);
-	std::cout << RED "buildRedir: status = " << getStatus() << RESET << std::endl;
-	Response::addHTTPHeader();
-	if (ft::isOkHTTP(getStatus()))
-	{
-		addBodyToResponse();
-	}
-	else if (getStatus() / 100 == 3)
-	{
-		std::cout << RED "Redir to FILE" RESET << std::endl;
-		_response.append("Location: " + redir.new_url + "\r\n");
-		_response.append("Connection: keep-alive\r\n");
-		AddErrorBodyToResponse();
-	}
-	else
-	{
-		std::cout << RED "Redir to ERROR" RESET << std::endl;
-		AddErrorBodyToResponse();
-	}
-	if (VERBOSE)
-	{
-		std::cout << "================== RESPONSE ==================" << std::endl;
-		std::cout << YELLOW << ft::timestamp(TIMESTAMP_FORMAT) << RESET << std::endl;
-		std::cout << GREEN << _response << RESET << std::endl;
-		std::cout << "==============================================" << std::endl << std::endl;
-	}
-}
-
 void ValidResponse::buildGetResponse()
 {
     if (useCGI()) // CGI or not ?

@@ -6,7 +6,7 @@
 #    By: trossel <trossel@42lausanne.ch>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/04/07 17:50:59 by trossel           #+#    #+#              #
-#    Updated: 2022/11/01 18:16:12 by trossel          ###   ########.fr        #
+#    Updated: 2022/11/03 14:45:20 by trossel          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -19,6 +19,7 @@ OBJS_DIR	= obj
 OBJS = 		$(patsubst %.cpp, $(OBJS_DIR)/%.o, $(SRCS))
 SRCS		= main.cpp \
 			  Config.cpp \
+			  RedirResponse.cpp \
 			  ErrorResponse.cpp \
 			  ValidResponse.cpp \
 			  Response.cpp \

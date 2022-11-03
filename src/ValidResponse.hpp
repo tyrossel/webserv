@@ -43,7 +43,6 @@ class ValidResponse : public Response {
         // =================================================================
 
         // BUILDERS ========================================================
-		void		buildRedirectionResponse(const Redirection &redir);
         void        buildGetResponse();
         void        buildPostResponse();
         void        buildDeleteResponse();
