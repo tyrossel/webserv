@@ -134,6 +134,14 @@ namespace ft {
         str.erase(str.size() - 1);
     }
 
+	std::string getExtension(const std::string &path)
+	{
+		size_t dot = path.find_last_of('.');
+		if (dot == path.npos || dot == path.size() - 1)
+			return "";
+		return path.substr(dot + 1);
+	}
+
     /**************************************************************************************/
     /*                                     ARRAY                                          */
     /**************************************************************************************/

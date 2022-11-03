@@ -163,14 +163,7 @@ bool ValidResponse::useCGI()
 {
 	if (_loc.isCGI)
 		return true;
-	std::string path = _req.getPath();
-	size_t slash = path.find_last_of('/');
-	if (slash == path.npos)
-		slash = 0;
-	size_t dot = path.find_last_of('.');
-	if (dot == path.npos || dot == path.size() - 1)
-		return false;
-	std::string path_extension = path.substr(dot + 1);
+	std::string path_extension = ft::getExtension(_req.getPath());
 	for(std::vector<std::string>::const_iterator it = _loc.cgi_extensions.begin();
 			it != _loc.cgi_extensions.end(); it++)
 	{

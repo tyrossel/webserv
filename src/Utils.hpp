@@ -24,6 +24,7 @@ namespace ft {
     void        trimLeft(std::string &str, const std::string &chars = " \t\n\f\v\r");
     void        trimRight(std::string &str, const std::string &chars = " \t\n\f\v\r");
     void        popBack(std::string &str);
+	std::string	getExtension(const std::string &str);
     // =======================================================
 
     // ARRAY =================================================
