@@ -98,7 +98,14 @@ int RequestParser::checkHeaders()
     if (_request._headers.find("Content-Length") != _request._headers.end())
     {
         std::map<std::string, std::string>::iterator it = _request._headers.find("Content-Length");
-        _request._body_length = ft::stoi(it->second);
+		try
+		{
+			_request._body_length = ft::stoi(it->second);
+		}
+		catch (const std::exception& e)
+		{
+			_request._body_length = -1;
+		}
         if (_request._body_length < 0)
             return (exitStatus(BAD_REQUEST));
     }

@@ -48,12 +48,12 @@ void ValidResponse::printLog(const std::string &title)
 
 void ValidResponse::addContentLengthCGI(CGI &cgi)
 {
+	// TODO : Check if already present ?
     _response.append("Content-Length: ");
     _response.append(ft::to_string(cgi.getRetBody().length()));
     _response.append("\r\n\r\n");
 }
 
-// TODO: add file to read from (std::string path)
 void ValidResponse::addBodyToResponse()
 {
     std::string text;
@@ -80,8 +80,10 @@ void ValidResponse::addBodyToResponse()
         }
         catch (const std::exception& e)
         {
-            _response.append("\r\n\r\n");
-            std::cerr << e.what() << std::endl; // TODO: This is very heavy for a common case..
+            std::cerr << e.what() << std::endl;
+			ErrorResponse err(FORBIDDEN);
+			_response = err.buildResponse();
+			return ;
         }
     }
     out << text.size();
@@ -269,6 +271,7 @@ void ValidResponse::buildGetResponse()
     }
 }
 
+// TODO: Check status before replying ?
 void ValidResponse::buildPostResponse()
 {
     CGI cgi(_req);

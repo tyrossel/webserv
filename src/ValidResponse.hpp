@@ -24,6 +24,10 @@ class ValidResponse : public Response {
 		ValidResponse &operator=(const ValidResponse &rhs);
         // =================================================================
 
+		std::string	buildResponse();
+        void        printLog(const std::string &title);
+
+	protected:
         // CHECKERS ========================================================
         void     checkPath();
         bool     secFetchImage();
@@ -31,7 +35,6 @@ class ValidResponse : public Response {
         // =================================================================
 
         // TOOLS ========================================================
-        void        printLog(const std::string &title);
         void        addContentLengthCGI(CGI &cgi);
         void        addBodyToResponse();
         void        AddErrorBodyToResponse();
@@ -40,7 +43,6 @@ class ValidResponse : public Response {
         // =================================================================
 
         // BUILDERS ========================================================
-		std::string	buildResponse();
 		void		buildRedirectionResponse(const Redirection &redir);
         void        buildGetResponse();
         void        buildPostResponse();

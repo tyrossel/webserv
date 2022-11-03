@@ -52,7 +52,7 @@ long Server::createSocket()
 
 void Server::setAddress()
 {
-    memset((char *)&_addr, 0, sizeof(_addr)); //TODO : import our memset
+	ft::bzero((char *)&_addr, sizeof(_addr));
 
     _addr.sin_family = AF_INET;
     _addr.sin_addr.s_addr = inet_addr(_address.c_str());
@@ -81,6 +81,8 @@ int Server::send(int socket, const Response &resp)
         return (bytes_sent_total);
 }
 
+// TODO: Maybe check if port is already in use, in order to allow several
+// servers on the same port
 int Server::setupListen()
 {
     _fd = socket(AF_INET, SOCK_STREAM, 0);

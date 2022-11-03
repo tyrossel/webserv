@@ -57,8 +57,9 @@ namespace ft {
         return hex;
     }
 
-    int stoi(std::string &str)
+    int stoi(const std::string &s)
     {
+		std::string str = s;
         int i;
 
         if (str.empty())
@@ -288,7 +289,7 @@ namespace ft {
         std::string ret;
 
         ret.append("<!DOCTYPE html>\n<html lang=\"en\">\n<body>\n<meta charset=\"UTF-8\">\n<h1 style=\"text-align: center\">");
-        ret.append(itoa(error));
+        ret.append(ft::itoa(error));
         ret.append(errorMessage(error));
         ret.append("</h1>\n<hr>\n<body>\n<h2 style=\"text-align: center\">WetServ</h2>\n</body>\n</html>\n");
         return (ret);

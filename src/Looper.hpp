@@ -37,6 +37,7 @@ class Looper {
         void    setMaxFd();
         int     setupLoop();
         void    checkConnectionTimeout();
+        bool    isInTimeout(int socket);
         // =================================================================
 
         // EXTRACT REQUEST =================================================

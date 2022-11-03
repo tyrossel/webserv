@@ -110,7 +110,7 @@ int CGI::executeCgi(const Request *request, const Server &server, const Location
                 exitFail("Can't duplicate _path", 42);
             argv[2] = NULL;
 
-			// TODO: Remove ?
+			// // TODO: Remove ?
             if (chdir(_file_path.substr(0, _file_path.find_last_of('/')).c_str()) == -1)
                 exitFail("Can't change directory", 42);
             if (dup2(pip_to_cgi[0], STDIN_FILENO) == -1)

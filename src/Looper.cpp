@@ -109,13 +109,8 @@ int Looper::setupLoop()
     return _max_fd == 0 ? -1 : 0;
 }
 
-void Looper::checkConnectionTimeout()
+bool Looper::isInTimeout(int socket)
 {
-    if (_timeout < 0)
-        return ;
-    for (std::map<long int, Server *>::iterator it(_active_servers.begin()); it != _active_servers.end();)
-    {
-        long int socket = it->first;
         time_t time_now(::time(NULL)), time_last(0);
         ::time(&time_now);
 
@@ -125,7 +120,17 @@ void Looper::checkConnectionTimeout()
         std::map<int, std::time_t>::iterator time_it = _last_activity.find(socket);
         if (time_it != _last_activity.end())
             time_last = time_it->second;
-        if (time_now - time_last > _timeout)
+        return time_now - time_last > _timeout;
+}
+
+void Looper::checkConnectionTimeout()
+{
+    if (_timeout < 0)
+        return ;
+    for (std::map<long int, Server *>::iterator it(_active_servers.begin()); it != _active_servers.end();)
+    {
+        long int socket = it->first;
+        if (isInTimeout(socket))
         {
             FD_CLR(socket, &_active_fd_set);
             _last_activity.erase(socket);
@@ -147,7 +152,6 @@ int Looper::startParsingRequest(int socket)
     RequestParser   parser;
     Request         request;
 
-    //TODO : check return of parsing ??
     if (parser.parseRequest(_raw_request[socket]) == -1)
         return parser.getRequest().getStatus();
 
@@ -174,7 +178,6 @@ int Looper::startParsingRequest(int socket)
         buildResponse(socket, loc);
     }
 
-    _last_activity[socket] = ::time(NULL);
 
     return 0;
 }
@@ -187,6 +190,7 @@ int Looper::readFromClient(long socket)
     ft::bzero(&buffer, BUFFER_SIZE);
 
     //TODO : timestamp
+    _last_activity[socket] = ::time(NULL);
 
     ret = recv(socket, buffer, BUFFER_SIZE-1, 0);
     if (ret <= 0)
@@ -198,8 +202,8 @@ int Looper::readFromClient(long socket)
     _raw_request[socket].append(buffer, ret);
 
     size_t headers_end = _raw_request[socket].find("\r\n\r\n");
-	if ((headers_end == std::string::npos && _raw_request.size() > HEADERS_MAX_LENGTH)
-			|| headers_end > HEADERS_MAX_LENGTH)
+	if ((headers_end == std::string::npos && _raw_request[socket].size() > HEADERS_MAX_LENGTH)
+			|| (headers_end != std::string::npos && headers_end > HEADERS_MAX_LENGTH))
 	{
 		return HEADERS_TOO_LARGE;
 	}
@@ -220,17 +224,27 @@ int Looper::readFromClient(long socket)
         // Here we want to see if our _raw_request size == Content-Length + Headers size
         headers_end += 4; // We have to add \r\n\r\n (4 char) because find exclude them
 
-        //TODO : update this shit with our function
-
         size_t len = 0;
-		if (_raw_request[socket].find("Content-Length:") != std::string::npos)
-			len = std::atoi(_raw_request[socket].substr(_raw_request[socket].find("Content-Length:") + 15, 10).c_str());
+		size_t pos = _raw_request[socket].find("Content-Length");
+		if ( pos != std::string::npos)
+		{
+			// If the buffer is split exactly between Content-Length and the integer
+			if (_raw_request[socket].size() - pos < 26)
+				return 1;
+			try
+			{
+				len = ft::stoi(_raw_request[socket].substr(pos + 15, 10));
+			}
+			catch (const std::exception& e)
+			{
+				return BAD_REQUEST;
+			}
+		}
         if (_raw_request[socket].size() >= len + headers_end)
             return 0;
         else
             return 1;
     }
-	// TODO : What happens when returning 1 ?!?
     return 1;
 }
 
@@ -421,6 +435,7 @@ void Looper::selectErrorHandle()
 
 int Looper::buildResponse(long socket, const Location &loc)
 {
+	// TODO: Create RedirectionResponse class
     Response *response = new ValidResponse(loc, *_active_servers[socket], _requests[socket]);
 
 	response->buildResponse();

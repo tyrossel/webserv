@@ -26,11 +26,6 @@ class JsonArray
 
 		void	clear();
 
-		template<typename T>
-		std::vector<T> value()
-		{
-			throw std::logic_error("Json array error: cannot contain this type");
-		}
 		std::vector<int> intValues() const { return this->ints;}
 		std::vector<std::string> stringValues() const { return this->strings;}
 		std::vector<bool> boolValues() const { return this->bools;}

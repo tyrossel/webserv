@@ -74,7 +74,6 @@ int         Response::respSize() const { return ((int)this->_response.size()); }
 int         Response::getStatus() const { return (this->_status); }
 void		Response::setStatus(int new_status)
 {
-	// TODO: better than that
 	if (new_status >= 100 && new_status < 600)
 		_status = new_status;
 	else

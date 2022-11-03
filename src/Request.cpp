@@ -36,10 +36,6 @@ Request &Request::operator=(const Request &other)
 
 bool Request::matchLocation(const std::string &path, const std::string &loc_path) const
 {
-    // TODO TYR: allow other matching, such as those defined in Nginx:
-    // = (has to be totally equal)
-    // ~ (case-sensitive)
-    // ~* case-insensitive
     return !path.compare(0, loc_path.size(), loc_path);
 }
 
@@ -84,7 +80,6 @@ const Server & Request::FindServer(const std::vector<Server> &servers, struct so
         for (std::vector<std::string>::const_iterator it_names = server_names.begin();
              it_names != server_names.end(); it_names++)
         {
-            // TODO: Handle wildcards
             if (*it_names == requestHost)
                 return *it_srv;
         }

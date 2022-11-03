@@ -12,7 +12,7 @@ namespace ft {
 
     // STRING ================================================
     size_t      hexToInt(std::string &hex_str);
-    int         stoi(std::string &str);
+    int         stoi(const std::string &str);
 
     std::string toLower(std::string s);
     std::string toUpper(std::string s);
