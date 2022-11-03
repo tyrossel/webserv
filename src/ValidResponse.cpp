@@ -299,7 +299,7 @@ void ValidResponse::buildDeleteResponse()
     addContentType();
 
     if (ft::isOkHTTP(getStatus()))
-        addBodyToResponse();
+        _response.append("\r\n");
     else
         AddErrorBodyToResponse();
     printLog("Valid");
