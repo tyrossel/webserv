@@ -178,16 +178,11 @@ int Looper::startParsingRequest(int socket)
     printLog(request, socket);
 
     if (!request.isValid(loc))
-    {
-        _requests.insert(std::make_pair<long, Request>(socket, request));
-        buildResponse(socket, loc);
-    }
-    else
-    {
-        request.updatePathWithLocation(loc);
-        _requests.insert(std::make_pair<long, Request>(socket, request));
-        buildResponse(socket, loc);
-    }
+        return request.getStatus();
+
+    request.updatePathWithLocation(loc);
+    _requests.insert(std::make_pair<long, Request>(socket, request));
+    buildResponse(socket, loc);
 
     return 0;
 }
