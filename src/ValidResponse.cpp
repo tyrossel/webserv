@@ -117,11 +117,6 @@ void ValidResponse::AddErrorBodyToResponse()
 void ValidResponse::addContentType()
 {
     _response.append("Content-Type: ");
-    std::map<std::string, std::string> tmp = _req.getHeaders();
-    if (tmp.find("Sec-Fetch-Dest") != tmp.end())
-        _response.append(tmp.find("Sec-Fetch-Dest")->second);
-    else
-        _response.append("NONE");
     _response.append("\r\n");
 }
 
@@ -223,6 +218,7 @@ void ValidResponse::buildGetResponse()
     else
     {
         addHTTPHeader();
+
         //addContentType(socket); // TODO: Mime if no CGI
         if (ft::isOkHTTP(getStatus()))
             addBodyToResponse();

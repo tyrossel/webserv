@@ -50,6 +50,8 @@ namespace ft {
     RequestType	RequestFromString(const std::string &str);
     std::string RequestToString(RequestType type);
 	std::string timestamp(const std::string &format);
+    std::map<std::string, std::string> createMimeMap();
+    std::string getMimeExtension(std::map<std::string, std::string> mime_map, const std::string &extension);
     // =======================================================
 
 }

@@ -10,6 +10,7 @@
 Response::Response(int status)
 {
 	setStatus(status);
+    _mime_map = ft::createMimeMap();
 }
 
 Response::~Response() {}

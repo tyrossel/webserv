@@ -11,7 +11,8 @@ class Response {
 
 	protected:
 
-        std::string             _response;
+        std::map<std::string, std::string>  _mime_map;
+        std::string                         _response;
 
     public:
 
