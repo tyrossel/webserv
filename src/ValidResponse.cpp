@@ -166,7 +166,7 @@ bool ValidResponse::useCGI()
 		slash = 0;
 	size_t dot = path.find_last_of('.');
 	if (dot == path.npos || dot == path.size() - 1)
-		dot = slash;
+		return false;
 	std::string path_extension = path.substr(dot + 1);
 	for(std::vector<std::string>::const_iterator it = _loc.cgi_extensions.begin();
 			it != _loc.cgi_extensions.end(); it++)
