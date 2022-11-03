@@ -116,8 +116,14 @@ void ValidResponse::AddErrorBodyToResponse()
 
 void ValidResponse::addContentType()
 {
-    _response.append("Content-Type: ");
-    _response.append("\r\n");
+    std::string extension = ft::getExtension(_req.getPath());
+    if (!extension.empty())
+    {
+        _response.append("Content-Type: ");
+        _response.append(ft::getMimeExtension(_mime_map, extension));
+        _response.append("\r\n");
+    }
+
 }
 
 void ValidResponse::addHTTPHeader(bool check_path)
@@ -219,7 +225,7 @@ void ValidResponse::buildGetResponse()
     {
         addHTTPHeader();
 
-        //addContentType(socket); // TODO: Mime if no CGI
+        addContentType();
         if (ft::isOkHTTP(getStatus()))
             addBodyToResponse();
         else
