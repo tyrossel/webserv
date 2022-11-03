@@ -237,13 +237,31 @@ void ValidResponse::buildGetResponse()
 // TODO: Check status before replying ?
 void ValidResponse::buildPostResponse()
 {
-    CGI cgi(_req);
-    setStatus(cgi.executeCgi(&_req, _server, _loc));
-    addHTTPHeader();
-    addContentLengthCGI(cgi);
-    _response.append(cgi.getRetBody());
-    printLog("CGI");
+    if (useCGI()) {
+        CGI cgi(_req);
+        setStatus(cgi.executeCgi(&_req, _server, _loc));
+        addHTTPHeader();
+        addContentLengthCGI(cgi);
+        _response.append(cgi.getRetBody());
+        printLog("CGI");
+    }
+    else {
+        std::cout << "salut" << std::endl;
+        if (!ft::isFile(_req.getLocation()))
+            setStatus(NOT_FOUND);
+        if (ft::writeFile(_req.getLocation(), _req.getBody()) == -1)
+            setStatus(FORBIDDEN);
+        addHTTPHeader();
+        if (ft::isOkHTTP(getStatus())) {
+            _response.append("Content-Length: 0\r\n\r\n");
+        }
+        else {
+            AddErrorBodyToResponse();
+        }
+    }
 }
+
+
 
 void ValidResponse::buildDeleteResponse()
 {

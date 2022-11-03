@@ -243,6 +243,19 @@ namespace ft {
         return content;
     }
 
+    int writeFile(std::string path, std::string body)
+    {
+        std::string content;
+        std::ofstream ofs(path.c_str(), std::ofstream::app);
+        if (!ofs.good())
+        {
+            return (-1);
+        }
+        ofs << body.c_str();
+        ofs.close();
+        return 0;
+    }
+
     /**************************************************************************************/
     /*                                     ERRORS / CHECKERS                              */
     /**************************************************************************************/
