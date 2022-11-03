@@ -13,6 +13,7 @@
 - [4. Response](#response)
 - [5. HTTP Methods](#http-methods)
 - [6. CGI](#cgi)
+  - [6.1 CGI Environment](#cgi-environment)
 
 Made by [Bima](https://github.com/Bima42), [YvanoffP](https://github.com/YvanoffP) and [Tyrossel](https://github.com/tyrossel)
 
@@ -156,3 +157,24 @@ make
 <p align="center">
   <img src="readme_docs/cgi_execution.png">
 </p>
+
+## CGI Environment
+
+| Header            | Value                                                                                     |
+|:------------------|:------------------------------------------------------------------------------------------|
+| CONTENT_LENGTH    | Length of the request body                                                                |
+| CONTENT_TYPE      | Value of Content-Type headers in request                                                  |
+| FILE_UPLOADS      | On or Off                                                                                 |
+| GATEWAY_INTERFACE | CGI/Version(1.1)                                                                          |
+| PATH_INFO         | Full path of the requested file                                                           |
+| PATH_TRANSLATED   | Full path of the requested file                                                           |
+| QUERY_STRING      | If query, part of request path after '?' / Otherwise, empty string                        |
+| REDIRECT_STATUS   | Should be initialize for php-cgi                                                          |
+| REMOTE_HOST       | Name of the client that sent the request                                                  |
+| REQUEST_METHOD    | Method of the request                                                                     |
+| REQUEST_URI       | Full path of the requested file                                                           |
+| SCRIPT_NAME       | Name of the cgi file                                                                      |
+| SERVER_NAME       | Server hostname, or IP address                                                            |
+| SERVER_PORT       | Port where the server i listening                                                         |
+| SERVER_PROTOCOL   | Name and revision of the information protcol this request came in with : Protocol/Version |
+| SERVER_SOFTWARE   | Name and version of the information server software answering the request : Name/Version  |

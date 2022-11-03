@@ -162,20 +162,20 @@ int CGI::setCGIEnvironment(const Request *request, const Server &server, const L
         _env["CONTENT_LENGTH"] = _headers["Content-Length"];
 
     _env["CONTENT_TYPE"] = _headers["Content-Type"];
+    _env["FILE_UPLOADS"] = "On";
     _env["GATEWAY_INTERFACE"] = "CGI/1.1";
     _env["PATH_INFO"] = _file_path;
-    _env["REQUEST_URI"] = _file_path;
     _env["PATH_TRANSLATED"] = _file_path;
     _env["QUERY_STRING"] = request->getQuery();
+    _env["REDIRECT_STATUS"] = "0";
     _env["REMOTE_HOST"] = "";
     _env["REQUEST_METHOD"] = ft::RequestToString(request->getMethod());
+    _env["REQUEST_URI"] = _file_path;
     _env["SCRIPT_NAME"] = loc.cgi_bin;
     _env["SERVER_NAME"] = server.getAddress();
     _env["SERVER_PORT"] = ft::to_string(server.getPort());
     _env["SERVER_PROTOCOL"] = "HTTP/" + request->getVersion();
     _env["SERVER_SOFTWARE"] = "WetServ/1.0";
-    _env["REDIRECT_STATUS"] = "0";
-    _env["FILE_UPLOADS"] = "On";
 
 
     for (std::map<std::string, std::string>::iterator it = _headers.begin(); it != _headers.end(); it++)
