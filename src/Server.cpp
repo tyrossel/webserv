@@ -81,8 +81,6 @@ int Server::send(int socket, const Response &resp)
         return (bytes_sent_total);
 }
 
-// TODO: Maybe check if port is already in use, in order to allow several
-// servers on the same port
 int Server::setupListen()
 {
     _fd = socket(AF_INET, SOCK_STREAM, 0);

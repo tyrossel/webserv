@@ -47,19 +47,17 @@ bool Config::isValid() const {
             std::cerr << "Port is not valid: " << it->getPort() << std::endl;
             return false;
         }
-        // if (portList.find(it->getPort()) != portList.end()) {
-        //     std::cerr << "Port is already used by a previous server : " <<
-        //               it->getPort() << std::endl;
-        //     return false;
-        // }
-        // portList.insert(it->getPort());
+        if (portList.find(it->getPort()) != portList.end()) {
+            std::cerr << "Port is already used by a previous server : " <<
+                      it->getPort() << std::endl;
+            return false;
+        }
+        portList.insert(it->getPort());
 
         if (inet_addr(it->getAddress().c_str()) == INADDR_NONE) {
             std::cerr << "Address is not valid: " << it->getAddress() << std::endl;
             return false;
         }
-
-        // TODO TYR: Maybe check that names are valid URL ?
 
         const std::map <std::string, Location> locations = it->getLocations();
         for (std::map<std::string, Location>::const_iterator it = locations.begin();

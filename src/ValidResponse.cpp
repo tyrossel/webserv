@@ -48,7 +48,8 @@ void ValidResponse::printLog(const std::string &title)
 
 void ValidResponse::addContentLengthCGI(CGI &cgi)
 {
-	// TODO : Check if already present ?
+	if (cgi.getRetHeaders().find("Content-Length:") != std::string::npos)
+		return ;
     _response.append("Content-Length: ");
     _response.append(ft::to_string(cgi.getRetBody().length()));
     _response.append("\r\n\r\n");
