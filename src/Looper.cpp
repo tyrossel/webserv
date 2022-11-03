@@ -130,17 +130,26 @@ void Looper::checkConnectionTimeout()
     for (std::map<long int, Server *>::iterator it(_active_servers.begin()); it != _active_servers.end();)
     {
         long int socket = it->first;
-        if (isInTimeout(socket))
-        {
+        if (!isInTimeout(socket)) {
+            it++;
+            continue;
+        }
+        if (_raw_request[socket].size() > 0) {
             if (std::find(_ready_fd.begin(), _ready_fd.end(), socket) == _ready_fd.end())
                 _ready_fd.push_back(socket);
             buildErrorResponse(socket, REQUEST_TIMEOUT, true);
             _last_activity.erase(socket);
             FD_CLR(socket, &_active_fd_set);
-            it++;
         }
-        else
-            it++;
+        else{
+            FD_CLR(socket, &_active_fd_set);
+            _last_activity.erase(socket);
+            _active_servers[socket]->close(socket);
+            _active_servers.erase(it++);
+            it = _active_servers.begin();
+            continue;
+        }
+        it++;
     }
 }
 
@@ -264,24 +273,23 @@ void Looper::loop()
         {
 
             // Setting the timeout for select
-            timeout.tv_sec  = 3;
+            timeout.tv_sec  = 1;
             timeout.tv_usec = 0;
             // Copying the content for the reading set into the active set
             ft::memcpy(&reading_fd_set, &_active_fd_set, sizeof(_active_fd_set));
             FD_ZERO(&writing_fd_set);
 
-            checkConnectionTimeout();
 
             // here we set the already active fd's in the writing fd's
-            for (std::vector<int>::iterator it = _ready_fd.begin(); it != _ready_fd.end(); it++) {
-                std::cout << "New active fd: " << *it << std::endl;
+            for (std::vector<int>::iterator it = _ready_fd.begin(); it != _ready_fd.end(); it++)
                 FD_SET(*it, &writing_fd_set);
-            }
-			// Handle connection timeouts
+
+
             // select will wait for an event on the set given
-
-
             ret = select(_max_fd + 1, &reading_fd_set, &writing_fd_set, NULL, &timeout);
+
+            // Handle connection timeouts
+            checkConnectionTimeout();
 
         }
         // ret will be greater than 0 if any valid event is catched
@@ -319,7 +327,7 @@ void Looper::sendResponse(fd_set &reading_fd_set, fd_set &writing_fd_set, fd_set
 		    ret_val = _active_servers[fd]->send(fd, *_responses[fd]);
 
 		if (_requests[fd].getHeaders()["Connection"] == "close"
-            || _responses[fd]->getResponse().find("Connection: close"))
+            || _responses[fd]->getResponse().find("Connection: close") != std::string::npos)
 		{
 			FD_CLR(fd, &_active_fd_set);
 			FD_CLR(fd, &reading_fd_set);
@@ -379,7 +387,8 @@ void Looper::requestProcess(fd_set &reading_fd_set)
 				_active_servers[socket]->close(socket);
 				_last_activity.erase(socket);
 				_active_servers.erase(it++);
-				break;
+                _raw_request.erase(socket);
+                break;
 			default: // Request not conform: Respond an error
                 buildErrorResponse(socket, ret_val);
 				_raw_request.erase(socket);
