@@ -205,6 +205,12 @@ int RequestParser::parsePath(std::string &first_line, size_t &start, size_t &end
     if (_request._path[0] != '/')
         return (exitStatus(BAD_REQUEST));
 
+    std::string formated_path = _request.getPath();
+    for (size_t pos = formated_path.find("+"); formated_path.find("+") != std::string::npos; pos = formated_path.find("+")) {
+        formated_path.replace(pos, 1, " ");
+    }
+    _request.setPath(formated_path);
+
     return (parseVersion(first_line, start, end));
 }
 

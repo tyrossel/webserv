@@ -158,6 +158,7 @@ int                                 Request::getStatus() const { return (this->_
 /**************************************************************************************/
 
 void Request::setStatus(int new_status) { this->_status = new_status; }
+void Request::setPath(std::string new_path) { this->_path = new_path; }
 
 /**************************************************************************************/
 /*                                      NON MEMBERS                                   */
