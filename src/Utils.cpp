@@ -251,7 +251,7 @@ namespace ft {
         {
             return (-1);
         }
-        ofs << body.c_str();
+        ofs << body.c_str() << " || ";
         ofs.close();
         return 0;
     }
