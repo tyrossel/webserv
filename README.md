@@ -12,8 +12,10 @@
   - [3.3 Looper Object](#looper-object)
 - [4. Response](#response)
 - [5. HTTP Methods](#http-methods)
-- [6. CGI](#cgi)
-  - [6.1 CGI Environment](#cgi-environment)
+- [6. Redirection](#redirection)
+- [7. CGI](#cgi)
+  - [7.1 CGI Environment](#cgi-environment)
+- [8. RFC Docs](#rfc-docs) 
 
 Made by [Bima](https://github.com/Bima42), [YvanoffP](https://github.com/YvanoffP) and [Tyrossel](https://github.com/tyrossel)
 
@@ -23,7 +25,7 @@ make
 ```
 
 ```
-./webserv configuration_file.json
+./webserv configuration_file
 ```
 
 # Parsing
@@ -33,7 +35,7 @@ make
   <img src="readme_docs/parsing_json_file.png">
 </p>
 
-- Configuration file must be JSON file
+- Configuration file must be JSON like
 - See how to parse JSON [here](https://www.json.org/json-en.html)
 
 ### Configurations values for Server
@@ -84,7 +86,10 @@ make
 - Payload body accepted in our server :
   - classic payload
   - chunked without trailer
-  - chunked with payload
+  - chunked with trailer
+- Here is some docs according to HTTP request format :
+  - [RFC 7230](https://www.rfc-editor.org/rfc/rfc7230#section-3.3)
+  - [RFC 7231](https://www.rfc-editor.org/rfc/rfc7231#section-5) 
 
 <p align="center">
   <img src="readme_docs/body_request.png">
@@ -100,9 +105,9 @@ make
 
 - allow your program to monitor multiple file descriptor (max 1024)
 - will be waiting for _timeout_ and return a value :
-  - -1 : error
-  - 0 : if timeout
-  - > 0 : total number of bits that are set in readfds, writefds and exceptfds
+  - `-1` : error
+  - `0` : if timeout
+  - `> 0` : total number of bits that are set in readfds, writefds and exceptfds
 
 ## Main Loop
 - Here is the main
@@ -135,11 +140,34 @@ make
 
 # HTTP Methods
 
-| Method          | Body                      | Resume                                                                                | 
-| :-------------- |:-----------------------   |:------------------------------------------------------------                          |
-| GET             | No                        | requests a representation of the specified resource                                   |
-| POST            | Yes                       | sends data to the server, sent via an HTML form and results in a change on the server |
-| DELETE          | May.                      | deletes the specified resource                                                        |
+| Method          | Body                     | Resume                                                                                | 
+| :-------------- |:-------------------------|:--------------------------------------------------------------------------------------|
+| GET             | No                       | Requests a representation of the specified resource                                   |
+| POST            | Yes                      | Sends data to the server, sent via an HTML form and results in a change on the server |
+| DELETE          | May                      | Deletes the specified resource                                                        |
+
+- [RFC 7231](https://www.rfc-editor.org/rfc/rfc7231)
+
+# Redirection
+## Resume
+- Technique to give more than one URL address to a page
+- It's a special case of response : use the 30X codes
+- Client send a request to the server. Server detect that the requested resource has been moved, so server respond the right 30X code. The client will send a new request with the new location to get the requested resource
+
+<p align="center">
+  <img src="readme_docs/http_redirection.png">
+</p>
+
+## Redirection codes
+| Code | Status             | Use case                                                                                            | 
+|:-----|:-------------------|:----------------------------------------------------------------------------------------------------|
+| 300  | Multiple choice    | Choices are listed in an HTML page in the body. Few use case                                        |
+| 301  | Moved Permanently  | Permanent redirection. Reorganization of a Web site                                                 |
+| 302  | Found              | Page is temporarily unavailable                                                                     |
+| 303  | See Other          | Used to redirect after a PUT or a POST                                                              |
+| 304  | Not Modified       | Sent for revalidated conditional requests. Indicates that the cached response is still fresh        |
+| 307  | Temporary Redirect | Page is temporarily unavailable for unforeseen reasons. Better than 302 when non-GET method is used |
+| 308  | Permanent Redirect | Reorganization of a Web site, with non-GET methods                                                  |
 
 # CGI
 - Common Gateway Interface
@@ -178,3 +206,13 @@ make
 | SERVER_PORT       | Port where the server i listening                                                         |
 | SERVER_PROTOCOL   | Name and revision of the information protcol this request came in with : Protocol/Version |
 | SERVER_SOFTWARE   | Name and version of the information server software answering the request : Name/Version  |
+
+# RFC Docs
+- RFC are public text use to set the standards of the Internet
+- Here is the most useful ones for this project
+  - [RFC 7230](https://www.rfc-editor.org/rfc/rfc7230)
+  - [RFC 7231](https://www.rfc-editor.org/rfc/rfc7231)
+  - [RFC 7232](https://www.rfc-editor.org/rfc/rfc7232)
+  - [RFC 7233](https://www.rfc-editor.org/rfc/rfc7233)
+  - [RFC 7234](https://www.rfc-editor.org/rfc/rfc7234)
+  - [RFC 7235](https://www.rfc-editor.org/rfc/rfc7235)
