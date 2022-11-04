@@ -18,7 +18,7 @@ class Request {
         std::string                         _version;
         std::map<std::string, std::string>  _headers;
         std::string                         _body;
-        int                                 _body_length;
+        long                                _body_length;
         int                                 _status;
         friend class                        RequestParser;
 
@@ -42,7 +42,7 @@ class Request {
         std::string                         getQuery() const;
         std::string                         getVersion() const;
         std::string                         getBody() const;
-        int                                 getBodyLength() const;
+        long                                getBodyLength() const;
         int                                 getStatus() const;
 
         /* SETTERS */
