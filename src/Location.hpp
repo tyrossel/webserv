@@ -30,7 +30,7 @@ struct Location
 
 	const Redirection *	 findRedirection(const std::string &req_path) const;
 
-	long								max_client_body_size;
+	long 								max_client_body_size;
 	std::bitset<LastRequestType>		requests_allowed;
 	bool								isCGI;
 	bool								auto_index;
