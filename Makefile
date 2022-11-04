@@ -6,13 +6,13 @@
 #    By: trossel <trossel@42lausanne.ch>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/04/07 17:50:59 by trossel           #+#    #+#              #
-#    Updated: 2022/11/04 09:07:20 by trossel          ###   ########.fr        #
+#    Updated: 2022/11/04 11:37:25 by trossel          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 TARGET		= webserv
 CXX			= c++
-CXXFLAGS	= -Wall -Wextra -Werror -std=c++98 -pedantic -g
+CXXFLAGS	= -Wall -Wextra -Werror -std=c++98 -pedantic
 CPPFLAGS	= -Iincludes
 SRC_DIR		= src
 OBJS_DIR	= obj
