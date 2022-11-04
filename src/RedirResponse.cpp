@@ -61,7 +61,7 @@ void RedirResponse::setError(int status, bool print)
 	std::map<int, std::string>::const_iterator it = _loc.error_pages.find(status);
 	std::string custom_page;
 
-	if (it == _loc.error_pages.end())
+	if (it != _loc.error_pages.end())
 		custom_page = it->second;
 
 	ErrorResponse err(status, false, &_loc);
