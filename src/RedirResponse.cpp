@@ -9,7 +9,6 @@
 RedirResponse::RedirResponse(const Location &loc, const Request &req, const Redirection &redir) :
 	Response(301), _loc(loc), _req(req), _redir(redir)
 {
-	buildResponse();
 }
 
 RedirResponse::~RedirResponse()
@@ -26,11 +25,11 @@ void	RedirResponse::buildResponse()
 	{
 		setHeader("Location", _redir.new_url);
 		setHeader("Connection", "keep-alive");
-		setError(getStatus());
+		setError(getStatus(), false);
 	}
 	else
 	{
-		setError(getStatus());
+		return setError(getStatus(), true);
 	}
 
 	printLog("Redirection");
@@ -57,36 +56,7 @@ void	RedirResponse::printLog(const std::string &title)
 	}
 }
 
-void RedirResponse::buildBody()
-{
-    std::string text;
-    std::string loc = _req.getLocation();
-    std::string path = _req.getPath();
-
-    if (ft::isDirectory(loc))
-    {
-		if (_loc.auto_index)
-			text = createDirectoryListingBody(path, loc);
-		else
-		{
-			return setError(FORBIDDEN);
-		}
-    }
-    else
-    {
-        try
-        {
-            text = ft::readFile(loc);
-        }
-        catch (const std::exception& e)
-        {
-            std::cerr << e.what() << std::endl;
-			return setError(FORBIDDEN);
-        }
-    }
-}
-
-void RedirResponse::setError(int status)
+void RedirResponse::setError(int status, bool print)
 {
 	std::map<int, std::string>::const_iterator it = _loc.error_pages.find(status);
 	std::string custom_page;
@@ -95,6 +65,8 @@ void RedirResponse::setError(int status)
 		custom_page = it->second;
 
 	ErrorResponse err(status, false, &_loc);
+	err.setPrint(print);
+	err.buildResponse();
 	setBody(err.getBody());
 	setStatus(status);
 }

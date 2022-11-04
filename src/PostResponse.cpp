@@ -6,7 +6,6 @@
 PostResponse::PostResponse(const Location &loc, const Server &server, const Request &req)
 	: ValidResponse(loc, server, req)
 {
-	buildResponse();
 }
 
 PostResponse::PostResponse(const PostResponse &rhs) :
@@ -27,9 +26,9 @@ void PostResponse::buildResponse()
     }
     else {
         if (!ft::isFile(_req.getLocation()))
-            setError(NOT_FOUND);
+            return setError(NOT_FOUND);
         else if (ft::writeFile(_req.getLocation(), _req.getBody()) == -1)
-            setError(FORBIDDEN);
+            return setError(FORBIDDEN);
 
         printLog("Valid Post");
     }

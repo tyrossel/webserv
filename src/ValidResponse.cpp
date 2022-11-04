@@ -66,6 +66,7 @@ void	ValidResponse::setError(int status)
 		custom_page = it->second;
 
 	ErrorResponse err(status, false, &_loc);
+	err.buildResponse();
 	setBody(err.getBody());
 	setStatus(status);
 }

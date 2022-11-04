@@ -11,9 +11,9 @@
 ErrorResponse::ErrorResponse(int status, bool close, const Location *loc) :
 	Response(status),
 	_loc(loc),
-    _close(close)
+    _close(close),
+	_print(true)
 {
-	buildResponse();
 }
 
 ErrorResponse::~ErrorResponse() {}
@@ -60,7 +60,8 @@ void	ErrorResponse::buildResponse()
 		body.append(ft::craftErrorHTML(getStatus()));
 	}
 	setBody(body);
-    printLog("Error");
+	if (_print)
+		printLog("Error");
 }
 
 /**************************************************************************************/
@@ -82,4 +83,9 @@ void	ErrorResponse::printLog(const std::string &title)
         else
             std::cout << GREEN << ft::timestamp(TIMESTAMP_FORMAT) << "Response code [" << getStatus() << "]" << RESET << std::endl;
 	}
+}
+
+void	ErrorResponse::setPrint(bool print)
+{
+	this->_print = print;
 }

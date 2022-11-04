@@ -8,7 +8,6 @@
 GetResponse::GetResponse(const Location &loc, const Server &server, const Request &req)
 	: ValidResponse(loc, server, req)
 {
-	buildResponse();
 }
 
 GetResponse::GetResponse(const GetResponse &rhs) :
@@ -59,7 +58,7 @@ void GetResponse::buildResponse()
             setBody(cgi.getRetBody());
         }
         else
-			setError(NOT_FOUND);
+			return setError(NOT_FOUND);
         printLog("CGI Get");
     }
     else
@@ -73,7 +72,7 @@ void GetResponse::buildResponse()
         if (ft::isOkHTTP(getStatus()))
             buildGetBody();
         else
-			setError(getStatus());
+			return setError(getStatus());
         printLog("Valid Get");
     }
 }

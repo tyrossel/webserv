@@ -6,7 +6,6 @@
 DeleteResponse::DeleteResponse(const Location &loc, const Server &server, const Request &req)
 	: ValidResponse(loc, server, req)
 {
-	buildResponse();
 }
 
 DeleteResponse::DeleteResponse(const DeleteResponse &rhs) :
@@ -22,12 +21,12 @@ void DeleteResponse::buildResponse()
     if (ft::isFile(path))
     {
         if (remove(path.c_str()) == 0)
-            setStatus(HTTP_NO_CONTENT);
+            return setError(HTTP_NO_CONTENT);
         else
-            setStatus(FORBIDDEN);
+            return setError(FORBIDDEN);
     }
     else
-        setStatus(NOT_FOUND);
+        return setError(NOT_FOUND);
 
     setContentType();
 

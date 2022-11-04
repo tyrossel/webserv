@@ -13,6 +13,7 @@ class ErrorResponse : public Response {
 		const Location *		_loc;
 		std::string		_custom_file;
         bool            _close;
+		bool			_print;
 
     public:
         // CONSTRUCTORS ====================================================
@@ -25,6 +26,7 @@ class ErrorResponse : public Response {
         // TOOLS ========================================================
 
         void		printLog(const std::string &title);
+		void		setPrint(bool print = true);
 
         // BUILDERS ========================================================
 

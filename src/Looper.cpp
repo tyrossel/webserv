@@ -473,6 +473,8 @@ int Looper::buildResponse(long socket, const Location &loc)
 		}
 	}
 
+	response->buildResponse();
+
 	_responses.insert(std::pair<int, Response *>(socket, response));
     return (1);
 }
@@ -481,5 +483,6 @@ void Looper::buildErrorResponse(long socket, int status, bool close)
 {
     Response *ret = new ErrorResponse(status, close);
 
+	ret->buildResponse();
     _responses.insert(std::pair<long int, Response*>(socket, ret));
 }

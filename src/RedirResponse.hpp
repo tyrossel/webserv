@@ -24,7 +24,7 @@ class RedirResponse : public Response {
 	private:
 
         void        buildBody();
-        void        setError(int status);
+        void        setError(int status, bool print);
 
 };
 
