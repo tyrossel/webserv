@@ -17,7 +17,7 @@ webserv
 webserv_docs/.obsidian
 
 # TestServer
-test_post.txt
+www/html/test_post.txt
 
 # Medias
 www/html/images/*.png
