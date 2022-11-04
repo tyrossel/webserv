@@ -19,6 +19,8 @@
   <div class="splide__track">
   <ul class="splide__list">
 <?php
+    if(!is_dir('../images'))
+        mkdir("../images", 0777, false, null);
     $dir = scandir("../images");
     $dir = array_diff($dir, array("..", ".", ".gitkeep"));
     foreach ($dir as $item)

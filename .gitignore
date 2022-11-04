@@ -15,3 +15,10 @@ webserv
 
 # doc files
 webserv_docs/.obsidian
+
+# TestServer
+test_post.txt
+
+# Medias
+www/html/images/*.png
+www/html/images/*.jpg
