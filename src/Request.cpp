@@ -150,7 +150,7 @@ std::string                         Request::getLocation() const { return (this-
 std::string                         Request::getQuery() const { return (this->_query); }
 std::string                         Request::getVersion() const { return (this->_version); }
 std::string                         Request::getBody() const { return (this->_body); }
-int                                 Request::getBodyLength() const { return (this->_body_length); }
+long                                Request::getBodyLength() const { return (this->_body_length); }
 int                                 Request::getStatus() const { return (this->_status); }
 
 /**************************************************************************************/
