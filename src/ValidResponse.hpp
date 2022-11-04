@@ -34,7 +34,6 @@ class ValidResponse : public Response {
 
         // TOOLS ========================================================
         void        addContentLengthCGI(CGI &cgi);
-        void        buildGetBody();
         void        setContentType();
         // =================================================================
 

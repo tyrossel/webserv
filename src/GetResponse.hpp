@@ -14,6 +14,7 @@ class GetResponse : public ValidResponse
 	private:
 
 		void		buildResponse();
+		void		buildGetBody();
 
 };
 

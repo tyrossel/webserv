@@ -50,36 +50,6 @@ void ValidResponse::printLog(const std::string &title)
 	}
 }
 
-void ValidResponse::buildGetBody()
-{
-    std::string text;
-    std::string loc = _req.getLocation();
-    std::string path = _req.getPath();
-
-    if (ft::isDirectory(loc))
-    {
-		if (_loc.auto_index)
-			text = createDirectoryListingBody(path, loc);
-		else
-		{
-			return setError(FORBIDDEN);
-		}
-    }
-    else
-    {
-        try
-        {
-            text = ft::readFile(loc);
-        }
-        catch (const std::exception& e)
-        {
-            std::cerr << e.what() << std::endl;
-			return setError(FORBIDDEN);
-        }
-    }
-	setBody(text);
-}
-
 void ValidResponse::setContentType()
 {
     std::string extension = ft::getExtension(_req.getPath());
