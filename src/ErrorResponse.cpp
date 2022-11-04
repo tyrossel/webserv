@@ -8,9 +8,9 @@
 /**************************************************************************************/
 /*                                  CONSTRUCTOR / DESTRUCTOR                          */
 /**************************************************************************************/
-ErrorResponse::ErrorResponse(int status, bool close, const std::string &custom_page) :
+ErrorResponse::ErrorResponse(int status, bool close, const Location *loc) :
 	Response(status),
-	_custom_file(custom_page),
+	_loc(loc),
     _close(close)
 {
 	buildResponse();
@@ -36,9 +36,16 @@ ErrorResponse &ErrorResponse::operator=(const ErrorResponse &rhs)
 /*                                  BUILDERS                                          */
 /**************************************************************************************/
 
-std::string	ErrorResponse::buildResponse()
+void	ErrorResponse::buildResponse()
 {
     std::string body;
+	std::string custom_file;
+	if (_loc)
+	{
+		std::map<int, std::string>::const_iterator it = _loc->error_pages.find(getStatus());
+		if (it != _loc->error_pages.end())
+			custom_file = it->second;
+	}
 
 	setHeader("Content-Type", "html");
     if (_close)
@@ -46,7 +53,7 @@ std::string	ErrorResponse::buildResponse()
 
 	try
 	{
-		body.append(ft::readFile(_custom_file));
+		body.append(ft::readFile(custom_file));
 	}
 	catch (const std::exception& e)
 	{
@@ -54,7 +61,6 @@ std::string	ErrorResponse::buildResponse()
 	}
 	setBody(body);
     printLog("Error");
-	return to_string();
 }
 
 /**************************************************************************************/

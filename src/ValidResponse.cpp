@@ -11,7 +11,6 @@
 ValidResponse::ValidResponse(const Location &loc, const Server &server, const Request &req)
 	: Response(req.getStatus()), _loc(loc), _server(server), _req(req)
 {
-	buildResponse();
 }
 
 ValidResponse::ValidResponse(const ValidResponse &rhs) :
@@ -96,7 +95,7 @@ void	ValidResponse::setError(int status)
 	if (it == _loc.error_pages.end())
 		custom_page = it->second;
 
-	ErrorResponse err(status, false, custom_page);
+	ErrorResponse err(status, false, &_loc);
 	setBody(err.getBody());
 	setStatus(status);
 }
@@ -120,95 +119,4 @@ bool ValidResponse::useCGI()
 		}
 	}
 	return false;
-}
-
-/**************************************************************************************/
-/*                                  BUILDERS                                          */
-/**************************************************************************************/
-
-std::string ValidResponse::buildResponse()
-{
-    switch (_req.getMethod())
-	{
-        case Get:
-            buildGetResponse();
-            break;
-        case Post:
-            buildPostResponse();
-            break;
-        case Delete:
-            buildDeleteResponse();
-            break;
-        default:
-			setError(NOT_IMPLEMENTED);
-			break;
-    }
-	return to_string();
-}
-
-void ValidResponse::buildGetResponse()
-{
-    if (useCGI())
-    {
-        if (ft::isFile(_req.getLocation())) {
-            CGI cgi(_req);
-            setStatus(cgi.executeCgi(&_req, _server, _loc));
-            setBody(cgi.getRetBody());
-        }
-        else
-			setError(NOT_FOUND);
-        printLog("CGI Get");
-    }
-    else
-    {
-		if (!ft::isDirectory(_req.getLocation()) && !ft::isFile(_req.getLocation()))
-			return setError(NOT_FOUND);
-
-        setContentType();
-        if (ft::isOkHTTP(getStatus()))
-            buildGetBody();
-        else
-			setError(getStatus());
-        printLog("Valid Get");
-    }
-}
-
-// TODO: Check status before replying ?
-void ValidResponse::buildPostResponse()
-{
-    if (useCGI()) {
-        CGI cgi(_req);
-
-        setStatus(cgi.executeCgi(&_req, _server, _loc));
-		setBody(cgi.getRetBody());
-        printLog("CGI Post");
-    }
-    else {
-        if (!ft::isFile(_req.getLocation()))
-            setError(NOT_FOUND);
-        else if (ft::writeFile(_req.getLocation(), _req.getBody()) == -1)
-            setError(FORBIDDEN);
-
-        printLog("Valid Post");
-    }
-}
-
-
-
-void ValidResponse::buildDeleteResponse()
-{
-    std::string path = _req.getLocation();
-    if (ft::isFile(path))
-    {
-        if (remove(path.c_str()) == 0)
-            setStatus(HTTP_NO_CONTENT);
-        else
-            setStatus(FORBIDDEN);
-    }
-    else
-        setStatus(NOT_FOUND);
-
-    setContentType();
-
-    printLog("Valid Delete");
 }

@@ -18,7 +18,7 @@ class RedirResponse : public Response {
 		RedirResponse &operator=(const RedirResponse &rhs);
         // =================================================================
 
-		std::string	buildResponse();
+		void	buildResponse();
         void        printLog(const std::string &title);
 
 	private:

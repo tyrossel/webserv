@@ -1,7 +1,9 @@
 #include "Looper.hpp"
 #include "ErrorResponse.hpp"
 #include "RedirResponse.hpp"
-#include "ValidResponse.hpp"
+#include "GetResponse.hpp"
+#include "PostResponse.hpp"
+#include "DeleteResponse.hpp"
 #include "webserv.hpp"
 
 /**************************************************************************************/
@@ -449,13 +451,27 @@ void Looper::selectErrorHandle()
 
 int Looper::buildResponse(long socket, const Location &loc)
 {
-	// TODO: Create RedirectionResponse class
 	const Redirection *redir = loc.findRedirection(_requests[socket].getPath());
 	Response *response;
 	if (redir)
 		response = new RedirResponse(loc, _requests[socket], *redir);
-	else
-		response = new ValidResponse(loc, *_active_servers[socket], _requests[socket]);
+	else {
+		switch (_requests[socket].getMethod())
+		{
+			case Get:
+				response = new GetResponse(loc, *_active_servers[socket], _requests[socket]);
+				break;
+			case Post:
+				response = new PostResponse(loc, *_active_servers[socket], _requests[socket]);
+				break;
+			case Delete:
+				response = new DeleteResponse(loc, *_active_servers[socket], _requests[socket]);
+				break;
+			default:
+				response = new ErrorResponse(NOT_IMPLEMENTED, false, &loc);
+				break;
+		}
+	}
 
 	_responses.insert(std::pair<int, Response *>(socket, response));
     return (1);

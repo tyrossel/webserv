@@ -16,7 +16,7 @@ RedirResponse::~RedirResponse()
 {
 }
 
-std::string	RedirResponse::buildResponse()
+void	RedirResponse::buildResponse()
 {
 	if (_redir.status == 0)
 		setStatus(HTTP_FOUND);
@@ -34,7 +34,6 @@ std::string	RedirResponse::buildResponse()
 	}
 
 	printLog("Redirection");
-	return to_string();
 }
 
 /**************************************************************************************/
@@ -95,7 +94,7 @@ void RedirResponse::setError(int status)
 	if (it == _loc.error_pages.end())
 		custom_page = it->second;
 
-	ErrorResponse err(status, false, custom_page);
+	ErrorResponse err(status, false, &_loc);
 	setBody(err.getBody());
 	setStatus(status);
 }

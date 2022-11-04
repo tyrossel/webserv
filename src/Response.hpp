@@ -27,7 +27,7 @@ class Response {
         virtual void		printLog(const std::string &title) = 0;
 
         // BUILDERS ========================================================
-		virtual std::string buildResponse() = 0;
+		virtual void buildResponse() = 0;
 
 
 		std::string	to_string() const;

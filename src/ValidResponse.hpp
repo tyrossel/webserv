@@ -11,7 +11,7 @@ class Server;
 class CGI;
 
 class ValidResponse : public Response {
-    private:
+    protected:
         const Location          &_loc;
         const Server            &_server;
 		const Request			&_req;
@@ -24,8 +24,8 @@ class ValidResponse : public Response {
 		ValidResponse &operator=(const ValidResponse &rhs);
         // =================================================================
 
-		std::string	buildResponse();
-        void        printLog(const std::string &title);
+		virtual void		buildResponse() = 0;
+        virtual void        printLog(const std::string &title);
 
 	protected:
         // CHECKERS ========================================================
@@ -39,12 +39,10 @@ class ValidResponse : public Response {
         // =================================================================
 
         // BUILDERS ========================================================
-        void        buildGetResponse();
         void        buildPostResponse();
         void        buildDeleteResponse();
         // =================================================================
 		//
-	private:
 		void		setError(int status);
 
 };

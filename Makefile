@@ -6,7 +6,7 @@
 #    By: trossel <trossel@42lausanne.ch>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/04/07 17:50:59 by trossel           #+#    #+#              #
-#    Updated: 2022/11/03 14:45:20 by trossel          ###   ########.fr        #
+#    Updated: 2022/11/04 09:07:20 by trossel          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -22,6 +22,9 @@ SRCS		= main.cpp \
 			  RedirResponse.cpp \
 			  ErrorResponse.cpp \
 			  ValidResponse.cpp \
+			  GetResponse.cpp \
+			  PostResponse.cpp \
+			  DeleteResponse.cpp \
 			  Response.cpp \
 			  Looper.cpp \
 			  Server.cpp \

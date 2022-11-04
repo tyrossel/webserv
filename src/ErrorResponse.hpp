@@ -2,6 +2,7 @@
 #define WEBSERV_ERRORRESPONSE_HPP
 
 #include "Response.hpp"
+#include "Location.hpp"
 #include "webserv.hpp"
 #include <string>
 
@@ -9,12 +10,13 @@ class ErrorResponse : public Response {
 
 	private:
 
+		const Location *		_loc;
 		std::string		_custom_file;
         bool            _close;
 
     public:
         // CONSTRUCTORS ====================================================
-        ErrorResponse(int status = 500, bool close=false, const std::string &custom_file = "");
+        ErrorResponse(int status = 500, bool close=false, const Location *loc = NULL);
 		ErrorResponse(const ErrorResponse &rhs);
         ~ErrorResponse();
 		ErrorResponse &operator=(const ErrorResponse &rhs);
@@ -26,7 +28,7 @@ class ErrorResponse : public Response {
 
         // BUILDERS ========================================================
 
-		std::string buildResponse();
+		void		buildResponse();
 
 	private:
 
