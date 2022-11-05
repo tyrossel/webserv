@@ -11,6 +11,7 @@
   - [3.2 Main Loop](#main-loop)
   - [3.3 Looper Object](#looper-object)
 - [4. Response](#response)
+  - [4.1 Response Object](#reponse-object)
 - [5. HTTP Methods](#http-methods)
 - [6. Redirection](#redirection)
 - [7. CGI](#cgi)
