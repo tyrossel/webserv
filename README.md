@@ -11,7 +11,7 @@
   - [3.2 Main Loop](#main-loop)
   - [3.3 Looper Object](#looper-object)
 - [4. Response](#response)
-  - [4.1 Response Object](#reponse-object)
+  - [4.1 Response Object](#response-object)
 - [5. HTTP Methods](#http-methods)
 - [6. Redirection](#redirection)
 - [7. CGI](#cgi)
@@ -148,7 +148,7 @@ make
 
 - `Content-Length` : must be sent to the client. It indicates to your browser the length exact of the requested resource
 
-## Response object
+## Response Object
 <p align="center">
   <img src="readme_docs/response_object.PNG">
 </p>
