@@ -113,7 +113,7 @@ make
 - Here is the main
 
 <p align="center">
-  <img src="readme_docs/principale_loop_resume.png">
+  <img src="readme_docs/principale_loop_resume.PNG">
 </p>
 
 - When select() returns a value > 0, 3 others loop are called
@@ -136,7 +136,21 @@ make
 - String, must be sent to the client
 - Use the socket to communicate with him
 - Response should be write with strict semantic
+- 3 parts :
+  - `Status line` with HTTP Protocol and Status Code
+  - `Headers` with some information about the requested resource
+  - `Body` with the content of the requested resource
 
+<p align="center">
+  <img src="readme_docs/response.PNG">
+</p>
+
+- `Content-Length` : must be sent to the client. It indicates to your browser the length exact of the requested resource
+
+## Response object
+<p align="center">
+  <img src="readme_docs/response_object.PNG">
+</p>
 
 # HTTP Methods
 
