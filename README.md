@@ -29,6 +29,12 @@ make
 ./webserv configuration_file
 ```
 
+- Go to `http://localhost:2022/index.html` for example, and explore it !
+
+<p align="center">
+  <img src="readme_docs/webserv_movie.gif" alt="animated" />
+</p>
+
 # Parsing
 ## Parse Configuration File
 
