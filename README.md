@@ -1,22 +1,23 @@
 # Webserv CPP98
 - [1. Get Started](#get-started)
-- [2. Parsing](#parsing)
-  - [2.1 Parse Configuration File](#parse-configuration-file)
-    - [2.1.1 Configurations values for Server](#configurations-values-for-server)
-    - [2.1.2 Configurations values for Locations](#configurations-values-for-locations)
-    - [2.1.3 Configurations values for Redirections](#configurations-values-for-redirections)
-  - [2.2 Parse HTTP Request](#parse-http-request)
-- [3. Execution](#execution)
-  - [3.1 Select()](#select)
-  - [3.2 Main Loop](#main-loop)
-  - [3.3 Looper Object](#looper-object)
-- [4. Response](#response)
-  - [4.1 Response Object](#response-object)
-- [5. HTTP Methods](#http-methods)
-- [6. Redirection](#redirection)
-- [7. CGI](#cgi)
-  - [7.1 CGI Environment](#cgi-environment)
-- [8. RFC Docs](#rfc-docs) 
+- [2. Resume](#resume)
+- [3. Parsing](#parsing)
+  - [3.1 Parse Configuration File](#parse-configuration-file)
+    - [3.1.1 Configurations values for Server](#configurations-values-for-server)
+    - [3.1.2 Configurations values for Locations](#configurations-values-for-locations)
+    - [3.1.3 Configurations values for Redirections](#configurations-values-for-redirections)
+  - [3.2 Parse HTTP Request](#parse-http-request)
+- [4. Execution](#execution)
+  - [4.1 Select()](#select)
+  - [4.2 Main Loop](#main-loop)
+  - [4.3 Looper Object](#looper-object)
+- [5. Response](#response)
+  - [5.1 Response Object](#response-object)
+- [6. HTTP Methods](#http-methods)
+- [7. Redirection](#redirection)
+- [8. CGI](#cgi)
+  - [8.1 CGI Environment](#cgi-environment)
+- [9. RFC Docs](#rfc-docs) 
 
 Made by [Bima](https://github.com/Bima42), [YvanoffP](https://github.com/YvanoffP) and [Tyrossel](https://github.com/tyrossel)
 
@@ -33,6 +34,11 @@ make
 
 <p align="center">
   <img src="readme_docs/webserv_movie.gif" alt="animated" />
+</p>
+
+# Resume
+<p align="center">
+  <img src="readme_docs/principale_loop_resume.png">
 </p>
 
 # Parsing
@@ -87,7 +93,7 @@ make
 - Client request is store in Request object
 
 <p align="center">
-  <img src="readme_docs/parse_http_request.png">
+  <img src="readme_docs/parse_http_request.PNG">
 </p>
 
 - Payload body accepted in our server :
@@ -117,12 +123,6 @@ make
   - `> 0` : total number of bits that are set in readfds, writefds and exceptfds
 
 ## Main Loop
-- Here is the main
-
-<p align="center">
-  <img src="readme_docs/principale_loop_resume.png">
-</p>
-
 - When select() returns a value > 0, 3 others loop are called
 
 <p align="center">
