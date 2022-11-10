@@ -120,7 +120,7 @@ make
 - Here is the main
 
 <p align="center">
-  <img src="readme_docs/principale_loop_resume.PNG">
+  <img src="readme_docs/principale_loop_resume.png">
 </p>
 
 - When select() returns a value > 0, 3 others loop are called
@@ -149,14 +149,14 @@ make
   - `Body` with the content of the requested resource
 
 <p align="center">
-  <img src="readme_docs/response.PNG">
+  <img src="readme_docs/response.png">
 </p>
 
 - `Content-Length` : must be sent to the client. It indicates to your browser the length exact of the requested resource
 
 ## Response Object
 <p align="center">
-  <img src="readme_docs/response_object.PNG">
+  <img src="readme_docs/response_object.png">
 </p>
 
 # HTTP Methods
